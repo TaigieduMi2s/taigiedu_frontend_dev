@@ -7,7 +7,7 @@
 .phaseCard {
     width: 100%;
     background-color: #ffffff;
-    font-size:1.2 rem;
+    font-size: 1.2 rem;
 }
 
 .phaseTitle {
@@ -104,7 +104,7 @@ a:hover {
 .dropdown-content {
     display: none;
     position: absolute;
-    top:36px;
+    top: 36px;
     width: 100%;
     height: 500px;
     min-width: 100%;
@@ -159,22 +159,22 @@ label {
 
 .menuTitle {
     font-size: 22px;
-    font-family: 微軟正黑體;
+    font-family: 'Huninn', sans-serif;
     font-weight: 400;
     color: #000;
-    
+
 }
 
 .menuText {
     font-size: 22px;
-    font-family: 微軟正黑體;
+    font-family: 'Huninn', sans-serif;
     font-weight: 400;
     color: #000;
 }
 
 .selectionText {
     font-size: 20px;
-    font-family: 微軟正黑體;
+    font-family: 'Huninn', sans-serif;
     font-weight: 500;
     color: #000;
     text-align: left;
@@ -185,134 +185,143 @@ label {
     font-weight: bold;
     margin-bottom: 0;
 }
+
 .SearchResultTitle {
     font-size: 2.3rem;
     font-weight: bold;
     margin-bottom: 0;
 }
 
-.selected-page{
-        background-color: #84C6DA;
-    }
+.selected-page {
+    background-color: #84C6DA;
+}
 
 
-    ul.pagination li a.wide-link {
-        width: 90px; /* 設置你想要的寬度 */
-      }
-    
-        ul.pagination li a {
-            text-align: center;
-            width: 48px;
-            border-radius: 5px;
-            color: #000;
-            border-color: rgba(0, 0, 0, 0);
-            background-color: rgba(0, 0, 0, 0);
-            ;
-        }
-    
-    
-        .lastbutton {
-            width: 35px;
-            border-radius: 5px;
-            border-color: rgba(0, 0, 0, 0);
-            background-color: rgba(0, 0, 0, 0);
-            ;
-        }
-    
-        ul.pagination li a:hover {
-            background-color: rgba(0, 0, 0, 0);
-            color: #2D92C1;
-            border-color: rgba(0, 0, 0, 0);
-        }
-    
-        ul.pagination li a.active {
-            border-radius: 5px;
-            border-color: rgba(0, 0, 0, 0);
-        }
-    
-        .page-item.active .page-link {
-            border-radius: 5px 5px 5px 5px;
-            z-index: 1;
-            color: #fff;
-            background-color: #2D92C1;
-            border-color: rgba(0, 0, 0, 0);
-    
-        }
-    
-        a,
-        a:hover {
-            color: inherit;
-            text-decoration: none;
-        }
-        .languageRadio{
-            width:50em;
-        }
-        .form-check-input[type=radio] {
-            margin-top: 1rem;
-        }
+ul.pagination li a.wide-link {
+    width: 90px;
+    /* 設置你想要的寬度 */
+}
+
+ul.pagination li a {
+    text-align: center;
+    width: 48px;
+    border-radius: 5px;
+    color: #000;
+    border-color: rgba(0, 0, 0, 0);
+    background-color: rgba(0, 0, 0, 0);
+    ;
+}
+
+
+.lastbutton {
+    width: 35px;
+    border-radius: 5px;
+    border-color: rgba(0, 0, 0, 0);
+    background-color: rgba(0, 0, 0, 0);
+    ;
+}
+
+ul.pagination li a:hover {
+    background-color: rgba(0, 0, 0, 0);
+    color: #2D92C1;
+    border-color: rgba(0, 0, 0, 0);
+}
+
+ul.pagination li a.active {
+    border-radius: 5px;
+    border-color: rgba(0, 0, 0, 0);
+}
+
+.page-item.active .page-link {
+    border-radius: 5px 5px 5px 5px;
+    z-index: 1;
+    color: #fff;
+    background-color: #2D92C1;
+    border-color: rgba(0, 0, 0, 0);
+
+}
+
+a,
+a:hover {
+    color: inherit;
+    text-decoration: none;
+}
+
+.languageRadio {
+    width: 50em;
+}
+
+.form-check-input[type=radio] {
+    margin-top: 1rem;
+}
 
 /* 載入樣式 - 與 ResourceContent 保持一致 */
 .phrase-loading {
-  width: 100%;
-  height: 400px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
+    width: 100%;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
 .loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid #3498db;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 20px;
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .phrase-empty {
-  width: 100%;
-  height: 200px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 18px;
-  color: #666;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  margin: 20px 0;
+    width: 100%;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    color: #666;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    margin: 20px 0;
 }
 
 /* 圖片按鈕樣式 */
 .icon-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem;
-  border: none;
-  background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border: none;
+    background: transparent;
 }
 
 .pagination-icon {
-  width: 20px;
-  height: 20px;
-  transition: opacity 0.2s ease;
+    width: 20px;
+    height: 20px;
+    transition: opacity 0.2s ease;
 }
 
 .pagination-icon:hover {
-  opacity: 0.7;
+    opacity: 0.7;
 }
 
 /* 右箭頭鏡像效果 */
 .right-arrow {
-  transform: scaleX(-1);
+    transform: scaleX(-1);
 }
 
 /* 按鈕間距調整 */
@@ -320,22 +329,22 @@ label {
 .back-button,
 .next-button,
 .last-page-button {
-  margin: 0 5px;
+    margin: 0 5px;
 }
 
 .pagination-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
 }
 
 .pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
 }
 
 .invisible {
-  visibility: hidden;
+    visibility: hidden;
 }
