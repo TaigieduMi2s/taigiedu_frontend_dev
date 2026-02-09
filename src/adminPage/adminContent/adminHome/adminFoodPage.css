@@ -1,0 +1,115 @@
+/* 飲食後台頁面樣式：初始複製自 adminNewsPage.css */
+@import './adminNewsPage.css';
+/* 若之後需要針對飲食頁面客製，覆蓋寫在此處 */
+
+.admin-thumb {
+	width: 48px;
+	height: 36px;
+	object-fit: cover;
+	border-radius: 4px;
+	border: 1px solid rgba(0,0,0,0.1);
+	background-color: #fff;
+}
+
+.file-cell {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.file-icon {
+	width: 42px;
+	height: 42px;
+	min-width: 42px;
+	border-radius: 6px;
+	background: #2D92C1; /* 接近表頭藍 */
+	color: #fff;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 700;
+	letter-spacing: 0.5px;
+}
+
+.file-name {
+	color: #333;
+}
+
+/* 檔案類型圖示（PNG）尺寸與外觀 */
+.file-icon-image {
+	width: 42px;
+	height: 42px;
+	object-fit: contain;
+	border-radius: 6px;
+}
+
+.audio-cell {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.audio-play-btn {
+	border: none;
+	background: transparent;
+	padding: 4px 6px;
+	border-radius: 6px;
+}
+
+.audio-play-btn:hover {
+	background: rgba(0,0,0,0.06);
+}
+
+/* ---- TTS 與錄音控制區樣式 ---- */
+.tts-controls, .record-controls {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.tts-progress-bar, .record-progress-bar {
+	width: 140px;
+	height: 8px;
+	background: #d6d6d6;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.tts-progress-inner, .record-progress-inner {
+	height: 8px;
+	background: #222;
+	border-radius: 4px;
+	transition: width 80ms linear;
+}
+
+.btn-record-primary {
+	background: #2D92C1;
+	border: 1px solid #2D92C1;
+	color: #fff;
+	padding: 6px 14px;
+	border-radius: 8px;
+	font-size: 14px;
+}
+
+.btn-record-primary:hover { filter: brightness(0.95); }
+
+.btn-record-outline {
+	background: transparent;
+	border: 1px solid #2D92C1;
+	color: #2D92C1;
+	padding: 6px 14px;
+	border-radius: 8px;
+	font-size: 14px;
+}
+
+.btn-tts-secondary {
+	background: transparent;
+	border: 1px solid #999;
+	color: #333;
+	padding: 6px 10px;
+	border-radius: 8px;
+	font-size: 14px;
+}
+
+.inline-hint { color: #c00; font-size: 14px; }

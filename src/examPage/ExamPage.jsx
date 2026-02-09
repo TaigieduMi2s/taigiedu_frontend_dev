@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import './ExamPage.css';
 import searchIcon from '../assets/home/search_logo.svg';
 // import questionMarkIcon from '../assets/question-mark.svg';
-import foodImage from '../assets/culture/foodN.png'; 
+import foodImage from '../assets/culture/foodN.png';
 import chevronUpIcon from '../assets/chevron-up.svg';
 
 const ExamPage = () => {
@@ -42,7 +42,7 @@ const ExamPage = () => {
         setError(null);
         try {
             const response = await fetch(
-                "https://dev.taigiedu.com/backend/exam_list",
+                `${import.meta.env.VITE_API_URL}/exam_list`,
                 {
                     method: 'POST',
                     headers: {
@@ -71,7 +71,7 @@ const ExamPage = () => {
                             id: index + 1,
                             title: item.title || '',
                             url: item.url || '',
-                            image: item.image ? `https://dev.taigiedu.com${item.image}` : foodImage,
+                            image: item.image ? `${import.meta.env.VITE_IMAGE_URL}${item.image}` : foodImage,
                             subcategory: item.subcategory || ''
                         }));
                     }
@@ -101,7 +101,7 @@ const ExamPage = () => {
     const handleTypeChange = (selectedValue) => {
         setSelectedType(selectedValue);
         setIsDropdownOpen(false); // 選擇後關閉下拉選單
-        
+
         // 滾動到對應的標題
         if (selectedValue !== "類型" && sectionRefs.current[selectedValue]?.current) {
             sectionRefs.current[selectedValue].current.scrollIntoView({
@@ -114,7 +114,7 @@ const ExamPage = () => {
     const handleSearch = (e) => {
         e.preventDefault();
         if (query.trim() === "") return;
-        
+
         // 搜尋邏輯會在 getFilteredData 中處理
     };
 
@@ -195,41 +195,41 @@ const ExamPage = () => {
         <div className="exam-page">
             <div className="exam-header">
                 <div className="container px-4">
-                <div className="exam-header-content">
-                    <div className="exam-custom-dropdown">
-                        <div className="dropdown-container">
-                            <div 
-                                className="dropdown-header exam-type-dropdown"
-                                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                            >
-                                {selectedType}
-                            </div>
-                            <img 
-                                src={chevronUpIcon} 
-                                alt="dropdown arrow" 
-                                className="dropdown-arrow"
-                            />
-                        </div>
-                        {isDropdownOpen && (
-                            <div className="exam-dropdown-menu">
+                    <div className="exam-header-content">
+                        <div className="exam-custom-dropdown">
+                            <div className="dropdown-container">
                                 <div
-                                    className={`exam-dropdown-item ${selectedType === "類型" ? 'selected' : ''}`}
-                                    onClick={() => handleTypeChange("類型")}
+                                    className="dropdown-header exam-type-dropdown"
+                                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                 >
-                                    類型
+                                    {selectedType}
                                 </div>
-                                {categories.map(category => (
-                                    <div
-                                        key={category}
-                                        className={`exam-dropdown-item ${selectedType === category ? 'selected' : ''}`}
-                                        onClick={() => handleTypeChange(category)}
-                                    >
-                                        {category}
-                                    </div>
-                                ))}
+                                <img
+                                    src={chevronUpIcon}
+                                    alt="dropdown arrow"
+                                    className="dropdown-arrow"
+                                />
                             </div>
-                        )}
-                    </div>                        <form onSubmit={handleSearch} className="exam-search-container">
+                            {isDropdownOpen && (
+                                <div className="exam-dropdown-menu">
+                                    <div
+                                        className={`exam-dropdown-item ${selectedType === "類型" ? 'selected' : ''}`}
+                                        onClick={() => handleTypeChange("類型")}
+                                    >
+                                        類型
+                                    </div>
+                                    {categories.map(category => (
+                                        <div
+                                            key={category}
+                                            className={`exam-dropdown-item ${selectedType === category ? 'selected' : ''}`}
+                                            onClick={() => handleTypeChange(category)}
+                                        >
+                                            {category}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>                        <form onSubmit={handleSearch} className="exam-search-container">
                             <input
                                 type="text"
                                 value={query}
@@ -247,7 +247,7 @@ const ExamPage = () => {
             {Object.entries(filteredData).map(([category, items]) => (
                 <div key={category} className="exam-section">
                     <div className="container px-4">
-                        <h2 
+                        <h2
                             className="exam-category-title"
                             ref={ref => {
                                 if (ref && !sectionRefs.current[category]) {
@@ -278,7 +278,7 @@ const ExamPage = () => {
                                         <h5 className="text-center mt-2">
                                             {item.subcategory && (
                                                 <span className="text-muted small">
-                                                    [{item.subcategory}] 
+                                                    [{item.subcategory}]
                                                 </span>
                                             )}
                                             {item.title}

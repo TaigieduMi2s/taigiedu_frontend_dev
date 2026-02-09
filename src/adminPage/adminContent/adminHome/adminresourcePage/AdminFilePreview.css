@@ -1,0 +1,194 @@
+/* 後台資源預覽頁面 */
+.admin-file-preview-page {
+    width: 100%;
+    min-height: 100vh;
+    background: #f8fafc;
+    padding-bottom: 40px;
+}
+
+/* 管理員檢視提示 */
+.admin-view-banner {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #FFE4C2;
+    color: #4B5563;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    border: 1px solid #FFD09A;
+    margin: 16px 32px;
+}
+
+.admin-view-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #FF9B42;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+/* 預覽頁面 Header */
+.admin-preview-header {
+    position: relative;
+    padding: 0 32px;
+    margin-bottom: 24px;
+}
+
+.admin-preview-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #EF4444;
+    margin: 0 0 16px 0;
+}
+
+/* 管理軌跡時間軸 */
+.management-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    background-color: #FEE2E2;
+    border-radius: 8px;
+}
+
+.timeline-entry {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.history-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 60px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.history-badge-report {
+    background-color: #EF4444;
+    color: white;
+}
+
+.history-badge-takedown {
+    background-color: #22C55E;
+    color: white;
+}
+
+.history-badge-restore {
+    background-color: #F59E0B;
+    color: white;
+}
+
+.history-badge-default {
+    background-color: #6B7280;
+    color: white;
+}
+
+.timeline-user {
+    font-weight: 500;
+    color: #1F2937;
+    min-width: 90px;
+    flex-shrink: 0;
+}
+
+.timeline-date {
+    color: #374151;
+    min-width: 80px;
+    flex-shrink: 0;
+}
+
+.timeline-reason {
+    flex: 1;
+    color: #374151;
+}
+
+/* 資源資訊 */
+.admin-preview-info {
+    margin-bottom: 12px;
+}
+
+.admin-preview-uploader {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.admin-preview-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.admin-preview-tag {
+    display: inline-flex;
+    padding: 6px 16px;
+    border-radius: 100px;
+    border: 1px solid #3c3c43;
+    font-size: 14px;
+    color: #3c3c43;
+    white-space: nowrap;
+}
+
+/* 管理操作按鈕 */
+.admin-action-button {
+    position: absolute;
+    top: 0;
+    right: 32px;
+    display: flex;
+    height: 40px;
+    padding: 10px 20px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.admin-action-button.takedown {
+    background-color: #EF4444;
+    color: white;
+}
+
+.admin-action-button.takedown:hover {
+    background-color: #DC2626;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.admin-action-button.restore {
+    background-color: #14B8A6;
+    color: white;
+}
+
+.admin-action-button.restore:hover {
+    background-color: #0D9488;
+    box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
+}
+
+/* 預覽圖片 */
+.admin-preview-image {
+    display: flex;
+    justify-content: center;
+    padding: 0 32px;
+}
+
+.admin-preview-image img {
+    max-width: 100%;
+    max-height: 600px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}

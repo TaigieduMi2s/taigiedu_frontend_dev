@@ -230,3 +230,22 @@
   background: #2d92c1;
   color: #fff;
 }
+
+/* 忘記密碼連結容器 */
+.forgot-password-container {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.forgot-password-link {
+  color: #2d92c1;
+  font-size: 14px;
+  font-family: "Roboto", sans-serif;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.forgot-password-link:hover {
+  color: #236d8f;
+}

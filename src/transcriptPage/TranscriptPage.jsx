@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useRef, useEffect  } from "react";
+import React, { createContext, useContext, useState, useRef, useEffect } from "react";
 import "./TranscriptPage.css";
 import { useToast } from "../components/Toast";
 import TranscriptHeader from "./TranscriptHeader";
@@ -133,77 +133,77 @@ const TranscriptPage = () => {
       setIsProcessing(true);
 
       // 在 stopRecording 函數中修改 API 回應處理部分
-// 在 stopRecording 函數中修改 API 回應處理部分
-audioRecorder.onstop = async () => {
-  try {
-    const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-    // 保存錄音的音訊
-    const audioUrl = URL.createObjectURL(audioBlob);
-    setAudioSource(audioUrl);
-    const reader = new FileReader();
+      // 在 stopRecording 函數中修改 API 回應處理部分
+      audioRecorder.onstop = async () => {
+        try {
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+          // 保存錄音的音訊
+          const audioUrl = URL.createObjectURL(audioBlob);
+          setAudioSource(audioUrl);
+          const reader = new FileReader();
 
-    reader.onloadend = async () => {
-      const base64Audio = reader.result.split(',')[1];
+          reader.onloadend = async () => {
+            const base64Audio = reader.result.split(',')[1];
 
-      try {
-        const response = await fetch('https://dev.taigiedu.com/backend/transcribe_speech', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            stt_type: 'base64',
-            stt_lang: 'tw',
-            stt_data: base64Audio
-          })
-        });
+            try {
+              const response = await fetch(`${import.meta.env.VITE_API_URL}/transcribe_speech`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  stt_type: 'base64',
+                  stt_lang: 'tw',
+                  stt_data: base64Audio
+                })
+              });
 
-        const responseData = await response.json();
-        console.log('=== API Response Content ===');
-        console.log('Raw response:', responseData);
-        
-        // 檢查是否為靜音回應 - 新格式 {"message": {"tw": "<silent>", ...}}
-        if (responseData.message && responseData.message.tw === "<{silent}>") {
-          showToast('這段錄音似乎沒有聲音，請再嘗試一次！', "warning");
-          setIsProcessing(false);
-          return; // 提前退出，不更新文本內容
+              const responseData = await response.json();
+              console.log('=== API Response Content ===');
+              console.log('Raw response:', responseData);
+
+              // 檢查是否為靜音回應 - 新格式 {"message": {"tw": "<silent>", ...}}
+              if (responseData.message && responseData.message.tw === "<{silent}>") {
+                showToast('這段錄音似乎沒有聲音，請再嘗試一次！', "warning");
+                setIsProcessing(false);
+                return; // 提前退出，不更新文本內容
+              }
+
+              // 更新各個標籤的內容
+              if (responseData.message) {
+                setContent({
+                  台文漢字: responseData.message.tw || "",
+                  台羅: responseData.message.tl || "",
+                  白話字: responseData.message.poj || ""
+                });
+              } else {
+                console.error('API 回傳格式錯誤:', responseData);
+                showError('API 回傳格式錯誤');
+                setIsProcessing(false);
+                return;
+              }
+
+              setIsEditable(true);
+              setIsProcessing(false);  // 重置處理狀態
+            } catch (error) {
+              console.error('API Error:', error);
+              console.error('Error details:', {
+                name: error.name,
+                message: error.message,
+                stack: error.stack
+              });
+              showError('轉換失敗，請重試');
+              setIsProcessing(false);  // 錯誤時也要重置處理狀態
+            }
+          };
+
+          reader.readAsDataURL(audioBlob);
+        } catch (error) {
+          console.error('Error processing audio:', error);
+          setIsProcessing(false);  // 錯誤時重置處理狀態
+          showError('音訊處理失敗，請重試');
         }
-        
-        // 更新各個標籤的內容
-        if (responseData.message) {
-          setContent({
-            台文漢字: responseData.message.tw || "",
-            台羅: responseData.message.tl || "",
-            白話字: responseData.message.poj || ""
-          });
-        } else {
-          console.error('API 回傳格式錯誤:', responseData);
-          showError('API 回傳格式錯誤');
-          setIsProcessing(false);
-          return;
-        }
-
-        setIsEditable(true);
-        setIsProcessing(false);  // 重置處理狀態
-      } catch (error) {
-        console.error('API Error:', error);
-        console.error('Error details:', {
-          name: error.name,
-          message: error.message,
-          stack: error.stack
-        });
-        showError('轉換失敗，請重試');
-        setIsProcessing(false);  // 錯誤時也要重置處理狀態
-      }
-    };
-
-    reader.readAsDataURL(audioBlob);
-  } catch (error) {
-    console.error('Error processing audio:', error);
-    setIsProcessing(false);  // 錯誤時重置處理狀態
-    showError('音訊處理失敗，請重試');
-  }
-};
+      };
 
       // 清理錄音資源
       audioRecorder.stream.getTracks().forEach(track => track.stop());
@@ -251,25 +251,25 @@ audioRecorder.onstop = async () => {
   const handleFileUpload = async (file) => {
     setIsProcessing(true);
     setIsEditable(false);
-  
+
     try {
       // 保存上傳的音訊檔案
       const audioUrl = URL.createObjectURL(file);
       setAudioSource(audioUrl);
       // 讀取音訊檔案並轉換為 base64
       const reader = new FileReader();
-  
+
       const base64Promise = new Promise((resolve, reject) => {
         reader.onload = () => resolve(reader.result);
         reader.onerror = reject;
       });
-  
+
       reader.readAsDataURL(file);
       const base64Data = await base64Promise;
       const base64Audio = base64Data.split(',')[1];
-  
+
       // 呼叫 API
-      const response = await fetch('https://dev.taigiedu.com/backend/transcribe_speech', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/transcribe_speech`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -280,24 +280,24 @@ audioRecorder.onstop = async () => {
           stt_data: base64Audio
         })
       });
-  
+
       console.log('API Response status:', response.status);
-  
+
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
       }
-  
+
       const responseData = await response.json();
       console.log('=== API Response Content ===');
       console.log('Raw response:', responseData);
-  
+
       // 檢查是否為靜音回應 - 新格式 {"message": {"tw": "<silent>", ...}}
       if (responseData.message && responseData.message.tw === "<{silent}>") {
         showToast('這段音檔似乎沒有聲音，請檢查後再試一次！', 'warning');
         setIsProcessing(false);
         return; // 提前退出，不更新文本內容
       }
-  
+
       // 更新各個標籤的內容
       if (responseData.message) {
         setContent({
@@ -311,7 +311,7 @@ audioRecorder.onstop = async () => {
         setIsProcessing(false);
         return;
       }
-  
+
       setIsEditable(true);
     } catch (error) {
       console.error('File processing failed:', error);
@@ -336,8 +336,8 @@ audioRecorder.onstop = async () => {
           onFontSizeChange={handleFontSizeChange}
           onFileUpload={handleFileUpload}
         />
-        <TranscriptContent 
-          isEditable={isEditable} 
+        <TranscriptContent
+          isEditable={isEditable}
           fontSize={fontSize}
           content={content}
           setContent={setContent}

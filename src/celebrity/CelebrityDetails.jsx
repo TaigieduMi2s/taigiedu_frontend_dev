@@ -7,10 +7,10 @@ import nopic from "../assets/celebrity/nopic.png"; // 預設無圖片
 // 可折疊的作品項目元件
 const CollapsibleWorkItem = ({ series, items }) => {
     const [isExpanded, setIsExpanded] = useState(false);
-    
+
     return (
         <li className="collapsible-work-item">
-            <div 
+            <div
                 className="work-series-header"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
@@ -36,7 +36,7 @@ const CelebrityDetails = () => {
     const { showError } = useToast();
     const [searchParams] = useSearchParams();
     const name = searchParams.get('name');
-    
+
     // 狀態管理
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -62,7 +62,7 @@ const CelebrityDetails = () => {
                 "name": celebrityName
             };
 
-            const response = await fetch("https://dev.taigiedu.com/backend/celebrity/detail", {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/celebrity/detail`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -84,8 +84,8 @@ const CelebrityDetails = () => {
                         name: data.basicInfo.name || celebrityName,
                         pron_poj: data.basicInfo.pron_poj || '',
                         pron_tl: data.basicInfo.pron_tl || '',
-                        photo: data.basicInfo.photo ? `https://dev.taigiedu.com/backend/static/celebrity/${data.basicInfo.photo}` : nopic,
-                        illustration: data.basicInfo.illustration ? `https://dev.taigiedu.com/backend/static/celebrity/${data.basicInfo.illustration}` : null,
+                        photo: data.basicInfo.photo ? `${import.meta.env.VITE_IMAGE_URL}/backend/static/celebrity/${data.basicInfo.photo}` : nopic,
+                        illustration: data.basicInfo.illustration ? `${import.meta.env.VITE_IMAGE_URL}/backend/static/celebrity/${data.basicInfo.illustration}` : null,
                         born: data.basicInfo.born || '',
                         dead: data.basicInfo.dead || '',
                         highlights: data.basicInfo.highlights || [],
@@ -124,16 +124,16 @@ const CelebrityDetails = () => {
     const handleTabClick = (tab) => {
         setActiveTab(tab);
     };
-    
+
     // 處理作品分類切換
     const handleCategoryClick = (category) => {
         setActiveWorkCategory(category);
     };
-    
+
     // 檢查標籤是否有資料的函數
     const hasData = (tabName) => {
         if (!celebrityData) return false;
-        
+
         switch (tabName) {
             case 'experience':
                 return Array.isArray(celebrityData.experience) && celebrityData.experience.length > 0;
@@ -149,13 +149,13 @@ const CelebrityDetails = () => {
                 return false;
         }
     };
-    
+
     // 獲取可用的標籤列表
     const getAvailableTabs = () => {
         const allTabs = ['experience', 'works', 'resources', 'metaverse', 'awards'];
         return allTabs.filter(tab => hasData(tab));
     };
-    
+
     // 設置第一個有資料的標籤為預設
     useEffect(() => {
         if (celebrityData) {
@@ -181,16 +181,16 @@ const CelebrityDetails = () => {
             }
         }
     }, [celebrityData, activeTab]);
-    
+
     // 渲染作品項目的函數
     const renderWorkItem = (work, index) => {
         // 檢查是否為帶有 series 和 items 的物件
         if (typeof work === 'object' && work.series && work.items) {
             return (
-                <CollapsibleWorkItem 
-                    key={index} 
-                    series={work.series} 
-                    items={work.items} 
+                <CollapsibleWorkItem
+                    key={index}
+                    series={work.series}
+                    items={work.items}
                 />
             );
         } else {
@@ -202,9 +202,9 @@ const CelebrityDetails = () => {
     // 渲染當前選擇的作品
     const renderWorks = () => {
         if (!celebrityData?.works) return null;
-        
+
         const { categories, items } = celebrityData.works;
-        
+
         if (activeWorkCategory === 'all') {
             // 顯示所有作品
             return (
@@ -213,7 +213,7 @@ const CelebrityDetails = () => {
                         <div key={category} className="work-category-section">
                             <h3 className="work-category-title">{category}</h3>
                             <ul className="work-list">
-                                {Array.isArray(items[category]) ? 
+                                {Array.isArray(items[category]) ?
                                     items[category].map((work, index) => renderWorkItem(work, index)) :
                                     <li>暫無資料</li>
                                 }
@@ -227,7 +227,7 @@ const CelebrityDetails = () => {
             return (
                 <div className="work-category-section">
                     <ul className="work-list">
-                        {Array.isArray(items[activeWorkCategory]) ? 
+                        {Array.isArray(items[activeWorkCategory]) ?
                             items[activeWorkCategory].map((work, index) => renderWorkItem(work, index)) :
                             <li>暫無資料</li>
                         }
@@ -268,13 +268,13 @@ const CelebrityDetails = () => {
             {/* 標題區塊：名字+拼音 */}
             <div className="celebrity-details-header">
                 <h1>
-                    {celebrityData.basicInfo.name} 
+                    {celebrityData.basicInfo.name}
                     {celebrityData.basicInfo.pron_poj && (
                         <span className="celebrity-pron"> {celebrityData.basicInfo.pron_poj}</span>
                     )}
                 </h1>
                 <div className="celebrity-subtitle">
-                    {celebrityData.basicInfo.born && celebrityData.basicInfo.dead ? 
+                    {celebrityData.basicInfo.born && celebrityData.basicInfo.dead ?
                         `${celebrityData.basicInfo.born}年-${celebrityData.basicInfo.dead}年` :
                         celebrityData.basicInfo.born ? `${celebrityData.basicInfo.born}年-` : ''
                     }
@@ -292,9 +292,9 @@ const CelebrityDetails = () => {
             {/* 內容區塊：圖片+介紹 */}
             <div className="celebrity-details-content">
                 <div className="celebrity-image-container">
-                    <img 
-                        src={celebrityData.basicInfo.photo} 
-                        alt={celebrityData.basicInfo.name} 
+                    <img
+                        src={celebrityData.basicInfo.photo}
+                        alt={celebrityData.basicInfo.name}
                         className="celebrity-detail-image"
                         onError={(e) => {
                             e.target.src = nopic;
@@ -310,40 +310,40 @@ const CelebrityDetails = () => {
             <div className="celebrity-tabs">
                 <div className="celebrity-tab-buttons">
                     {hasData('experience') && (
-                        <button 
-                            className={`tab-button ${activeTab === 'experience' ? 'active' : ''}`} 
+                        <button
+                            className={`tab-button ${activeTab === 'experience' ? 'active' : ''}`}
                             onClick={() => handleTabClick('experience')}
                         >
                             經歷
                         </button>
                     )}
                     {hasData('works') && (
-                        <button 
-                            className={`tab-button ${activeTab === 'works' ? 'active' : ''}`} 
+                        <button
+                            className={`tab-button ${activeTab === 'works' ? 'active' : ''}`}
                             onClick={() => handleTabClick('works')}
                         >
                             作品
                         </button>
                     )}
                     {hasData('resources') && (
-                        <button 
-                            className={`tab-button ${activeTab === 'resources' ? 'active' : ''}`} 
+                        <button
+                            className={`tab-button ${activeTab === 'resources' ? 'active' : ''}`}
                             onClick={() => handleTabClick('resources')}
                         >
                             網路資源
                         </button>
                     )}
                     {hasData('metaverse') && (
-                        <button 
-                            className={`tab-button ${activeTab === 'metaverse' ? 'active' : ''}`} 
+                        <button
+                            className={`tab-button ${activeTab === 'metaverse' ? 'active' : ''}`}
                             onClick={() => handleTabClick('metaverse')}
                         >
                             元宇宙
                         </button>
                     )}
                     {hasData('awards') && (
-                        <button 
-                            className={`tab-button ${activeTab === 'awards' ? 'active' : ''}`} 
+                        <button
+                            className={`tab-button ${activeTab === 'awards' ? 'active' : ''}`}
                             onClick={() => handleTabClick('awards')}
                         >
                             得獎
@@ -363,21 +363,21 @@ const CelebrityDetails = () => {
                             </ul>
                         </div>
                     )}
-                    
+
                     {/* 作品頁籤 */}
                     {hasData('works') && (
                         <div className={`tab-panel ${activeTab === 'works' ? 'active' : ''}`}>
                             {/* 作品分類按鈕組 */}
                             <div className="work-category-filters">
                                 <span className="work-category-label">作品類型:</span>
-                                <button 
+                                <button
                                     className={`category-pill ${activeWorkCategory === 'all' ? 'active' : ''}`}
                                     onClick={() => handleCategoryClick('all')}
                                 >
                                     ALL
                                 </button>
                                 {celebrityData.works.categories.map(category => (
-                                    <button 
+                                    <button
                                         key={category}
                                         className={`category-pill ${activeWorkCategory === category ? 'active' : ''}`}
                                         onClick={() => handleCategoryClick(category)}
@@ -386,29 +386,29 @@ const CelebrityDetails = () => {
                                     </button>
                                 ))}
                             </div>
-                            
+
                             {/* 作品內容 */}
                             <div className="works-content">
                                 {renderWorks()}
                             </div>
                         </div>
                     )}
-                    
+
                     {/* 網路資源頁籤 */}
                     {hasData('resources') && (
                         <div className={`tab-panel ${activeTab === 'resources' ? 'active' : ''}`}>
                             <div className="resource-cards-grid">
                                 {celebrityData.resources.map((resource, index) => (
-                                    <div 
-                                        className="resource-card" 
+                                    <div
+                                        className="resource-card"
                                         key={index}
                                         onClick={() => resource.url && window.open(resource.url, '_blank')}
                                         style={{ cursor: resource.url ? 'pointer' : 'default' }}
                                     >
                                         {resource.img && (
                                             <div className="resource-card-image-container">
-                                                <img 
-                                                    src={resource.img} 
+                                                <img
+                                                    src={resource.img}
                                                     alt={resource.title}
                                                     className="resource-card-image"
                                                     onError={(e) => {
@@ -428,7 +428,7 @@ const CelebrityDetails = () => {
                             </div>
                         </div>
                     )}
-                    
+
                     {/* 元宇宙頁籤 */}
                     {hasData('metaverse') && (
                         <div className={`tab-panel ${activeTab === 'metaverse' ? 'active' : ''}`}>
@@ -439,7 +439,7 @@ const CelebrityDetails = () => {
                             </ul>
                         </div>
                     )}
-                    
+
                     {/* 得獎頁籤 */}
                     {hasData('awards') && (
                         <div className={`tab-panel ${activeTab === 'awards' ? 'active' : ''}`}>

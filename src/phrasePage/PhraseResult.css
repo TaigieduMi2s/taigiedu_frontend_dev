@@ -159,7 +159,7 @@ label {
 
 .menuTitle {
     font-size: 22px;
-    font-family: 'Huninn', sans-serif;
+    font-family: 'Huninn', 'NotoSansTC', sans-serif;
     font-weight: 400;
     color: #000;
 
@@ -167,14 +167,14 @@ label {
 
 .menuText {
     font-size: 22px;
-    font-family: 'Huninn', sans-serif;
+    font-family: 'Huninn', 'NotoSansTC', sans-serif;
     font-weight: 400;
     color: #000;
 }
 
 .selectionText {
     font-size: 20px;
-    font-family: 'Huninn', sans-serif;
+    font-family: 'Huninn', 'NotoSansTC', sans-serif;
     font-weight: 500;
     color: #000;
     text-align: left;

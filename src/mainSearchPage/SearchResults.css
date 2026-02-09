@@ -121,7 +121,7 @@ label {
 
 .menuTitle {
 	font-size: 22px;
-	font-family: 'Huninn', sans-serif;
+	font-family: 'Huninn', 'NotoSansTC', sans-serif;
 	font-weight: 400;
 	color: #000;
 
@@ -129,14 +129,14 @@ label {
 
 .menuText {
 	font-size: 22px;
-	font-family: 'Huninn', sans-serif;
+	font-family: 'Huninn', 'NotoSansTC', sans-serif;
 	font-weight: 400;
 	color: #000;
 }
 
 .selectionText {
 	font-size: 20px;
-	font-family: 'Huninn', sans-serif;
+	font-family: 'Huninn', 'NotoSansTC', sans-serif;
 	font-weight: 500;
 	color: #000;
 	text-align: left;
@@ -215,7 +215,7 @@ label {
 
 .imgTitle {
 	font-size: 12px;
-	font-family: 'Huninn', sans-serif;
+	font-family: 'Huninn', 'NotoSansTC', sans-serif;
 	/* font-weight: bold; */
 	/* overflow:hidden; white-space: nowrap; text-overflow: ellipsis; */
 	-webkit-line-clamp: 2;
@@ -259,7 +259,7 @@ label {
 
 .sentenceContent {
 	font-size: 16px;
-	font-family: 'Huninn', sans-serif;
+	font-family: 'Huninn', 'NotoSansTC', sans-serif;
 	/* overflow:hidden; white-space: nowrap; text-overflow: ellipsis; */
 	-webkit-line-clamp: 1;
 	overflow: hidden;

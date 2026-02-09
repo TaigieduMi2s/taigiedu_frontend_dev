@@ -1,0 +1,779 @@
+import { useState, useEffect, useMemo } from 'react';
+import { DndContext, closestCenter, DragOverlay, PointerSensor, KeyboardSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, useSortable, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import './adminSocialmediaPage.css';
+import { useToast } from '../../../components/Toast';
+import PropTypes from 'prop-types';
+
+// 使用真實的圖標
+import editIcon from '../../../assets/adminPage/pencil.svg';
+import deleteIcon from '../../../assets/adminPage/trash.svg';
+import addIcon from '../../../assets/adminPage/plus.svg';
+import uturnIcon from '../../../assets/adminPage/uturn.svg';
+import dragIcon from '../../../assets/adminPage/bars-2.png';
+import jpgIconSvg from '../../../assets/adminPage/jpg icon.svg';
+
+const AdminSocialmediaPage = () => {
+  // 基本狀態
+  const [menuItems, setMenuItems] = useState({});
+  const [allItems, setAllItems] = useState([]);
+  const [parentFilter, setParentFilter] = useState('全部');
+  const [childFilter, setChildFilter] = useState('全部');
+  const [statusFilter, setStatusFilter] = useState('published');
+  const { showToast } = useToast();
+  
+  // Modal 狀態
+  const [showModal, setShowModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentEditId, setCurrentEditId] = useState(null);
+  const [name, setName] = useState('');
+  const [link, setLink] = useState('');
+  const [pickedCategories, setPickedCategories] = useState([]);
+  const [imageName, setImageName] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [attemptedSubmit, setAttemptedSubmit] = useState(false);
+
+  // DnD 狀態
+  const [activePageItem, setActivePageItem] = useState(null);
+
+  // 分頁狀態
+  const PAGE_SIZE = 12;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const resetForm = () => {
+    setIsEditing(false);
+    setCurrentEditId(null);
+    setName('');
+    setLink('');
+    setPickedCategories([]);
+    setImageName('');
+    setImageUrl('');
+  };
+
+  const togglePicked = (cat) => {
+    setPickedCategories(p => p.includes(cat) ? p.filter(c => c !== cat) : [...p, cat]);
+  };
+
+  const openCreate = () => {
+    resetForm();
+    setAttemptedSubmit(false);
+    setShowModal(true);
+  };
+
+  const openEdit = (item) => {
+    setIsEditing(true);
+    setCurrentEditId(item.id);
+    setName(item.name || '');
+    setLink(item.link || '');
+    setPickedCategories(item.categories || []);
+    setImageName(item.imageName || '');
+    setImageUrl(item.imageUrl || '');
+    setAttemptedSubmit(false);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setAttemptedSubmit(false);
+    setShowModal(false);
+  };
+
+  // 取得資料
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('https://dev.taigiedu.com/backend/media', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        if (!response.ok) throw new Error('載入失敗');
+        const result = await response.json();
+        
+        const dynamicMenu = {};
+        const items = [];
+        
+        Object.keys(result).forEach(rawCategory => {
+          const mainCategory = rawCategory === '' ? '其他' : rawCategory;
+          const records = result[rawCategory] || [];
+          const subSet = new Set();
+          
+          records.forEach(item => {
+            if (item.subcategory && item.subcategory.trim() !== '') {
+              subSet.add(item.subcategory.trim());
+            }
+          });
+          
+          const subItems = Array.from(subSet).sort();
+          dynamicMenu[mainCategory] = {
+            hasSubMenu: subItems.length > 0,
+            subItems
+          };
+          
+          records.forEach(item => {
+            items.push({
+              id: item.id || `media-${Date.now()}-${Math.random()}`,
+              mainCategory,
+              subCategory: item.subcategory && item.subcategory.trim() !== '' ? item.subcategory.trim() : '',
+              categories: item.subcategory && item.subcategory.trim() !== '' ? [item.subcategory.trim()] : [],
+              name: item.title || '未命名',
+              link: item.url || '#',
+              imageUrl: item.image || '',
+              imageName: '',
+              status: 'published',
+              timestamp: new Date().toLocaleDateString('zh-TW')
+            });
+          });
+        });
+        
+        setMenuItems(dynamicMenu);
+        setAllItems(items);
+      } catch (error) {
+        console.error('載入失敗:', error);
+        showToast('載入資料失敗', 'error');
+      }
+    };
+    fetchData();
+  }, [showToast]);
+
+  // 取得子選項
+  const childOptions = useMemo(() => {
+    if (parentFilter === '全部') return [];
+    return menuItems[parentFilter]?.subItems || [];
+  }, [parentFilter, menuItems]);
+
+  // 過濾邏輯
+  const filteredItems = useMemo(() => {
+    let list = allItems.filter(i => i.status === statusFilter);
+    if (parentFilter !== '全部') {
+      list = list.filter(i => i.mainCategory === parentFilter);
+    }
+    if (childFilter !== '全部') {
+      list = list.filter(i => i.subCategory === childFilter);
+    }
+    return list;
+  }, [allItems, parentFilter, childFilter, statusFilter]);
+
+  // 分頁邏輯
+  const totalPages = Math.ceil(filteredItems.length / PAGE_SIZE);
+  const visibleItems = filteredItems.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
+  // 重置頁碼當篩選改變時
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [parentFilter, childFilter, statusFilter]);
+
+  // DnD 處理
+  const handleDragStart = (event) => {
+    const pageItem = visibleItems.find(item => item.id === event.active.id);
+    setActivePageItem(pageItem);
+  };
+
+  const handleDragCancel = () => {
+    setActivePageItem(null);
+  };
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) {
+      handleDragCancel();
+      return;
+    }
+    
+    const oldIndex = visibleItems.findIndex(item => item.id === active.id);
+    const newIndex = visibleItems.findIndex(item => item.id === over.id);
+    
+    if (oldIndex === -1 || newIndex === -1) {
+      handleDragCancel();
+      return;
+    }
+
+    const reorderedVisible = [...visibleItems];
+    const [movedItem] = reorderedVisible.splice(oldIndex, 1);
+    reorderedVisible.splice(newIndex, 0, movedItem);
+
+    setAllItems(prevItems => {
+      const newItems = [...prevItems];
+      reorderedVisible.forEach((item) => {
+        const globalIndex = newItems.findIndex(i => i.id === item.id);
+        if (globalIndex !== -1) {
+          newItems[globalIndex] = { ...item };
+        }
+      });
+      return newItems;
+    });
+
+    handleDragCancel();
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setAttemptedSubmit(true);
+    
+    if (!name.trim()) {
+      showToast('請輸入名稱', 'warning');
+      return;
+    }
+    
+    if (pickedCategories.length === 0) {
+      showToast('請至少選擇一個類別', 'warning');
+      return;
+    }
+    
+    try {
+      new URL(link);
+    } catch {
+      showToast('請輸入有效的連結 URL', 'warning');
+      return;
+    }
+    
+    const now = new Date();
+    const ts = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    
+    if (isEditing && currentEditId) {
+      setAllItems(prev => prev.map(i => 
+        i.id === currentEditId 
+          ? { ...i, name, link, categories: pickedCategories, imageName: imageName || i.imageName, imageUrl: imageUrl || i.imageUrl }
+          : i
+      ));
+      showToast('項目已更新', 'success');
+    } else {
+      setAllItems(prev => [{
+        id: 'media-' + Date.now(),
+        name,
+        link,
+        categories: pickedCategories,
+        imageName,
+        imageUrl,
+        status: 'published',
+        timestamp: ts
+      }, ...prev]);
+      showToast('項目已新增', 'success');
+    }
+    
+    setShowModal(false);
+  };
+
+  const validateAndSetImage = (file) => {
+    if (!file) return;
+    
+    if (!['image/jpeg', 'image/png'].includes(file.type)) {
+      showToast('只接受 JPG 或 PNG 格式', 'warning');
+      return;
+    }
+    
+    if (file.size > 2 * 1024 * 1024) {
+      showToast('檔案大小不能超過 2MB', 'warning');
+      return;
+    }
+    
+    setImageName(file.name);
+    setImageUrl(URL.createObjectURL(file));
+  };
+
+  const handleDeleteOrRestore = (id) => {
+    const item = allItems.find(i => i.id === id);
+    if (!item) return;
+    
+    const newStatus = item.status === 'published' ? 'archived' : 'published';
+    setAllItems(prev => prev.map(i => i.id === id ? { ...i, status: newStatus } : i));
+    showToast(newStatus === 'archived' ? '項目已封存' : '項目已恢復', 'success');
+  };
+
+  const showChildFilter = parentFilter === '全部'
+    ? childOptions.length > 0
+    : !!menuItems[parentFilter]?.hasSubMenu && childOptions.length > 0;
+
+  // 將類別攤平成 parent/sub 顯示
+  const flatCategoryOptions = useMemo(() => {
+    const arr = [];
+    Object.entries(menuItems).forEach(([parent, cfg]) => {
+      if (cfg.hasSubMenu) {
+        cfg.subItems.forEach(sub => arr.push({
+          key: parent + '>' + sub,
+          label: parent + '/' + sub
+        }));
+      } else {
+        arr.push({ key: parent, label: parent });
+      }
+    });
+    return arr;
+  }, [menuItems]);
+
+  // 分頁相關函數
+  const getPageNumbers = () => {
+    const VISIBLE_PAGES = 5;
+    const pages = [];
+    
+    if (totalPages <= VISIBLE_PAGES) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      const half = Math.floor(VISIBLE_PAGES / 2);
+      let start = Math.max(1, currentPage - half);
+      let end = Math.min(totalPages, start + VISIBLE_PAGES - 1);
+      
+      if (end - start + 1 < VISIBLE_PAGES) {
+        start = Math.max(1, end - VISIBLE_PAGES + 1);
+      }
+      
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+    }
+    
+    return pages;
+  };
+
+  const handleFirst = () => setCurrentPage(1);
+  const handlePrev = () => setCurrentPage(Math.max(1, currentPage - 1));
+  const handleNext = () => setCurrentPage(Math.min(totalPages, currentPage + 1));
+  const handleLast = () => setCurrentPage(totalPages);
+
+  const getFileName = (url) => {
+    if (!url) return '';
+    try {
+      return url.split('/').pop()?.split('.')[0] || 'image';
+    } catch {
+      return 'image';
+    }
+  };
+
+  return (
+    <div className="admin-container">
+      <h1 className="admin-title">媒體與社群資源管理</h1>
+      
+      <div className="header-top-row">
+        <div className="filter-breadcrumb">
+          <span className="breadcrumb-title">篩選</span>
+          <span className="breadcrumb-sep">|</span>
+          <select
+            className="pill-select"
+            value={parentFilter}
+            onChange={(e) => {
+              setParentFilter(e.target.value);
+              setChildFilter('全部');
+            }}
+          >
+            <option value="全部">全部</option>
+            {Object.keys(menuItems).map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+          
+          {showChildFilter && (
+            <>
+              <span className="breadcrumb-sep">&gt;</span>
+              <select
+                className="pill-select"
+                value={childFilter}
+                onChange={(e) => setChildFilter(e.target.value)}
+              >
+                <option value="全部">全部</option>
+                {childOptions.map(sub => (
+                  <option key={sub} value={sub}>{sub}</option>
+                ))}
+              </select>
+            </>
+          )}
+        </div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <select
+            className="pill-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="published">已發布</option>
+            <option value="archived">已封存</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="header-second-row">
+        <button className="admin-add-button" onClick={openCreate}>
+          新增項目
+        </button>
+      </div>
+      
+      <DndContext
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>編輯</th>
+              <th>名稱</th>
+              <th>類別</th>
+              <th>連結</th>
+              <th>圖片</th>
+              <th>操作</th>
+              <th>更新時間</th>
+            </tr>
+          </thead>
+          <tbody>
+            <SortableContext
+              items={visibleItems.map(item => item.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {visibleItems.map((item) => (
+                <SortableMediaRow
+                  key={item.id}
+                  item={item}
+                  statusFilter={statusFilter}
+                  openEdit={openEdit}
+                  handleDeleteOrRestore={handleDeleteOrRestore}
+                  getFileName={getFileName}
+                />
+              ))}
+            </SortableContext>
+          </tbody>
+        </table>
+        
+        <DragOverlay>
+          {activePageItem ? (
+            <div style={{
+              background: 'white',
+              padding: '8px',
+              borderRadius: '4px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+            }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <tbody>
+                  <tr>
+                    <td>{activePageItem.name}</td>
+                    <td>
+                      {activePageItem.mainCategory
+                        ? (activePageItem.subCategory
+                          ? `${activePageItem.mainCategory} > ${activePageItem.subCategory}`
+                          : activePageItem.mainCategory)
+                        : (activePageItem.categories && activePageItem.categories.length > 0
+                          ? activePageItem.categories.join(', ')
+                          : '—')}
+                    </td>
+                    <td>
+                      <a href={activePageItem.link} target="_blank" rel="noopener noreferrer">
+                        {activePageItem.link}
+                      </a>
+                    </td>
+                    <td>
+                      {(activePageItem.imageUrl || activePageItem.imageName) ? (
+                        <div className="file-cell">
+                          <span className="file-icon-image">{jpgIcon}</span>
+                          <span className="file-name">
+                            {activePageItem.imageName || getFileName(activePageItem.imageUrl) || '圖片'}
+                          </span>
+                        </div>
+                      ) : '無'}
+                    </td>
+                    <td>{activePageItem.timestamp}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
+
+      {/* 分頁控制 */}
+      {totalPages > 1 && (
+        <div className="admin-pagination">
+          <ul className="pagination">
+            <li className="page-item">
+              <button
+                className="page-link"
+                onClick={handleFirst}
+                disabled={currentPage === 1}
+              >
+                <img
+                  src={chevronDoubleLeftIcon}
+                  alt="First"
+                  style={{ transform: 'scaleX(-1)' }}
+                />
+              </button>
+            </li>
+            <li className="page-item">
+              <button
+                className="page-link"
+                onClick={handlePrev}
+                disabled={currentPage === 1}
+              >
+                <img src={chevronLeftIcon} alt="Previous" />
+              </button>
+            </li>
+            {getPageNumbers().map(pageNum => (
+              <li key={pageNum} className="page-item">
+                <button
+                  className={`page-link ${currentPage === pageNum ? 'active' : ''}`}
+                  onClick={() => setCurrentPage(pageNum)}
+                >
+                  {pageNum}
+                </button>
+              </li>
+            ))}
+            <li className="page-item">
+              <button
+                className="page-link"
+                onClick={handleNext}
+                disabled={currentPage === totalPages}
+              >
+                <img
+                  src={chevronLeftIcon}
+                  alt="Next"
+                  style={{ transform: 'scaleX(-1)' }}
+                />
+              </button>
+            </li>
+            <li className="page-item">
+              <button
+                className="page-link"
+                onClick={handleLast}
+                disabled={currentPage === totalPages}
+              >
+                <img src={chevronDoubleLeftIcon} alt="Last" />
+              </button>
+            </li>
+          </ul>
+        </div>
+      )}
+
+      {/* Debug Overlay (開發模式) */}
+      {import.meta.env.DEV && (
+        <div style={{
+          position: 'fixed',
+          top: '10px',
+          right: '10px',
+          background: 'black',
+          color: 'white',
+          padding: '10px',
+          borderRadius: '5px',
+          fontSize: '12px',
+          zIndex: 9999
+        }}>
+          <div>當前頁: {currentPage}/{totalPages}</div>
+          <div>頁面項目: {visibleItems.length}</div>
+          <div>總項目: {filteredItems.length}</div>
+          <div>Parent: {parentFilter}</div>
+          <div>Child: {childFilter}</div>
+        </div>
+      )}
+
+      {/* Modal */}
+      <div className={`modal ${showModal ? 'show d-block' : 'd-none'}`}>
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header admin-modal-header">
+              <h5 className="modal-title admin-modal-title">
+                {isEditing ? '編輯' : '新增'}項目
+              </h5>
+              <button
+                type="button"
+                className="btn-close admin-btn-close"
+                onClick={closeModal}
+              ></button>
+            </div>
+            <form onSubmit={handleSubmit}>
+              <div className="modal-body admin-modal-body">
+                <div className="mb-3">
+                  <label className="form-label admin-form-label">*名稱</label>
+                  <input
+                    type="text"
+                    className={`form-control admin-form-control ${
+                      attemptedSubmit && !name.trim() ? 'is-invalid' : ''
+                    }`}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+                
+                <div className="mb-3">
+                  <label className="form-label admin-form-label">
+                    *類別（至少勾選一個類別）
+                  </label>
+                  {flatCategoryOptions.length === 0 ? (
+                    <div className="text-muted" style={{ fontSize: '0.9rem' }}>
+                      尚無可選分類
+                    </div>
+                  ) : (
+                    <div className="category-grid">
+                      {flatCategoryOptions.map(opt => (
+                        <label key={opt.key} className="form-check-label category-option">
+                          <input
+                            type="checkbox"
+                            className="form-check-input"
+                            checked={pickedCategories.includes(opt.key)}
+                            onChange={() => togglePicked(opt.key)}
+                          />
+                          {' '}
+                          {opt.label}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                  {attemptedSubmit && pickedCategories.length === 0 && (
+                    <div className="invalid-hint">請至少勾選一個類別</div>
+                  )}
+                </div>
+                
+                <div className="mb-3">
+                  <label className="form-label admin-form-label">*圖片</label>
+                  <div className="upload-wrapper">
+                    <label className="upload-btn">
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png"
+                        className="d-none"
+                        onChange={(e) => validateAndSetImage(e.target.files?.[0])}
+                      />
+                      上傳檔案
+                    </label>
+                    <span className="upload-hint">
+                      ※限 JPG、PNG 可上傳，限制 2MB。
+                    </span>
+                  </div>
+                  {(imageName || imageUrl) && (
+                    <div className="file-cell" style={{ marginTop: 8 }}>
+                      <span className="file-icon-image">{jpgIcon}</span>
+                      <span className="file-name">
+                        {imageName || getFileName(imageUrl) || '圖片'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="mb-3">
+                  <label className="form-label admin-form-label">*連結</label>
+                  <input
+                    type="url"
+                    className={`form-control admin-form-control ${
+                      attemptedSubmit && (() => {
+                        try {
+                          new URL(link);
+                          return false;
+                        } catch {
+                          return true;
+                        }
+                      })() ? 'is-invalid' : ''
+                    }`}
+                    value={link}
+                    onChange={(e) => setLink(e.target.value)}
+                  />
+                </div>
+              </div>
+              
+              <div className="modal-footer admin-modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary admin-btn-cancel"
+                  onClick={closeModal}
+                >
+                  取消
+                </button>
+                <button type="submit" className="btn btn-primary admin-btn-submit">
+                  送出
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      {showModal && <div className="modal-backdrop fade show"></div>}
+    </div>
+  );
+};
+
+const SortableMediaRow = ({ item, statusFilter, openEdit, handleDeleteOrRestore, getFileName }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id
+  });
+  
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 10 : 0,
+    opacity: isDragging ? 0.8 : 1
+  };
+  
+  const isArchived = statusFilter === 'archived';
+  const actionIcon = isArchived ? uturnIcon : deleteIcon;
+  const actionClass = isArchived ? 'admin-action-btn restore-btn' : 'admin-action-btn delete-btn';
+  
+  return (
+    <tr ref={setNodeRef} style={style} className={isDragging ? 'dragging-row' : ''}>
+      <td className="drag-handle-column">
+        <button className="drag-handle-btn" {...listeners} {...attributes}>
+          <span className="drag-handle-icon">{dragIcon}</span>
+        </button>
+      </td>
+      <td>
+        <button className="admin-action-btn edit-btn" onClick={() => openEdit(item)}>
+          <span className="admin-action-icon">{editIcon}</span>
+        </button>
+      </td>
+      <td>{item.name}</td>
+      <td>
+        {item.mainCategory
+          ? (item.subCategory
+            ? `${item.mainCategory} > ${item.subCategory}`
+            : item.mainCategory)
+          : (item.categories && item.categories.length > 0
+            ? item.categories.join(', ')
+            : '—')}
+      </td>
+      <td>
+        <a href={item.link} target="_blank" rel="noopener noreferrer">
+          {item.link}
+        </a>
+      </td>
+      <td>
+        {(item.imageUrl || item.imageName) ? (
+          <div className="file-cell">
+            <span className="file-icon-image">{jpgIcon}</span>
+            <span className="file-name">
+              {item.imageName || getFileName(item.imageUrl) || '圖片'}
+            </span>
+          </div>
+        ) : (
+          <span className="text-muted">無</span>
+        )}
+      </td>
+      <td>
+        <button
+          className={actionClass}
+          onClick={() => handleDeleteOrRestore(item.id)}
+        >
+          <span className="admin-action-icon">{actionIcon}</span>
+        </button>
+      </td>
+      <td>{item.timestamp}</td>
+    </tr>
+  );
+};
+
+SortableMediaRow.propTypes = {
+  item: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    name: PropTypes.string.isRequired,
+    categories: PropTypes.arrayOf(PropTypes.string),
+    mainCategory: PropTypes.string,
+    subCategory: PropTypes.string,
+    link: PropTypes.string.isRequired,
+    imageUrl: PropTypes.string,
+    imageName: PropTypes.string,
+    timestamp: PropTypes.string.isRequired,
+    status: PropTypes.string.isRequired
+  }).isRequired,
+  statusFilter: PropTypes.string.isRequired,
+  openEdit: PropTypes.func.isRequired,
+  handleDeleteOrRestore: PropTypes.func.isRequired,
+  getFileName: PropTypes.func.isRequired
+};
+
+export default AdminSocialmediaPage;

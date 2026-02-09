@@ -22,7 +22,7 @@ const CelebrityPage = () => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await fetch("https://dev.taigiedu.com/backend/celebrity/list", {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/celebrity/list`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -41,8 +41,8 @@ const CelebrityPage = () => {
                 const formattedCelebrities = data.map((celebrity, index) => ({
                     id: index + 1,
                     name: celebrity.name,
-                    image: celebrity.photo ? `https://dev.taigiedu.com${celebrity.photo}` : {nopic},
-                    illustration: celebrity.illustration ? `https://dev.taigiedu.com${celebrity.illustration}` : null
+                    image: celebrity.photo ? `${import.meta.env.VITE_IMAGE_URL}${celebrity.photo}` : { nopic },
+                    illustration: celebrity.illustration ? `${import.meta.env.VITE_IMAGE_URL}${celebrity.illustration}` : null
                 }));
                 setCelebrities(formattedCelebrities);
             } else if (Array.isArray(data) && data.length === 0) {
@@ -68,7 +68,7 @@ const CelebrityPage = () => {
 
         // 直接使用 window.open
         window.open(detailUrl.toString(), '_blank', 'noopener,noreferrer');
-        
+
         console.log("Opening URL:", detailUrl.toString());
     };
 
@@ -98,13 +98,13 @@ const CelebrityPage = () => {
             ) : (
                 <div className="row g-4 pt-4">
                     {celebrities.map(celebrity => (
-                        <div key={celebrity.id} 
-                             className="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-custom-5"
-                             onClick={() => handleCardClick(celebrity)}>
+                        <div key={celebrity.id}
+                            className="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-custom-5"
+                            onClick={() => handleCardClick(celebrity)}>
                             <div className="celebrity-card">
                                 <div className="image-container">
-                                    <img 
-                                        src={celebrity.image} 
+                                    <img
+                                        src={celebrity.image}
                                         alt={celebrity.name}
                                         className="celebrity-image"
                                         onError={(e) => {

@@ -1,0 +1,55 @@
+.admin-content-wrapper{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);padding:16px;}
+.admin-banner{background:#ffe4c2;color:#4b5563;border:1px solid #ffd09a;border-radius:8px;padding:8px 12px;display:inline-flex;align-items:center;gap:8px;margin-bottom:10px}
+.admin-banner .dot{width:10px;height:10px;border-radius:50%;background:#ff9b42;display:inline-block}
+.admin-header h2{margin:0;font-size:20px;color:#2D92C1}
+.admin-subtitle{margin-top:4px;color:#666;font-size:13px}
+.admin-toolbar{display:flex;justify-content:space-between;gap:8px;align-items:flex-end;margin:12px 0}
+.admin-btn{border:1px solid #2D92C1;color:#2D92C1;background:#fff;border-radius:8px;padding:6px 10px;cursor:pointer}
+.admin-btn.primary{background:#2D92C1;color:#fff}
+.admin-search{display:flex;gap:8px}
+.admin-search input{border:1px solid #ccc;border-radius:8px;padding:6px 10px;width:240px}
+.admin-search-btn{width:40px;height:36px;border:none;border-radius:8px;background:#2D92C1;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.admin-search-btn img{width:18px;filter:invert(1)}
+.admin-filters{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin:8px 0 4px}
+.admin-filters.left{flex:1}
+.filter-item{display:flex;flex-direction:column;gap:6px}
+.filter-item span{font-size:12px;color:#555}
+.admin-select{border:1px solid #c9d6df;border-radius:8px;padding:6px 10px;min-width:140px;background:#fff}
+.admin-status{display:flex;align-items:center;gap:8px}
+
+.admin-card-grid{margin-top:12px;display:grid;gap:16px}
+.admin-card-grid.four-cols{grid-template-columns:repeat(4, minmax(0,1fr))}
+.admin-card-grid.down-mode .resource-card{opacity:.7}
+.admin-card-grid.down-mode .resource-card:hover{transform:none;box-shadow:0px 4px 8px rgba(0,0,0,0.1)}
+.empty-state{color:#555;text-align:center;padding:24px;background:#DFEAF2;border-radius:8px}
+.admin-pagination{display:flex;justify-content:center;margin:18px 0 8px}
+
+/* Modal */
+.admin-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;z-index:50}
+.admin-modal{background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.2);width:520px;max-width:92vw}
+.admin-modal-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #e5eef4;font-weight:700}
+.admin-modal-close{background:transparent;border:0;font-size:18px;cursor:pointer}
+.admin-modal-body{padding:12px 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.admin-radio{display:flex;align-items:center;gap:8px}
+.admin-modal-footer{display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid #e5eef4}
+
+/* Reported card visuals */
+.admin-card-wrapper{position:relative}
+.admin-card-wrapper.reported .resource-card{box-shadow: 0 0 0 9999px rgba(0,0,0,0.0)}
+.reported-overlay{position:absolute;inset:0;border-radius:8px;background:rgba(0,0,0,0.45);pointer-events:none}
+.reported-badge{position:absolute;top:12px;left:12px;background:#F8D7D7;color:#1f2937;padding:8px 14px;border-radius:16px;display:flex;align-items:center;gap:8px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:2}
+.reported-badge span{font-size:16px;line-height:1}
+.reported-badge img{width:18px;height:18px}
+.reported-controls{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;gap:12px;opacity:0;transition:opacity .2s ease;z-index:2}
+.admin-card-wrapper.reported:hover .reported-controls{opacity:1}
+.reported-button{background:#fff;color:#111;border:1px solid #e5e5e5;border-radius:12px;padding:10px 24px;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,0.15);cursor:pointer}
+.reported-button:hover{box-shadow:0 4px 12px rgba(0,0,0,0.2)}
+
+/* Down-mode hover controls */
+.down-overlay{position:absolute;inset:0;border-radius:8px;background:rgba(0,0,0,0.25);opacity:0;transition:opacity .2s ease}
+.admin-card-grid.down-mode .admin-card-wrapper:hover .down-overlay{opacity:1}
+.down-controls{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;gap:12px;opacity:0;transition:opacity .2s ease;z-index:2}
+.admin-card-grid.down-mode .admin-card-wrapper:hover .down-controls{opacity:1}
+.down-button{background:#fff;color:#111;border:1px solid #e5e5e5;border-radius:12px;padding:12px 28px;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,0.15);cursor:pointer}
+.down-button.primary{background:#2D92C1;color:#fff;border-color:#2D92C1}
+.down-button:hover{box-shadow:0 4px 12px rgba(0,0,0,0.2)}

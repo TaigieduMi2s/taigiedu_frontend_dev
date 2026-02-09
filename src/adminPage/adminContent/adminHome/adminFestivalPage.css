@@ -1,0 +1,31 @@
+/* 節慶後台頁面樣式：初始複製自 adminNewsPage.css */
+@import './adminNewsPage.css';
+/* 若之後需要針對節慶頁面客製，覆蓋寫在此處 */
+
+.file-cell {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.file-icon-image {
+	width: 42px;
+	height: 42px;
+	object-fit: contain;
+	border-radius: 6px;
+}
+
+.audio-cell {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.audio-play-btn {
+	border: none;
+	background: transparent;
+	padding: 4px 6px;
+	border-radius: 6px;
+}
+
+.audio-play-btn:hover { background: rgba(0,0,0,0.06); }

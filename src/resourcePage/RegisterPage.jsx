@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
+import TermsDialog from "../components/TermsDialog";
 import "./RegisterPage.css";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const { showToast } = useToast(); 
+  const { showToast } = useToast();
   const [isVerificationVisible, setIsVerificationVisible] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(60);
-  const [isSubmitting, setIsSubmitting] = useState(false); // 控制表單提交狀態
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 條款相關狀態
+  const [termsDialogType, setTermsDialogType] = useState(null); // 'terms' or 'privacy'
+  const [hasReadTerms, setHasReadTerms] = useState(false);
+  const [hasReadPrivacy, setHasReadPrivacy] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [agreePrivacy, setAgreePrivacy] = useState(false);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -53,9 +61,85 @@ const RegisterPage = () => {
     }
   };
 
+  // 處理條款 checkbox 點擊
+  const handleTermsCheckboxClick = (e) => {
+    if (!hasReadTerms) {
+      e.preventDefault();
+      setTermsDialogType('terms');
+    } else {
+      setAgreeTerms(e.target.checked);
+    }
+  };
+
+  // 處理隱私權 checkbox 點擊
+  const handlePrivacyCheckboxClick = (e) => {
+    if (!hasReadPrivacy) {
+      e.preventDefault();
+      setTermsDialogType('privacy');
+    } else {
+      setAgreePrivacy(e.target.checked);
+    }
+  };
+
+  // 開啟條款對話框
+  const openTermsDialog = (type) => {
+    setTermsDialogType(type);
+  };
+
+  // 關閉條款對話框
+  const closeTermsDialog = () => {
+    setTermsDialogType(null);
+  };
+
+  // 接受條款
+  const handleAcceptTerms = () => {
+    if (termsDialogType === 'terms') {
+      setHasReadTerms(true);
+      setAgreeTerms(true);
+    } else if (termsDialogType === 'privacy') {
+      setHasReadPrivacy(true);
+      setAgreePrivacy(true);
+    }
+    closeTermsDialog();
+  };
+
+  // 檢查必填欄位是否都已填寫
+  const isFormValid = () => {
+    if (!formData.email || !formData.password || !formData.lastName ||
+      !formData.firstName || !formData.profession || !formData.organization) {
+      return false;
+    }
+
+    if (formData.usagePurpose.length === 0) {
+      return false;
+    }
+
+    if (formData.profession === "其他" && !formData.professionOther) {
+      return false;
+    }
+
+    const otherPurpose = formData.usagePurpose.find(item => item.type === "其他");
+    if (otherPurpose && !otherPurpose.custom) {
+      return false;
+    }
+
+    return true;
+  };
+
+  // 檢查送出按鈕是否應該啟用
+  const isSubmitEnabled = () => {
+    return isFormValid() && agreeTerms && agreePrivacy && !isSubmitting;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
+    // 檢查是否已同意條款
+    if (!agreeTerms || !agreePrivacy) {
+      showToast("請先閱讀並同意使用條款及隱私權政策", "error");
+      return;
+    }
+
     // 基本驗證
     if (formData.password !== formData.confirmPassword) {
       showToast("密碼與確認密碼不一致！", "error");
@@ -107,7 +191,7 @@ const RegisterPage = () => {
     setIsSubmitting(true); // 開始提交
 
     try {
-      const response = await fetch("https://dev.taigiedu.com/backend/api/user/register", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -139,9 +223,9 @@ const RegisterPage = () => {
   const handleResendCode = async () => {
     if (resendCooldown === 0) {
       setResendCooldown(60); // 重置倒數計時
-      
+
       try {
-        const response = await fetch("https://dev.taigiedu.com/backend/api/user/resend-verification", {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/resend-verification`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -221,7 +305,7 @@ const RegisterPage = () => {
                 />
               </label>
 
-              {/* 註冊表單 */}
+              {/* 再次輸入密碼 */}
               <label className="form-label">
                 <span className="form-label-title">
                   <span className="form-label-required">*</span>再次輸入密碼
@@ -359,15 +443,67 @@ const RegisterPage = () => {
                 </div>
               </label>
 
-              <button 
-                type="submit" 
+              {/* 使用條款及隱私權政策同意區塊 */}
+              <div className="terms-agreement-section">
+                <p className="terms-agreement-title">
+                  <span className="form-label-required">*</span>
+                  使用條款與隱私權政策（必須閱讀完畢）：
+                </p>
+
+                <div className="terms-checkbox-group">
+                  <label className="terms-checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={agreeTerms}
+                      onChange={handleTermsCheckboxClick}
+                      disabled={!hasReadTerms}
+                    />
+                    <span>我已閱讀並同意</span>
+                    <button
+                      type="button"
+                      className="terms-link-button"
+                      onClick={() => openTermsDialog('terms')}
+                    >
+                      《網站使用條款》
+                    </button>
+                  </label>
+
+                  <label className="terms-checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={agreePrivacy}
+                      onChange={handlePrivacyCheckboxClick}
+                      disabled={!hasReadPrivacy}
+                    />
+                    <span>我已閱讀並同意</span>
+                    <button
+                      type="button"
+                      className="terms-link-button"
+                      onClick={() => openTermsDialog('privacy')}
+                    >
+                      《隱私權政策》
+                    </button>
+                  </label>
+                </div>
+              </div>
+
+              <button
+                type="submit"
                 className="register-submit-button"
-                disabled={isSubmitting}
+                disabled={!isSubmitEnabled()}
               >
                 {isSubmitting ? "處理中..." : "送出"}
               </button>
             </form>
           </div>
+
+          {/* 條款對話框 */}
+          <TermsDialog
+            isOpen={termsDialogType !== null}
+            onClose={closeTermsDialog}
+            onAccept={handleAcceptTerms}
+            type={termsDialogType}
+          />
         </>
       ) : (
         <>

@@ -1,0 +1,18 @@
+/* 國小欄（Figma 1331:15775） */
+.es-col{border:1px solid #d95a5b;border-radius:0;overflow:hidden;width:240px;background:transparent}
+.es-header{background:#ecabac}
+.es-list{background:#f3f4f8}
+.es-row{display:flex;align-items:center;justify-content:space-between;height:48px;padding:12px 24px;border-bottom:1px solid #d95a5b}
+.es-label{font-family:'Huninn', 'NotoSansTC', sans-serif,'Inter',sans-serif;font-size:18px;line-height:18px;color:#424242}
+/* 防止中文字分行，確保由左到右呈現 */
+.es-label{white-space:nowrap;word-break:keep-all}
+.es-icon-btn{background:transparent;border:none;padding:0;cursor:pointer;width:24px;height:24px;display:flex;align-items:center;justify-content:center}
+.es-icon{width:24px;height:24px}
+/* 新增列（加號 + 文字） */
+.es-add-row{display:flex;align-items:center;gap:12px;height:48px;padding:12px 24px;border-bottom:1px solid #d95a5b;cursor:pointer}
+.es-plus{font-family:'Huninn', 'NotoSansTC', sans-serif,'Inter',sans-serif;font-weight:600;font-size:24px;line-height:24px;color:#202d47}
+.es-add-label{font-family:'Huninn', 'NotoSansTC', sans-serif,'Inter',sans-serif;font-size:18px;line-height:18px;color:#424242}
+/* 切換為輸入模式時的區塊 */
+.es-add-edit{display:flex;align-items:center;background:#f3f4f8;padding:0 24px;height:48px;border-bottom:1px solid #d95a5b}
+.es-input{flex:1;border:1px solid #e5e7eb;border-radius:8px;padding:6px 8px;font-size:16px}
+.es-submit{margin-left:12px;width:72px;height:40px;background:#ecabac;border:1px solid #d95a5b;color:#fff;font-size:16px;border-radius:9999px}

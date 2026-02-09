@@ -1,77 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import './PolicyPage.css';
+import './styles/markdown.css';
 
 const PolicyPage = () => {
+  const [content, setContent] = useState('');
+
+  useEffect(() => {
+    // 讀取 markdown 文件
+    const baseUrl = import.meta.env.BASE_URL.endsWith('/')
+      ? import.meta.env.BASE_URL.slice(0, -1)
+      : import.meta.env.BASE_URL;
+
+    fetch(`${baseUrl}/docs/legal/privacy-policy.md`)
+      .then((response) => response.text())
+      .then((text) => setContent(text))
+      .catch((error) => console.error('Error loading privacy policy:', error));
+  }, []);
+
   return (
     <div className="policy-container">
-      <div className="policy-content">
-        <h1>《隱私權政策》</h1>
-        <p>「台語文教學共備平台」（以下稱「本網站」）重視會員的隱私權，並依據《個人資料保護法》及相關法令制定本隱私權政策（以下稱「本政策」）。本政策說明我們如何蒐集、使用、保護及管理您的個人資料。</p>
-        <p>使用本網站服務即表示您已閱讀、理解並同意本政策之內容。</p>
-
-        <h2>一、適用範圍</h2>
-        <p>本政策適用於會員於本網站瀏覽、註冊、登入、使用服務、參與活動、填寫表單或與我們聯繫時所涉及的個人資料蒐集與使用。</p>
-        <p>若您連結至第三方網站或服務，其隱私權保護不屬本網站管理範疇，請自行參考該第三方之隱私政策。</p>
-
-        <h2>二、個人資料蒐集方式與類別</h2>
-        <p>本網站可能透過下列方式蒐集您的個人資料：</p>
-        <ol>
-          <li>會員註冊：例如姓名、電子郵件、帳號資訊、聯絡方式。</li>
-          <li>使用服務：例如瀏覽紀錄、學習紀錄、教材下載紀錄、互動留言或上傳的內容。</li>
-          <li>自動蒐集資訊：例如 IP 位址、瀏覽器類型、裝置資訊、Cookies 或其他追蹤技術。</li>
-          <li>聯絡服務：當您透過電子郵件或其他方式與我們聯繫時，所提供的聯絡資訊與訊息內容。</li>
-        </ol>
-
-        <h2>三、個人資料使用目的</h2>
-        <p>本網站蒐集之個人資料，將依下列目的使用：</p>
-        <ol>
-          <li>提供會員服務，包括身份驗證、帳號管理、學習資源存取與社群互動。</li>
-          <li>改善網站功能與內容，進行服務優化與學習資源推廣。</li>
-          <li>進行統計、分析與學術研究（僅以去識別化或匿名方式使用）。</li>
-          <li>通知服務異動、更新、活動訊息或其他必要公告。</li>
-          <li>符合法律或主管機關要求之使用。</li>
-        </ol>
-
-        <h2>四、資料保存與保護</h2>
-        <p>本網站將妥善保存會員之個人資料，並採取合理之資訊安全措施（如加密、存取控管）以防止未經授權之存取、洩漏、篡改或破壞。</p>
-        <p>除法律另有規定或為履行契約所需，本網站將於達成蒐集目的後，刪除或匿名化處理您的個人資料。</p>
-
-        <h2>五、資料分享與第三方揭露</h2>
-        <p>本網站不會任意出售、交換、出租或以其他方式揭露您的個人資料予第三人。但下列情形除外：</p>
-        <ol>
-          <li>已事先獲得您的同意。</li>
-          <li>為履行契約、提供服務所必要（例如：雲端伺服器或技術合作廠商）。</li>
-          <li>基於法律規定或主管機關之要求。</li>
-          <li>為保護會員、公共安全或本網站合法權益所必要。</li>
-        </ol>
-
-        <h2>六、Cookie 與追蹤技術</h2>
-        <p>本網站可能使用 Cookies 或類似技術，記錄會員偏好、學習進度與使用行為，以提升服務品質。</p>
-        <p>您可透過瀏覽器設定管理或停用 Cookies，但可能影響部分功能之正常使用。</p>
-
-        <h2>七、會員的權利</h2>
-        <p>依《個人資料保護法》，您對於您的個人資料享有以下權利：</p>
-        <ol>
-          <li>查詢或請求閱覽。</li>
-          <li>請求製給複製本。</li>
-          <li>請求補充或更正。</li>
-          <li>請求停止蒐集、處理或利用。</li>
-          <li>請求刪除。</li>
-        </ol>
-        <p>若您欲行使上述權利，請透過「聯絡方式」與我們申請，本網站將依法處理。</p>
-
-        <h2>八、未成年人保護</h2>
-        <p>本網站之服務以教育、學術用途為主，若使用者為未滿十八歲之未成年人，應由法定代理人陪同或同意後方可使用。</p>
-        <p>本網站將不會於知情情況下蒐集未成年人之資料，若發現誤收，將立即刪除。</p>
-
-        <h2>九、政策修改</h2>
-        <p>本網站有權隨時修訂本政策，修改後之內容將公告於網站上。若您繼續使用本網站服務，即視為同意修改後之政策。</p>
-
-        <h2>十、聯絡方式</h2>
-        <p>若您對本政策有任何疑問或欲行使相關權利，請聯絡我們：</p>
-        <p>Email：lekunoffice@gmail.com</p>
-
-        <p className="policy-note">最後更新：2025-12-20</p>
+      <div className="policy-content markdown-content">
+        <ReactMarkdown>{content}</ReactMarkdown>
       </div>
     </div>
   );

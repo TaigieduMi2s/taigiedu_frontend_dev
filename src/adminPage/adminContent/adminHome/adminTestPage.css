@@ -1,0 +1,135 @@
+/* ===== AdminTestPage 頁面專用樣式 ===== */
+
+.admin-content-wrapper {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    min-height: 600px;
+    padding: 30px;
+}
+
+.admin-header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 20px;
+}
+
+.admin-header-controls h5 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.admin-header-controls h5 .text-secondary {
+    color: #666 !important;
+}
+
+.admin-add-button {
+    background-color: #2D92C1;
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+}
+
+.admin-add-button:hover {
+    background-color: #40a9ff;
+}
+
+.admin-add-button img {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    filter: brightness(0) invert(1);
+}
+
+.admin-controls-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.status-filter {
+    display: flex;
+    align-items: center;
+}
+
+.status-filter span {
+    font-size: 0.95rem;
+    color: #555;
+    margin-right: 10px;
+}
+
+.admin-status-dropdown {
+    width: 120px;
+    font-size: 0.9rem;
+}
+
+/* ===== Modal 樣式 ===== */
+.admin-modal-content {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.admin-modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 1rem 1.5rem;
+}
+
+.admin-modal-header .modal-title {
+    font-weight: 600;
+    color: #333;
+}
+
+.admin-modal-body {
+    padding: 1.5rem;
+}
+
+.admin-modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e9ecef;
+    background-color: #f8f9fa;
+}
+
+.admin-form-label {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.admin-form-control {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 0.5rem 0.75rem;
+}
+
+.admin-form-control:focus {
+    border-color: #2D92C1;
+    box-shadow: 0 0 0 0.2rem rgba(45, 146, 193, 0.25);
+}
+
+.admin-btn-cancel {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.admin-btn-cancel:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.admin-btn-submit {
+    background-color: #2D92C1;
+    border-color: #2D92C1;
+}
+
+.admin-btn-submit:hover {
+    background-color: #258db8;
+    border-color: #2387b0;
+}

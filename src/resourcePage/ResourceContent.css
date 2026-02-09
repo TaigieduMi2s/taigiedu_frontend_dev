@@ -9,41 +9,50 @@
 
 .resource-content-container {
   width: 100%;
-  max-width: 1440px; /* 設定最大寬度 */
+  max-width: 1440px;
+  /* 設定最大寬度 */
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 0 auto; /* 使用 margin auto 確保水平居中 */
+  margin: 0 auto;
+  /* 使用 margin auto 確保水平居中 */
 }
 
 /* 添加一個居中的 grid 容器 */
 .resource-content {
   position: relative;
-  margin: 40px 0px;
+  margin: 40px auto;
   padding-top: 20px;
   display: grid;
-  grid-template-columns: repeat(4, minmax(250px, 300px)); /* 更靈活的列寬 */
-  column-gap: 48px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 300px));
+  /* 自動調整列數 */
+  column-gap: 30px;
+  /* 縮小間距以適應更多螢幕 */
   row-gap: 50px;
   min-height: 400px;
   align-items: start;
   width: 100%;
-  justify-content: center; /* 將網格居中 */
+  justify-content: center;
 }
 
 /* 修改卡片樣式，確保固定寬度 */
-.resource-content > * {
-  width: 100%; /* 設置寬度為100% */
-  max-width: 300px; /* 但限制最大寬度 */
-  justify-self: center; /* 在網格單元格中居中 */
+.resource-content>* {
+  width: 100%;
+  /* 設置寬度為100% */
+  max-width: 300px;
+  /* 但限制最大寬度 */
+  justify-self: center;
+  /* 在網格單元格中居中 */
 }
 
 /* 確保 ResourceCard 組件內的卡片有固定寬度 */
 .resource-content .resource-card {
   width: 100%;
   max-width: 300px;
-  height: 400px; /* 固定高度 */
-  margin: 0 auto; /* 在容器中居中 */
+  height: 400px;
+  /* 固定高度 */
+  margin: 0 auto;
+  /* 在容器中居中 */
 }
 
 /* 刪除頁面的卡片包裝器也需要固定尺寸 */
@@ -58,8 +67,10 @@
   min-height: 750px;
   position: relative;
   width: 100%;
-  display: flex; /* 使用 flex 布局 */
-  justify-content: center; /* 水平居中內容 */
+  display: flex;
+  /* 使用 flex 布局 */
+  justify-content: center;
+  /* 水平居中內容 */
 }
 
 .pagination-container {
@@ -74,12 +85,12 @@
 /* 響應式設計 */
 @media (max-width: 1440px) {
   .resource-content {
-    grid-template-columns: repeat(4, 1fr);
-    column-gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 280px));
+    column-gap: 20px;
   }
-  
-  .resource-content > * {
-    max-width: 100%; /* 在較小螢幕上允許卡片填滿網格單元 */
+
+  .resource-content>* {
+    max-width: 100%;
   }
 }
 
@@ -87,7 +98,7 @@
   .resource-content {
     grid-template-columns: repeat(3, 1fr);
   }
-  
+
   .resource-content-wrapper {
     min-height: 850px;
   }
@@ -97,7 +108,7 @@
   .resource-content {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .resource-content-wrapper {
     min-height: 1250px;
   }
@@ -107,7 +118,7 @@
   .resource-content {
     grid-template-columns: repeat(1, 1fr);
   }
-  
+
   .resource-content-wrapper {
     min-height: 2450px;
   }
@@ -135,8 +146,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .resource-empty {
@@ -151,6 +167,7 @@
   border-radius: 8px;
   margin: 20px 0;
 }
+
 /* 
 
 .pagination {

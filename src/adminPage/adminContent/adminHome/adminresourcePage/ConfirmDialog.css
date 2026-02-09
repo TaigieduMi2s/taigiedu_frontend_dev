@@ -1,0 +1,5 @@
+.confirm-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center}
+.confirm-dialog{background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.2);width:360px;max-width:90vw;padding:16px}
+.confirm-title{font-weight:700;color:#1b1b1b}
+.confirm-message{margin-top:8px;color:#555}
+.confirm-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}

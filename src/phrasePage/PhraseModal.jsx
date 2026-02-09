@@ -1,10 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import './PhraseModal.css';
 import megaphoneIcon from '../assets/megaphone.svg';
 
 const PhraseModal = ({ isOpen, onClose, phrase, pronunciation, interpretation, pronun_diff, audio, type }) => {
   console.log("Modal 接收的數據:", { phrase, pronunciation, interpretation, pronun_diff, audio });
-  
+
+  const audioRef = useRef(null);
+  const ttsRequestIdRef = useRef(0);
+  const ttsAbortRef = useRef(null);
+
   useEffect(() => {
     if (isOpen) {
       console.log("Modal 打開時的方音差數據:", {
@@ -16,16 +20,57 @@ const PhraseModal = ({ isOpen, onClose, phrase, pronunciation, interpretation, p
     }
   }, [isOpen, pronun_diff]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current = null;
+      }
+      if (ttsAbortRef.current) {
+        ttsAbortRef.current.abort();
+        ttsAbortRef.current = null;
+      }
+    }
+  }, [isOpen]);
+
+  const stopCurrentAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+    if (ttsAbortRef.current) {
+      ttsAbortRef.current.abort();
+      ttsAbortRef.current = null;
+    }
+  };
+
+  const beginTtsRequest = () => {
+    ttsRequestIdRef.current += 1;
+    const requestId = ttsRequestIdRef.current;
+    if (ttsAbortRef.current) {
+      ttsAbortRef.current.abort();
+    }
+    const controller = new AbortController();
+    ttsAbortRef.current = controller;
+    return { requestId, signal: controller.signal };
+  };
+
+  const isLatestTtsRequest = (requestId) => requestId === ttsRequestIdRef.current;
+
   const playAudio = () => {
     try {
       if (audio) {
         console.log("使用 API 提供的音頻數據");
+        stopCurrentAudio();
         // 確保音頻數據格式正確
         const audioSrc = audio.startsWith('data:')
           ? audio
           : `data:audio/wav;base64,${audio}`;
 
         const audioElement = new Audio(audioSrc);
+        audioRef.current = audioElement;
         audioElement.play().catch(error => {
           console.error("播放音頻失敗:", error);
           // 如果播放失敗，嘗試使用 TTS API
@@ -40,7 +85,7 @@ const PhraseModal = ({ isOpen, onClose, phrase, pronunciation, interpretation, p
       fetchAndPlayTTS();
     }
   };
-  
+
 
   const fetchAndPlayTTS = async () => {
     try {
@@ -48,17 +93,22 @@ const PhraseModal = ({ isOpen, onClose, phrase, pronunciation, interpretation, p
       // 準備 API 參數
       const parameters = {
         tts_lang: 'tb',  // 使用漢羅
-        tts_data: pronunciation // 要合成的文字
+        tts_data: pronunciation, // 要合成的文字
+        tts_request_id: Date.now()
       };
 
       console.log('發送 TTS 請求:', parameters);
 
-      const response = await fetch('https://dev.taigiedu.com/backend/synthesize_speech', {
+      const { requestId, signal } = beginTtsRequest();
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/synthesize_speech`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
         },
-        body: JSON.stringify(parameters)
+        body: JSON.stringify(parameters),
+        cache: 'no-store',
+        signal
       });
 
       if (!response.ok) {
@@ -66,13 +116,21 @@ const PhraseModal = ({ isOpen, onClose, phrase, pronunciation, interpretation, p
       }
 
       const synthesized_audio_base64 = await response.text();
+      if (!isLatestTtsRequest(requestId)) {
+        return;
+      }
       console.log('收到音頻數據長度:', synthesized_audio_base64.length);
 
       // 建立並播放音訊
-      const audio = new Audio(`data:audio/wav;base64,${synthesized_audio_base64}`);
-      await audio.play();
+      stopCurrentAudio();
+      const audioElement = new Audio(`data:audio/wav;base64,${synthesized_audio_base64}`);
+      audioRef.current = audioElement;
+      await audioElement.play();
 
     } catch (error) {
+      if (error?.name === 'AbortError') {
+        return;
+      }
       console.error('合成音頻失敗:', error);
     }
   };
@@ -80,15 +138,22 @@ const PhraseModal = ({ isOpen, onClose, phrase, pronunciation, interpretation, p
   const playVariationAudio = async (word, pronun) => {
     try {
       console.log(`播放方音差: ${word} - ${pronun}`);
-      const response = await fetch('https://dev.taigiedu.com/backend/synthesize_speech', {
+      const parameters = {
+        tts_lang: 'tb',
+        tts_data: pronun,
+        tts_request_id: Date.now()
+      };
+      console.log('發送方音差 TTS 請求:', parameters);
+      const { requestId, signal } = beginTtsRequest();
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/synthesize_speech`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
         },
-        body: JSON.stringify({
-          tts_lang: 'tb',
-          tts_data: pronun
-        }),
+        body: JSON.stringify(parameters),
+        cache: 'no-store',
+        signal
       });
 
       if (!response.ok) {
@@ -96,9 +161,18 @@ const PhraseModal = ({ isOpen, onClose, phrase, pronunciation, interpretation, p
       }
 
       const synthesized_audio_base64 = await response.text();
-      const audio = new Audio(`data:audio/wav;base64,${synthesized_audio_base64}`);
-      audio.play();
+      if (!isLatestTtsRequest(requestId)) {
+        return;
+      }
+      console.log('方音差音頻數據長度:', synthesized_audio_base64.length);
+      stopCurrentAudio();
+      const audioElement = new Audio(`data:audio/wav;base64,${synthesized_audio_base64}`);
+      audioRef.current = audioElement;
+      await audioElement.play();
     } catch (error) {
+      if (error?.name === 'AbortError') {
+        return;
+      }
       console.error('播放方音差音頻失敗:', error);
     }
   };

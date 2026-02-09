@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
+import { useAuth } from "../contexts/AuthContext";
 import "./ResourceHeader.css";
 import MultiSelect from "../phrasePage/multiselect";
 import chevronUpIcon from "../assets/chevron-up.svg";
 
-const ResourceHeader = ({ onUploadOpen, isLoggedIn, setIsLoggedIn, onSearch }) => {
+const ResourceHeader = ({ onUploadOpen, isLoggedIn, onSearch }) => {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { logout } = useAuth();
   const [selectedGrade, setSelectedGrade] = useState("階段");
   const [query, setQuery] = useState("");
   const [isGradeOpen, setIsGradeOpen] = useState(false);
@@ -50,7 +52,7 @@ const ResourceHeader = ({ onUploadOpen, isLoggedIn, setIsLoggedIn, onSearch }) =
     return gradeToVersions[grade] || [];
   };
 
-  const allVersions = Array.from(new Set([...(gradeToVersions.國小||[]),...(gradeToVersions.國中||[]),...(gradeToVersions.高中||[])]));
+  const allVersions = Array.from(new Set([...(gradeToVersions.國小 || []), ...(gradeToVersions.國中 || []), ...(gradeToVersions.高中 || [])]));
 
   const handleCategoryChange = (selected) => {
     setSelectedCategories(selected);
@@ -64,11 +66,11 @@ const ResourceHeader = ({ onUploadOpen, isLoggedIn, setIsLoggedIn, onSearch }) =
   useEffect(() => {
     const onCfg = () => {
       const latest = loadConfig();
-      const latestTypes = Array.isArray(latest?.contentTypes) && latest.contentTypes.length>0 ? latest.contentTypes : fallbackContentTypes;
+      const latestTypes = Array.isArray(latest?.contentTypes) && latest.contentTypes.length > 0 ? latest.contentTypes : fallbackContentTypes;
       setSelectedContentTypes([...latestTypes]);
       // 若目前選的階段不是「階段」，同步更新版本清單
-      if (selectedGrade === '全部') setSelectedCategories(Array.from(new Set([...(latest?.versions?.['國小']||[]),...(latest?.versions?.['國中']||[]),...(latest?.versions?.['高中']||[])])));
-      else if (selectedGrade !== '階段') setSelectedCategories([...(latest?.versions?.[selectedGrade]||defaultVersions[selectedGrade]||[])]);
+      if (selectedGrade === '全部') setSelectedCategories(Array.from(new Set([...(latest?.versions?.['國小'] || []), ...(latest?.versions?.['國中'] || []), ...(latest?.versions?.['高中'] || [])])));
+      else if (selectedGrade !== '階段') setSelectedCategories([...(latest?.versions?.[selectedGrade] || defaultVersions[selectedGrade] || [])]);
     };
     window.addEventListener('resource-config-updated', onCfg);
     return () => window.removeEventListener('resource-config-updated', onCfg);
@@ -128,12 +130,9 @@ const ResourceHeader = ({ onUploadOpen, isLoggedIn, setIsLoggedIn, onSearch }) =
     navigate("/delete-resource");
   };
 
-  // 登出處理
-  const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("isLoggedIn");
-    setIsLoggedIn(false);
+  // 登出處理 - 使用 AuthContext 的 logout
+  const handleLogout = async () => {
+    await logout();
     showToast("已成功登出", "success");
   };
 

@@ -26,4 +26,14 @@ Thumbs.db
 
 # Env files (通常包含敏感資訊)
 .env
-.env.*
+.env.local
+.env.development
+.env.production
+.env.*.local
+
+# Playwright E2E 測試
+tests/e2e/playwright-report/
+tests/e2e/test-results/
+tests/e2e/.auth/
+
+eng.traineddata

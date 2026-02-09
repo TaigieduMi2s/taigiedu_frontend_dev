@@ -66,7 +66,7 @@ const TranslatePage = () => {
 
   // 執行單次API轉換
   const performSingleConversion = async (mode, textToConvert) => {
-    const response = await fetch("https://dev.taigiedu.com/backend/convert_taibun", {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/convert_taibun`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -108,7 +108,7 @@ const TranslatePage = () => {
       if (directConversionModes[conversionKey]) {
         // 單步轉換
         result = await performSingleConversion(directConversionModes[conversionKey], originalContent);
-      } 
+      }
       // 檢查是否有多步轉換路徑
       else if (conversionPaths[conversionKey]) {
         // 多步轉換
@@ -120,7 +120,7 @@ const TranslatePage = () => {
         }
 
         result = currentText;
-      } 
+      }
       // 不支援的轉換
       else {
         showToast(`不支援 ${originalLanguage} 到 ${targetLanguage} 的轉換`, 'error');
@@ -174,18 +174,18 @@ const TranslatePage = () => {
         {loading ? (
           <>
             翻譯中
-            <img 
-              src={loadingImage} 
-              alt="loading" 
+            <img
+              src={loadingImage}
+              alt="loading"
               className="translate-arrow loading-icon"
             />
           </>
         ) : (
           <div className="translate-content-wrapper">
             翻譯
-            <img 
-              src={arrowRightIcon} 
-              alt="translate arrow" 
+            <img
+              src={arrowRightIcon}
+              alt="translate arrow"
               className="translate-arrow"
             />
           </div>

@@ -71,7 +71,7 @@ const ContentFeedback = ({ isOpen, onClose, content, onSubmit, audioSource, acti
       };
 
       console.log('Full Parameters:', parameters);
-      const response = await fetch('https://dev.taigiedu.com/backend/submit_stt_feedback', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/submit_stt_feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -88,7 +88,7 @@ const ContentFeedback = ({ isOpen, onClose, content, onSubmit, audioSource, acti
       onClose();
     } catch (error) {
       console.error('Feedback submission failed:', error);
-    showToast('提交失敗，請稍後再試', 'error');
+      showToast('提交失敗，請稍後再試', 'error');
     } finally {
       setIsSubmitting(false);
     }

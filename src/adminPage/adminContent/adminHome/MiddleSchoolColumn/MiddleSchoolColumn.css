@@ -1,0 +1,15 @@
+.ms-col{border:1px solid #CEAAF2;border-radius:0;overflow:hidden;width:240px;background:transparent}
+.ms-header{background:#CEAAF2}
+.ms-list{background:#f3f4f8}
+.ms-row{display:flex;align-items:center;justify-content:space-between;height:48px;padding:12px 24px;border-bottom:1px solid #CEAAF2}
+.ms-label{font-family:'Huninn', 'NotoSansTC', sans-serif,'Inter',sans-serif;font-size:18px;line-height:18px;color:#424242}
+/* 防止中文字分行，確保由左到右呈現 */
+.ms-label{white-space:nowrap;word-break:keep-all}
+.ms-icon-btn{background:transparent;border:none;padding:0;cursor:pointer;width:24px;height:24px;display:flex;align-items:center;justify-content:center}
+.ms-icon{width:24px;height:24px}
+.ms-input{flex:1;border:1px solid #e5e7eb;border-radius:8px;padding:6px 8px;font-size:16px}
+.ms-add-row{display:flex;align-items:center;gap:12px;height:48px;padding:12px 24px;border-bottom:1px solid #CEAAF2;cursor:pointer}
+.ms-plus{font-family:'Huninn', 'NotoSansTC', sans-serif,'Inter',sans-serif;font-weight:600;font-size:24px;line-height:24px;color:#202d47}
+.ms-add-label{font-family:'Huninn', 'NotoSansTC', sans-serif,'Inter',sans-serif;font-size:18px;line-height:18px;color:#424242}
+.ms-add-edit{display:flex;align-items:center;background:#f3f4f8;padding:0 24px;height:48px;border-bottom:1px solid #CEAAF2}
+.ms-submit{margin-left:12px;width:72px;height:40px;background:#CEAAF2;border:1px solid #CEAAF2;color:#fff;font-size:16px;border-radius:9999px}

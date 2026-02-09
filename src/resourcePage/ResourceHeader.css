@@ -2,6 +2,9 @@
   display: flex;
   align-items: center;
   gap: 20px;
+  flex-wrap: wrap;
+  /* 允許換行以防止溢出 */
+  width: 100%;
 }
 
 .dropdown-container {
@@ -10,8 +13,9 @@
 }
 
 .grade-dropdown,
-.version-dropdown,.resource-multi .select-header {
-  position: relative; 
+.version-dropdown,
+.resource-multi .select-header {
+  position: relative;
   display: flex;
   width: 148px;
   height: 48px;
@@ -27,15 +31,19 @@
   font-size: 16px;
   font-style: normal;
   font-weight: 400;
-  line-height: 22px; /* 122.222% */
+  line-height: 22px;
+  /* 122.222% */
 
-   cursor: pointer;
-  transition: all 0.3s ease; /* 添加過渡動畫 */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  /* 添加過渡動畫 */
 }
+
 .grade-dropdown,
-.version-dropdown{
+.version-dropdown {
   outline: none;
-  appearance: none; /* 隱藏預設箭頭 */
+  appearance: none;
+  /* 隱藏預設箭頭 */
 }
 
 .dropdown-arrow {
@@ -45,13 +53,14 @@
   transform: translateY(-50%);
   width: 20px;
   height: 20px;
-  pointer-events: none; /* 讓箭頭不會阻擋點擊事件 */
+  pointer-events: none;
+  /* 讓箭頭不會阻擋點擊事件 */
 }
 
 
 .grade-dropdown:hover,
 .version-dropdown:hover,
-.resource-multi .select-header:hover{
+.resource-multi .select-header:hover {
   box-shadow: 0px 0px 0px 4px #017ab1;
 }
 
@@ -67,13 +76,15 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-grow: 0.5; /* 搜索框占满剩余空间 */
+  flex: 1 1 300px;
+  /* 允許縮放，最小寬度 300px */
   max-width: 800px;
 }
 
 .res-search-input {
   width: 100%;
-  padding: 0.75rem 2.5rem 0.75rem 0.75rem; /* 調整內距以便顯示圖示 */
+  padding: 0.75rem 2.5rem 0.75rem 0.75rem;
+  /* 調整內距以便顯示圖示 */
   border: 1px solid #cbd5e0;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -81,6 +92,7 @@
   margin: 0 auto;
   outline: none;
 }
+
 .res-search-input:focus,
 .res-search-input:hover {
   border-color: #4AA3BA;
@@ -94,11 +106,13 @@
   color: #cbd5e0;
 }
 
-.res-button-container{
-    display: flex; /* 创建一个独立的区域 */
-    flex: 1;
-    justify-content: flex-end; /* 按钮靠右对齐 */
-    gap: 20px; /* 按钮之间的间距 */
+.res-button-container {
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+  gap: 15px;
+  flex-wrap: wrap;
+  /* 內容多時自動換行 */
 }
 
 .res-upload-button,
@@ -122,10 +136,12 @@
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
-  line-height: 21px; /* 150% */
+  line-height: 21px;
+  /* 150% */
 }
-.res-delete-button{
-    background: #F37458;
+
+.res-delete-button {
+  background: #F37458;
 }
 
 
@@ -134,8 +150,8 @@
   background-color: #005f8d;
 }
 
-.res-delete-button:hover{
-    background-color: #c62905;
+.res-delete-button:hover {
+  background-color: #c62905;
 }
 
 
@@ -151,10 +167,34 @@
 
 /* 登出按鈕樣式 */
 .res-login-button.logout-button {
-  background-color: #e74c3c; /* 紅色背景 */
+  background-color: #e74c3c;
+  /* 紅色背景 */
   color: white;
 }
 
 .res-login-button.logout-button:hover {
-  background-color: #c0392b; /* 深紅色 hover 效果 */
+  background-color: #c0392b;
+  /* 深紅色 hover 效果 */
+}
+
+/* 響應式優化 */
+@media (max-width: 1200px) {
+  .resource-header {
+    gap: 15px;
+  }
+}
+
+@media (max-width: 992px) {
+  .res-button-container {
+    justify-content: flex-start;
+    /* 小螢幕改為靠左 */
+    width: 100%;
+  }
+
+  .res-search-container {
+    order: -1;
+    /* 搜尋框移到前面 */
+    width: 100%;
+    max-width: 100%;
+  }
 }

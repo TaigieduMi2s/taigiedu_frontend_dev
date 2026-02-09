@@ -19,7 +19,7 @@ const SearchBar = ({ initialQuery = '', categories = [], selectedCategories = []
 
     // 呼叫 top_keywords API 來建立統計資料
     try {
-      const keywordsResponse = await fetch('https://dev.taigiedu.com/backend/top_keywords', {
+      const keywordsResponse = await fetch(`${import.meta.env.VITE_API_URL}/top_keywords`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

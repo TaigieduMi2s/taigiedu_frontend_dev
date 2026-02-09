@@ -3,7 +3,8 @@
   width: 85%;
   height: 90%;
   background: #fff;
-  overflow: hidden; /* 隱藏多餘內容，防止滾動條出現 */
+  overflow: hidden;
+  /* 隱藏多餘內容，防止滾動條出現 */
   position: relative;
   margin-top: 40px;
 }
@@ -23,15 +24,18 @@
   font-size: 24px;
   font-style: normal;
   font-weight: 700;
-  line-height: 24px; /* 100% */
+  line-height: 24px;
+  /* 100% */
 }
 
 .file-separator {
-  margin-left: -32px; /* 抵消父元素左側的 padding */
+  margin-left: -32px;
+  /* 抵消父元素左側的 padding */
   margin-right: -64px;
   height: 13px;
   flex-shrink: 0;
-  background-color: #d9d9d9; /* 分隔線顏色，可根據需要調整 */
+  background-color: #d9d9d9;
+  /* 分隔線顏色，可根據需要調整 */
 }
 
 .file-info {
@@ -89,7 +93,8 @@
   display: flex;
   align-items: flex-start;
   gap: 4px;
-  flex-wrap: wrap; /* 若超出空間，自動換行 */
+  flex-wrap: wrap;
+  /* 若超出空間，自動換行 */
 }
 
 .file-tag {
@@ -100,14 +105,177 @@
   gap: 10px;
   border-radius: 100px;
   border: 1px solid #3c3c43;
-  white-space: nowrap; /* 防止標籤換行 */
+  white-space: nowrap;
+  /* 防止標籤換行 */
+}
+
+/* ========== 管理員檢視提示 ========== */
+.admin-view-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  margin: 16px 32px 0;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+}
+
+.admin-view-icon {
+  font-size: 18px;
+}
+
+/* ========== 管理軌跡時間軸 (Figma Style) ========== */
+.management-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 20px;
+  margin: 12px 0;
+  background-color: #FEE2E2;
+  border-radius: 8px;
+}
+
+.timeline-entry {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.history-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 60px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.history-badge-report {
+  background-color: #EF4444;
+  color: white;
+}
+
+.history-badge-takedown {
+  background-color: #22C55E;
+  color: white;
+}
+
+.history-badge-restore {
+  background-color: #F59E0B;
+  color: white;
+}
+
+.history-badge-default {
+  background-color: #6B7280;
+  color: white;
+}
+
+.timeline-user {
+  font-weight: 500;
+  color: #1F2937;
+  min-width: 90px;
+  flex-shrink: 0;
+}
+
+.timeline-date {
+  color: #374151;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.timeline-reason {
+  flex: 1;
+  color: #374151;
+}
+
+/* ========== 管理員操作按鈕 ========== */
+.admin-action-button {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  display: flex;
+  height: 40px;
+  padding: 10px 20px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.admin-action-button.takedown {
+  background-color: #EF4444;
+  color: white;
+}
+
+.admin-action-button.takedown:hover {
+  background-color: #DC2626;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.admin-action-button.restore {
+  background-color: #14B8A6;
+  color: white;
+}
+
+.admin-action-button.restore:hover {
+  background-color: #0D9488;
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
+}
+
+/* ========== 檢舉按鈕 (右下角，在灰色 bar 上方) ========== */
+.file-report-button {
+  position: absolute;
+  bottom: 110px;
+  right: 32px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  z-index: 100;
+}
+
+.file-report-button:hover {
+  opacity: 0.7;
+}
+
+.file-report-button .report-icon {
+  height: 20px;
+  width: auto;
+}
+
+.file-report-button span {
+  color: #FF5722;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .file-like-button,
 .file-download-button {
-  position: absolute; /* 絕對定位 */
-  bottom: 32px; /* 距離底部的距離 */
-  right: 32px; /* 距離右邊的距離 */
+  position: absolute;
+  /* 絕對定位 */
+  bottom: 32px;
+  /* 距離底部的距離 */
+  right: 32px;
+  /* 距離右邊的距離 */
   cursor: pointer;
   transition: background-color 0.3s ease;
 
@@ -126,19 +294,26 @@
   font-size: 16px;
   font-style: normal;
   font-weight: 400;
-  line-height: 24px; /* 150% */
+  line-height: 24px;
+  /* 150% */
 
-  background-image: url("/src/assets/resourcepage/like_pink.svg"); /* 圖片路徑 */
+  background-image: url("/src/assets/resourcepage/like_pink.svg");
+  /* 圖片路徑 */
   background-repeat: no-repeat;
-  background-position: 20px center; /* 調整圖片在按鈕中的位置 */
-  background-size: 20px 20px; /* 調整圖片大小 */
-  text-indent: 20px; /* 將文字與圖片分開 */
+  background-position: 20px center;
+  /* 調整圖片在按鈕中的位置 */
+  background-size: 20px 20px;
+  /* 調整圖片大小 */
+  text-indent: 20px;
+  /* 將文字與圖片分開 */
   transition: background-color 0.3s ease;
 }
 
-.file-download-button{
-  background-image: url("/src/assets/resourcepage/like_blue.svg"); /* 圖片路徑 */
-  right: 180px; /* 距離右邊的距離 */
+.file-download-button {
+  background-image: url("/src/assets/resourcepage/like_blue.svg");
+  /* 圖片路徑 */
+  right: 180px;
+  /* 距離右邊的距離 */
   border: 1px solid #2D92C1;
   color: #2D92C1;
 }
@@ -146,16 +321,20 @@
 .file-like-button:hover {
   background-color: #eccace;
 }
-.file-download-button:hover{
+
+.file-download-button:hover {
   background-color: #c1e0ef;
 }
 
 /* 下半部*/
 .file-preview-image {
   margin: auto;
-  width: 60%; /* 圖片寬度為父容器的 70% */
-  max-width: 100%; /* 防止超出容器 */
-  height: auto; /* 保持等比例縮放 */
+  width: 60%;
+  /* 圖片寬度為父容器的 70% */
+  max-width: 100%;
+  /* 防止超出容器 */
+  height: auto;
+  /* 保持等比例縮放 */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -171,15 +350,20 @@
 }
 
 .file-bottom-fixed {
-  position: absolute; /* 絕對定位 */
-  bottom: 0; /* 固定在父容器底部 */
+  position: absolute;
+  /* 絕對定位 */
+  bottom: 0;
+  /* 固定在父容器底部 */
   left: 0;
-  width: 100%; /* 滿足父容器寬度 */
-  height: 96px; /* 高度固定 */
+  width: 100%;
+  /* 滿足父容器寬度 */
+  height: 96px;
+  /* 高度固定 */
 
   gap: 10px;
   flex-shrink: 0;
-  background: rgba(0, 0, 0, 0.25); /* 灰色背景 */
+  background: rgba(0, 0, 0, 0.25);
+  /* 灰色背景 */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -190,15 +374,18 @@
   font-size: 32px;
   font-style: normal;
   font-weight: 300;
-  line-height: 21px; /* 65.625% */
+  line-height: 21px;
+  /* 65.625% */
 
   cursor: pointer;
-  z-index: 1000; /* 確保此區域位於最上層 */
+  z-index: 1000;
+  /* 確保此區域位於最上層 */
 }
 
 /* 點擊時的 hover 效果 */
 .file-bottom-fixed:hover {
-  background: rgba(0, 0, 0, 0.5); /* 灰色背景 */
+  background: rgba(0, 0, 0, 0.5);
+  /* 灰色背景 */
 }
 
 
@@ -206,6 +393,18 @@
 .file-like-button.liked {
   background-color: #ff6b6b;
   color: white;
+}
+
+.file-like-button.is-loading,
+.report-modal-submit.is-loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.file-like-button:disabled,
+.report-modal-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .file-preview-loading {
@@ -216,4 +415,101 @@
   justify-content: center;
   align-items: center;
   text-align: center;
+}
+
+/* ========== 檢舉 Modal ========== */
+.report-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.report-modal {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.report-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.report-modal-close:hover {
+  color: #1f2937;
+}
+
+.report-modal-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1f2937;
+  margin-bottom: 20px;
+}
+
+.report-modal-title .required {
+  color: #ef4444;
+  margin-right: 2px;
+}
+
+.report-modal-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.report-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 15px;
+  color: #374151;
+}
+
+.report-option input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+.report-option span {
+  user-select: none;
+}
+
+.report-modal-submit {
+  width: 100%;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.report-modal-submit:hover {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
 }

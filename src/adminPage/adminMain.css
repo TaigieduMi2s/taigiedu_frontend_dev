@@ -1,0 +1,148 @@
+.admin-main-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 80vh;
+}
+
+.admin-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 2rem 0;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.admin-header h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.admin-header p {
+  font-size: 1.1rem;
+  color: #6b7280;
+}
+
+.admin-content {
+  width: 100%;
+}
+
+/* 功能卡片網格 */
+.function-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  align-items: start; /* 確保卡片頂部對齊 */
+}
+
+/* 功能卡片樣式 */
+.function-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  height: fit-content; /* 讓卡片高度自適應內容 */
+}
+
+.function-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 卡片標題 */
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* 圖標容器 */
+.card-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.card-icon img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+/* 分隔線 */
+.card-divider {
+  border: none;
+  height: 5px;
+  background-color: #9ca3af;
+  margin: 0 0 1rem 0;
+}
+
+/* 功能連結容器 */
+.function-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* 功能連結樣式 */
+.function-link {
+  padding: 0.5rem 0.75rem;
+  color: #374151;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  text-align: center;
+  border: 1px solid transparent;
+}
+
+.function-link:hover {
+  background-color: #D0E3FF;
+  color: #1f2937;
+  text-decoration: none;
+  border-color: #D0E3FF;
+}
+
+/* 響應式設計 */
+@media (max-width: 1024px) {
+  .function-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-main-container {
+    padding: 1rem;
+  }
+  
+  .admin-header h1 {
+    font-size: 2rem;
+  }
+  
+  .function-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .function-card {
+    padding: 1.2rem;
+  }
+  
+  .card-title {
+    font-size: 1.1rem;
+  }
+  
+  .card-icon img {
+    width: 40px;
+    height: 40px;
+  }
+}

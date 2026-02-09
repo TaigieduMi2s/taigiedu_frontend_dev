@@ -1,0 +1,180 @@
+/* 媒體與社群資源後台頁面樣式 */
+
+.admin-content-wrapper {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    min-height: 600px;
+    padding: 30px;
+}
+
+.admin-header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 20px;
+}
+
+.admin-header-controls h5 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.admin-add-button {
+    background-color: #2D92C1;
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+}
+
+.admin-add-button:hover {
+    background-color: #40a9ff;
+}
+
+.admin-add-button img {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    filter: brightness(0) invert(1);
+}
+
+.admin-controls-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.filter-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.breadcrumb-label {
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.breadcrumb-separator {
+    color: #6b7280;
+    margin: 0 5px;
+}
+
+.admin-filter-select {
+    width: auto;
+    min-width: 140px;
+    font-size: 0.9rem;
+}
+
+.status-filter {
+    display: flex;
+    align-items: center;
+}
+
+.status-filter span {
+    font-size: 0.95rem;
+    color: #555;
+    margin-right: 10px;
+}
+
+.admin-status-dropdown {
+    width: 120px;
+    font-size: 0.9rem;
+}
+
+/* 無資料訊息 */
+.no-data-message-container {
+    background-color: #fff;
+    border-radius: .25rem;
+    box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
+    padding: 3rem 1rem;
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+/* 圖片預覽 */
+.image-preview-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.file-icon-img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+.file-name-text {
+    color: #333;
+    font-size: 0.9rem;
+}
+
+/* Modal 樣式 */
+.category-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+    background: #F6FAFD;
+    border: 1px solid #e3eef5;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.category-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #333;
+}
+
+.upload-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.upload-btn {
+    display: inline-block;
+    background: #2D92C1;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.upload-btn:hover {
+    background: #257aa0;
+}
+
+.upload-hint {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.invalid-hint {
+    color: #DC2626;
+    font-size: 0.85rem;
+    margin-top: 6px;
+}
+
+.is-invalid {
+    border-color: #DC2626 !important;
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
+}
+
+.d-none {
+    display: none !important;
+}
+
+/* 注意：表格樣式已移至 AdminDataTable 組件，請勿在此重複定義 */

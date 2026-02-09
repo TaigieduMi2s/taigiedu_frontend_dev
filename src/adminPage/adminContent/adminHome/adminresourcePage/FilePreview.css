@@ -1,0 +1,145 @@
+/* 後台 FilePreview 容器 */
+.admin-file-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* 檔案資訊卡片 */
+.file-preview {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #E5EEF4;
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.file-name {
+    font-weight: 600;
+    color: #1b1b1b;
+}
+
+.file-meta {
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.file-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* ========== 管理員檢視提示 (與 adminResourcePage 一致) ========== */
+.admin-view-banner {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #FFE4C2;
+    color: #4B5563;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    border: 1px solid #FFD09A;
+}
+
+.admin-view-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #FF9B42;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+/* ========== 管理軌跡時間軸 (Figma Style) ========== */
+.management-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 20px;
+    background-color: #FEE2E2;
+    border-radius: 8px;
+}
+
+.timeline-entry {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.history-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 60px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.history-badge-report {
+    background-color: #EF4444;
+    color: white;
+}
+
+.history-badge-takedown {
+    background-color: #22C55E;
+    color: white;
+}
+
+.history-badge-restore {
+    background-color: #F59E0B;
+    color: white;
+}
+
+.history-badge-default {
+    background-color: #6B7280;
+    color: white;
+}
+
+.timeline-user {
+    font-weight: 500;
+    color: #1F2937;
+    min-width: 90px;
+    flex-shrink: 0;
+}
+
+.timeline-date {
+    color: #374151;
+    min-width: 80px;
+    flex-shrink: 0;
+}
+
+.timeline-reason {
+    flex: 1;
+    color: #374151;
+}
+
+/* ========== 管理員操作按鈕 ========== */
+.admin-btn.takedown {
+    background-color: #EF4444;
+    color: white;
+    border: none;
+}
+
+.admin-btn.takedown:hover {
+    background-color: #DC2626;
+}
+
+.admin-btn.restore {
+    background-color: #14B8A6;
+    color: white;
+    border: none;
+}
+
+.admin-btn.restore:hover {
+    background-color: #0D9488;
+}

@@ -1,0 +1,115 @@
+/* ===== AdminModal 通用 Modal 樣式 ===== */
+
+/* Modal 對話框容器 - 設置最大高度 */
+.modal-dialog.modal-dialog-centered {
+    max-height: calc(100vh - 3.5rem);
+    margin: 1.75rem auto;
+}
+
+/* Modal 內容容器 */
+.admin-modal-content.modal-content {
+    background-color: #fff;
+    border-radius: 8px;
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    max-height: calc(100vh - 3.5rem);
+    display: flex;
+    padding: 0 !important;
+    /* 強制覆蓋全域 .modal-content 可能有的 padding 衝突 */
+    flex-direction: column;
+    overflow: hidden;
+    /* 確保內容不超出圓角 */
+    background-clip: padding-box;
+    /* 防止背景滲出邊界 */
+}
+
+/* 確保 form 不會造成額外間距 */
+.admin-modal-content form {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    margin: 0;
+    padding: 0;
+    min-height: 0;
+}
+
+/* Modal Header */
+.admin-modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 1rem 1.5rem;
+    flex-shrink: 0;
+}
+
+.admin-modal-header .modal-title {
+    font-weight: 600;
+    color: #333;
+}
+
+/* Modal Body - 可滾動區域 */
+.admin-modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    max-height: calc(100vh - 12rem);
+    /* 扣除 header、footer 和邊距 */
+}
+
+/* Modal Footer */
+.admin-modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e9ecef;
+    background-color: #f8f9fa;
+    flex-shrink: 0;
+}
+
+/* 表單標籤 */
+.admin-form-label {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+/* 表單控制項 */
+.admin-form-control {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 0.5rem 0.75rem;
+}
+
+.admin-form-control:focus {
+    border-color: #2D92C1;
+    box-shadow: 0 0 0 0.2rem rgba(45, 146, 193, 0.25);
+}
+
+/* 取消按鈕 */
+.admin-btn-cancel {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.admin-btn-cancel:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+/* 送出按鈕 */
+.admin-btn-submit {
+    background-color: #2D92C1;
+    border-color: #2D92C1;
+}
+
+.admin-btn-submit:hover {
+    background-color: #258db8;
+    border-color: #2387b0;
+}
+
+/* 表單群組間距 */
+.admin-modal-body .mb-3 {
+    margin-bottom: 1rem !important;
+}
+
+.admin-modal-body .mb-3:last-child {
+    margin-bottom: 0 !important;
+}

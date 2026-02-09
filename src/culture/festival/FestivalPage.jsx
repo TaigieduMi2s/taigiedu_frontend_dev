@@ -12,7 +12,7 @@ const FestivalPage = () => {
     const [festivals, setFestivals] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    
+
     // 組件載入時獲取節慶列表
     useEffect(() => {
         // 從 API 獲取節慶列表
@@ -20,7 +20,7 @@ const FestivalPage = () => {
             setIsLoading(true);
             setError(null);
             try {
-                const response = await fetch("https://dev.taigiedu.com/backend/culture/festival", {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/culture/festival`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -39,7 +39,7 @@ const FestivalPage = () => {
                     const formattedFestivals = data.map((festival, index) => ({
                         key: index, // 使用索引作為唯一標識，代替 id
                         name: festival.name || '',
-                        image: festival.image ? `https://dev.taigiedu.com${festival.image}` : festivalN,
+                        image: festival.image ? `${import.meta.env.VITE_IMAGE_URL}${festival.image}` : festivalN,
                         pron: festival.pron || '',
                         date: festival.date_mandarin || '',
                         intro: festival.intro_mandarin || '',
@@ -61,18 +61,18 @@ const FestivalPage = () => {
                 setIsLoading(false);
             }
         };
-        
+
         fetchFestivalList();
     }, [showError]);
-    
+
     // 重新載入函數供按鈕使用
     const handleReload = () => {
         setIsLoading(true);
         setError(null);
-        
+
         const fetchData = async () => {
             try {
-                const response = await fetch("https://dev.taigiedu.com/backend/culture/festival", {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/culture/festival`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -90,7 +90,7 @@ const FestivalPage = () => {
                     const formattedFestivals = data.map((festival, index) => ({
                         key: index,
                         name: festival.name || '',
-                        image: festival.image ? `https://dev.taigiedu.com${festival.image}` : festivalN,
+                        image: festival.image ? `${import.meta.env.VITE_IMAGE_URL}${festival.image}` : festivalN,
                         pron: festival.pron || '',
                         date: festival.date_mandarin || '',
                         intro: festival.intro_mandarin || '',
@@ -111,7 +111,7 @@ const FestivalPage = () => {
                 setIsLoading(false);
             }
         };
-        
+
         fetchData();
     };
     const handleCardClick = (festival) => {
@@ -145,13 +145,13 @@ const FestivalPage = () => {
             ) : (
                 <div className="row g-4 pt-4">
                     {festivals.map(festival => (
-                        <div key={festival.key} 
-                             className="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-custom-5"
-                             onClick={() => handleCardClick(festival)}>
+                        <div key={festival.key}
+                            className="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-custom-5"
+                            onClick={() => handleCardClick(festival)}>
                             <div className="festival-card">
                                 <div className="image-container">
-                                    <img 
-                                        src={festival.image} 
+                                    <img
+                                        src={festival.image}
                                         alt={festival.name}
                                         className="festival-image"
                                         onError={(e) => {

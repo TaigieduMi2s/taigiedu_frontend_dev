@@ -1,0 +1,121 @@
+/* 推薦用書頁面樣式 */
+
+.admin-exam-books-page {
+  background-color: #fff;
+  min-height: 100vh;
+}
+
+.admin-header-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-header-main h5 {
+  font-size: 1rem;
+  color: #6c757d;
+}
+
+.admin-header-main h5 span {
+  color: #333;
+  font-weight: 500;
+}
+
+.admin-controls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.admin-add-button {
+  background-color: #2D92C1;
+  border: none;
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+}
+
+.admin-add-button:hover {
+  background-color: #257aa0;
+}
+
+.admin-add-button img {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  filter: brightness(0) invert(1);
+}
+
+.status-filter {
+  display: flex;
+  align-items: center;
+}
+
+.status-filter span {
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.admin-status-dropdown {
+  width: 140px;
+  font-size: 0.9rem;
+}
+
+/* 圖片預覽樣式 */
+.image-preview-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-icon-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.file-name-text {
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.admin-link {
+  color: #2D92C1;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.admin-link:hover {
+  text-decoration: underline;
+}
+
+/* 上傳區域樣式 */
+.upload-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.upload-btn {
+  display: inline-block;
+  background: #2D92C1;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.upload-btn:hover {
+  background: #257aa0;
+}
+
+.upload-hint {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+/* 注意：表格及 Modal 樣式已移至 AdminDataTable 和 AdminModal 組件，請勿在此重複定義 */

@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import "./ResourceContent.css";
 import ResourceCard from "./ResourceCard";
 import { useToast } from "../components/Toast";
+import { authenticatedFetch } from "../services/authService";
+import { useAuth } from "../contexts/AuthContext";
 
 // 添加 renderCard 到組件參數中
 const ResourceContent = ({ searchParams, onCardClick, renderCard, onResourcesLoaded }) => {
   const { showToast } = useToast();
+  const { isLoading: isAuthLoading } = useAuth();
   const [allResources, setAllResources] = useState([]); // 存儲所有資源
   const [displayedResources, setDisplayedResources] = useState([]); // 當前頁顯示的資源
   const [totalItems, setTotalItems] = useState(0);
@@ -18,31 +22,57 @@ const ResourceContent = ({ searchParams, onCardClick, renderCard, onResourcesLoa
   const [totalPages, setTotalPages] = useState(1);
   const VISIBLE_PAGES = 10;
 
+  const [searchParamsFromRouter, setSearchParamsFromRouter] = useSearchParams();
+  const pageFromUrl = parseInt(searchParamsFromRouter.get("page") || "1", 10);
+
   // 當搜索參數變更時重新獲取數據
   useEffect(() => {
     // 檢查搜索參數是否變化
     const isParamsChanged = JSON.stringify(searchParams) !== JSON.stringify(lastSearchParams);
     if (isParamsChanged) {
       console.log("搜索參數已變更，重新獲取資源");
-      setCurrentPage(1); // 重置到第一頁
+      // 如果不是初次讀取（lastSearchParams 不為 null），且搜尋條件變了，則重置頁碼到 1
+      if (lastSearchParams !== null && pageFromUrl !== 1) {
+        const newParams = new URLSearchParams(searchParamsFromRouter);
+        newParams.set("page", "1");
+        setSearchParamsFromRouter(newParams);
+      } else if (!isAuthLoading) {
+        fetchResources();
+      }
       setLastSearchParams(searchParams);
-      fetchResources();
     }
-  }, [searchParams]);
+  }, [searchParams, isAuthLoading]);
+
+  // 同步 URL 中的頁碼到 currentPage 狀態
+  useEffect(() => {
+    if (pageFromUrl !== currentPage) {
+      setCurrentPage(pageFromUrl);
+    }
+  }, [pageFromUrl, currentPage]);
 
   // 監聽後台更新事件，重新抓取前台資源
   useEffect(() => {
     const onUpdated = () => {
-      // 保持目前搜尋條件，僅重新拉資料
-      fetchResources();
+      if (!isAuthLoading) {
+        // 保持目前搜尋條件，僅重新拉資料
+        fetchResources();
+      }
     };
     window.addEventListener('resource-updated', onUpdated);
     return () => window.removeEventListener('resource-updated', onUpdated);
-  }, []);
+  }, [isAuthLoading]);
+
+  useEffect(() => {
+    if (!isAuthLoading && lastSearchParams) {
+      fetchResources();
+    }
+  }, [isAuthLoading, lastSearchParams]);
 
   // 當頁碼變更時更新顯示的資源
   useEffect(() => {
-    updateDisplayedResources();
+    if (allResources.length > 0) {
+      updateDisplayedResources();
+    }
   }, [currentPage, allResources]);
 
   // 更新當前頁顯示的資源
@@ -50,12 +80,14 @@ const ResourceContent = ({ searchParams, onCardClick, renderCard, onResourcesLoa
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, allResources.length);
 
-    if (startIndex < allResources.length) {
+    if (startIndex < allResources.length && startIndex >= 0) {
       const resourcesForCurrentPage = allResources.slice(startIndex, endIndex);
       setDisplayedResources(resourcesForCurrentPage);
-    } else {
-      // 如果當前頁已經超出範圍，重置到第一頁
-      setCurrentPage(1);
+    } else if (allResources.length > 0) {
+      // 只有在有資源的情況下，且頁碼超出範圍時才重置
+      const newParams = new URLSearchParams(searchParamsFromRouter);
+      newParams.set("page", "1");
+      setSearchParamsFromRouter(newParams);
     }
   };
 
@@ -82,11 +114,8 @@ const ResourceContent = ({ searchParams, onCardClick, renderCard, onResourcesLoa
 
       console.log("搜索參數:", parameters);
 
-      const response = await fetch("https://dev.taigiedu.com/backend/api/resource/search", {
+      const response = await authenticatedFetch(`${import.meta.env.VITE_API_URL}/api/resource/search`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
         body: JSON.stringify(parameters)
       });
 
@@ -96,7 +125,7 @@ const ResourceContent = ({ searchParams, onCardClick, renderCard, onResourcesLoa
         console.log("搜索結果:", result);
 
         if (result.data && Array.isArray(result.data.resources)) {
-          const resourcesList = result.data.resources;
+          const resourcesList = [...result.data.resources].reverse();
           setAllResources(resourcesList);
           setTotalItems(resourcesList.length);
 
@@ -150,21 +179,21 @@ const ResourceContent = ({ searchParams, onCardClick, renderCard, onResourcesLoa
 
   // 分頁處理函數
   const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
+    const newParams = new URLSearchParams(searchParamsFromRouter);
+    newParams.set("page", pageNumber.toString());
+    setSearchParamsFromRouter(newParams);
     window.scrollTo(0, 0); // 滾動到頁面頂部
   };
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
-      setCurrentPage(prev => prev - 1);
-      window.scrollTo(0, 0);
+      handlePageChange(currentPage - 1);
     }
   };
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
-      setCurrentPage(prev => prev + 1);
-      window.scrollTo(0, 0);
+      handlePageChange(currentPage + 1);
     }
   };
 
@@ -183,91 +212,92 @@ const ResourceContent = ({ searchParams, onCardClick, renderCard, onResourcesLoa
   };
   // 只更新 return 部分的 JSX 結構
 
-  
-return (
-  <>
-    <div className="resource-container">
-      <div className="resource-content-container"> {/* 新增的置中容器 */}
-        {isLoading ? (
-          <div className="resource-loading">
-            <div className="loading-spinner"></div>
-            <p>載入資源中...</p>
-          </div>
-        ) : allResources.length === 0 ? (
-          <div className="resource-empty">
-            <p>沒有找到符合條件的資源</p>
-          </div>
-        ) : (
-          // 包裝元素來確保固定高度
-          <div className="resource-content-wrapper">
-            <div className="resource-content">
-              {displayedResources.map((resource, index) => {
-                // 如果提供了自定義渲染函數，則使用它
-                if (renderCard) {
-                  return renderCard(resource, index);
-                }
-                
-                // 否則使用默認的卡片渲染
-                return (
-                  <ResourceCard
-                    key={resource.id || index}
-                    imageUrl={resource.imageUrl || "/src/assets/resourcepage/file_preview_demo.png"}
-                    fileType={resource.fileType || "PDF"}
-                    likes={resource.likes || 0}
-                    downloads={resource.downloads || 0}
-                    title={resource.title || "無標題資源"}
-                    uploader={resource.uploader_name || "匿名上傳者"}
-                    tags={resource.tags || []}
-                    date={resource.date || ""}
-                    onCardClick={() => onCardClick && onCardClick(resource)}
-                  />
-                );
-              })}
+
+  return (
+    <>
+      <div className="resource-container">
+        <div className="resource-content-container"> {/* 新增的置中容器 */}
+          {isLoading ? (
+            <div className="resource-loading">
+              <div className="loading-spinner"></div>
+              <p>載入資源中...</p>
             </div>
-          </div>
-        )}
+          ) : allResources.length === 0 ? (
+            <div className="resource-empty">
+              <p>沒有找到符合條件的資源</p>
+            </div>
+          ) : (
+            // 包裝元素來確保固定高度
+            <div className="resource-content-wrapper">
+              <div className="resource-content">
+                {displayedResources.map((resource, index) => {
+                  // 如果提供了自定義渲染函數，則使用它
+                  if (renderCard) {
+                    return renderCard(resource, index);
+                  }
 
-        {!isLoading && allResources.length > 0 && (
-          <div className="pagination-container">
-            <ul className="pagination">
-              <li className="page-item back-button">
-                <a
-                  className={`page-link wide-link ${currentPage <= 1 ? 'invisible' : ''}`}
-                  onClick={handlePreviousPage}
-                >
-                  《 Back
-                </a>
-              </li>
+                  // 否則使用默認的卡片渲染
+                  return (
+                    <ResourceCard
+                      key={resource.id || index}
+                      imageUrl={resource.imageUrl || "/src/assets/resourcepage/file_preview_demo.png"}
+                      fileType={resource.fileType || "PDF"}
+                      likes={resource.likes || 0}
+                      downloads={resource.downloads || 0}
+                      title={resource.title || "無標題資源"}
+                      uploader={resource.uploader_name || "匿名上傳者"}
+                      tags={resource.tags || []}
+                      date={resource.date || ""}
+                      isLiked={Boolean(resource.is_like)}
+                      onCardClick={() => onCardClick && onCardClick(resource)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
-              {getPageNumbers().map(number => (
-                <li
-                  key={number}
-                  className={`page-item ${currentPage === number ? 'active' : ''}`}
-                >
+          {!isLoading && allResources.length > 0 && (
+            <div className="pagination-container">
+              <ul className="pagination">
+                <li className="page-item back-button">
                   <a
-                    className="page-link"
-                    onClick={() => handlePageChange(number)}
+                    className={`page-link wide-link ${currentPage <= 1 ? 'invisible' : ''}`}
+                    onClick={handlePreviousPage}
                   >
-                    {number}
+                    《 Back
                   </a>
                 </li>
-              ))}
 
-              <li className="page-item next-button">
-                <a
-                  className={`page-link wide-link ${currentPage >= totalPages ? 'invisible' : ''}`}
-                  onClick={handleNextPage}
-                >
-                  Next 》
-                </a>
-              </li>
-            </ul>
-          </div>
-        )}
+                {getPageNumbers().map(number => (
+                  <li
+                    key={number}
+                    className={`page-item ${currentPage === number ? 'active' : ''}`}
+                  >
+                    <a
+                      className="page-link"
+                      onClick={() => handlePageChange(number)}
+                    >
+                      {number}
+                    </a>
+                  </li>
+                ))}
+
+                <li className="page-item next-button">
+                  <a
+                    className={`page-link wide-link ${currentPage >= totalPages ? 'invisible' : ''}`}
+                    onClick={handleNextPage}
+                  >
+                    Next 》
+                  </a>
+                </li>
+              </ul>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  </>
-);
+    </>
+  );
 };
 
 export default ResourceContent;

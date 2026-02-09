@@ -6,22 +6,25 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
 import deleteIcon from "../assets/resourcepage/delete-icon.svg";
 import arrowLeftCircle from "../assets/resourcepage/arrow-left-circle.svg";
+import { authenticatedFetch } from "../services/authService";
+import { useAuth } from "../contexts/AuthContext";
 
 
 const DeleteResource = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { isLoading: isAuthLoading } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedResource, setSelectedResource] = useState(null);
   const [userId, setUserId] = useState(null);
   const [username, setUsername] = useState(null);
-  
+
   // 資源相關狀態
   const [allResources, setAllResources] = useState([]); // 所有資源
   const [userResources, setUserResources] = useState([]); // 篩選後的使用者資源
   const [displayedResources, setDisplayedResources] = useState([]); // 當前頁顯示的資源
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // 分頁相關狀態
   const ITEMS_PER_PAGE = 12;
   const [currentPage, setCurrentPage] = useState(1);
@@ -43,16 +46,24 @@ const DeleteResource = () => {
 
     setUserId(currentUserId);
     setUsername(currentUsername);
-    
-    // 載入資源
-    fetchResources(currentUserId, currentUsername);
-  }, [navigate, showToast]);
+
+    if (!isAuthLoading) {
+      // 載入資源
+      fetchResources(currentUserId, currentUsername);
+    }
+  }, [navigate, showToast, isAuthLoading]);
+
+  useEffect(() => {
+    if (!isAuthLoading && userId && username) {
+      fetchResources(userId, username);
+    }
+  }, [isAuthLoading, userId, username]);
 
   // 當使用者資源變化時更新分頁
   useEffect(() => {
     const totalPages = Math.max(1, Math.ceil(userResources.length / ITEMS_PER_PAGE));
     setTotalPages(totalPages);
-    
+
     // 如果當前頁超出範圍，重置到第一頁
     if (currentPage > totalPages) {
       setCurrentPage(1);
@@ -77,11 +88,8 @@ const DeleteResource = () => {
         limit: 1000 // 獲取所有資源
       };
 
-      const response = await fetch("https://dev.taigiedu.com/backend/api/resource/search", {
+      const response = await authenticatedFetch(`${import.meta.env.VITE_API_URL}/api/resource/search`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
         body: JSON.stringify(parameters)
       });
 
@@ -91,14 +99,14 @@ const DeleteResource = () => {
         if (result.data && Array.isArray(result.data.resources)) {
           const resourcesList = result.data.resources;
           setAllResources(resourcesList);
-          
+
           // 篩選出當前使用者的資源
           const filtered = resourcesList.filter(resource => {
             const matchById = resource.uploader_id && resource.uploader_id.toString() === currentUserId;
             const matchByName = resource.uploader_name === currentUsername;
             return matchById || matchByName;
           });
-          
+
           setUserResources(filtered);
         } else {
           setAllResources([]);
@@ -122,7 +130,7 @@ const DeleteResource = () => {
   const updateDisplayedResources = () => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, userResources.length);
-    
+
     const resourcesForCurrentPage = userResources.slice(startIndex, endIndex);
     setDisplayedResources(resourcesForCurrentPage);
   };
@@ -177,13 +185,13 @@ const DeleteResource = () => {
 
     // 獲取登入使用者的 userId（參數名稱是 username 但要送 userId）
     const currentUserId = localStorage.getItem("userId");
-    
+
     if (!currentUserId) {
       showToast("無法取得使用者資訊，請重新登入", "error");
       setIsDialogOpen(false);
       return;
     }
-    
+
     // 根據你提供的 API 格式設定參數（參數名稱是 username，但值是 userId）
     const parameters = {
       resourceId: parseInt(selectedResource.id, 10),
@@ -191,40 +199,37 @@ const DeleteResource = () => {
     };
 
     // 使用 fetch API 發送刪除請求
-    fetch("https://dev.taigiedu.com/backend/api/resource/delete", {
+    authenticatedFetch(`${import.meta.env.VITE_API_URL}/api/resource/delete`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
       body: JSON.stringify(parameters)
     })
-    .then(response => {
-      return response.text();
-    })
-    .then(text => {
-      try {
-        const response = JSON.parse(text);
-        
-        if (response.status === "success") {
-          showToast("資源已成功刪除", "success");
-          
-          // 刪除成功後重新載入頁面
-          setTimeout(() => {
-            window.location.reload();
-          }, 1500);
-        } else {
-          showToast("刪除資源失敗: " + (response.message || "未知錯誤"), "error");
+      .then(response => {
+        return response.text();
+      })
+      .then(text => {
+        try {
+          const response = JSON.parse(text);
+
+          if (response.status === "success") {
+            showToast("資源已成功刪除", "success");
+
+            // 刪除成功後重新載入頁面
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+          } else {
+            showToast("刪除資源失敗: " + (response.message || "未知錯誤"), "error");
+          }
+        } catch (e) {
+          showToast("無法解析伺服器回應", "error");
         }
-      } catch (e) {
-        showToast("無法解析伺服器回應", "error");
-      }
-    })
-    .catch(error => {
-      showToast("網絡連接錯誤: " + error.message, "error");
-    })
-    .finally(() => {
-      setIsDialogOpen(false);
-    });
+      })
+      .catch(error => {
+        showToast("網絡連接錯誤: " + error.message, "error");
+      })
+      .finally(() => {
+        setIsDialogOpen(false);
+      });
   };
 
   // 取消刪除
@@ -260,7 +265,7 @@ const DeleteResource = () => {
           <div className="no-resources-message">
             <h3>您尚未上傳任何資源</h3>
             <p>上傳資源來分享您的知識吧！</p>
-            <button 
+            <button
               className="upload-resource-button"
               onClick={() => navigate("/resource")}
             >
@@ -278,7 +283,7 @@ const DeleteResource = () => {
               <div className="resource-content">
                 {displayedResources.map((resource, index) => (
                   <div key={resource.id || index} className="delete-card-wrapper">
-                    <ResourceCard 
+                    <ResourceCard
                       imageUrl={resource.imageUrl || "/src/assets/resourcepage/file_preview_demo.png"}
                       fileType={resource.fileType || "PDF"}
                       likes={resource.likes || 0}
@@ -287,6 +292,7 @@ const DeleteResource = () => {
                       uploader={resource.uploader_name || "匿名上傳者"}
                       tags={resource.tags || []}
                       date={resource.date || ""}
+                      isLiked={Boolean(resource.is_like)}
                       onCardClick={null} // 關閉跳轉
                     />
                     <div className="delete-overlay"></div>

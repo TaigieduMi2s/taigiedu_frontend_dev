@@ -1,0 +1,3500 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "台語文教學共融平台",
+    "description": "台語教育平台完整 API 文件,包含使用者認證、教學資源、台語工具、文化資源等功能",
+    "version": "1.0.0",
+    "contact": {
+      "name": "台語教育平台",
+      "url": "https://dev.taigiedu.com"
+    }
+  },
+  "tags": [
+    {
+      "name": "Authentication"
+    },
+    {
+      "name": "Session Management"
+    },
+    {
+      "name": "Teaching Resources"
+    },
+    {
+      "name": "Text Search"
+    },
+    {
+      "name": "Taiwanese Tools - TTS"
+    },
+    {
+      "name": "Taiwanese Tools - STT"
+    },
+    {
+      "name": "Taiwanese Tools - Translation"
+    },
+    {
+      "name": "Idioms"
+    },
+    {
+      "name": "Culture"
+    },
+    {
+      "name": "Media"
+    },
+    {
+      "name": "Celebrity"
+    },
+    {
+      "name": "Events"
+    },
+    {
+      "name": "Admin - Member"
+    },
+    {
+      "name": "Admin - Resource"
+    },
+    {
+      "name": "Admin - Audit"
+    }
+  ],
+  "paths": {
+    "/api/user/register": {
+      "post": {
+        "summary": "使用者註冊",
+        "deprecated": false,
+        "description": "註冊新帳號,會發送驗證信到指定信箱",
+        "tags": [
+          "Authentication"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              },
+              "example": {
+                "email": "localhost@gimpmail.com",
+                "password": "123456",
+                "confirmPassword": "123456",
+                "lastName": "{{$person.lastName}}",
+                "firstName": "{{$person.firstName}}",
+                "profession": "{{$person.jobTitle}}",
+                "professionOther": "{{$person.jobType}}",
+                "organization": "{{$person.jobArea}}",
+                "usagePurpose": [
+                  {
+                    "type": "備課"
+                  },
+                  {
+                    "type": "自學"
+                  },
+                  {
+                    "type": "其他",
+                    "custom": "自定義內容"
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "註冊成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "example": {
+                  "success": true,
+                  "message": "註冊成功",
+                  "userId": 1
+                }
+              }
+            },
+            "headers": {}
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "請求參數錯誤"
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/user/resend-verification": {
+      "post": {
+        "summary": "重新發送驗證信",
+        "deprecated": false,
+        "description": "重新發送帳號驗證信",
+        "tags": [
+          "Authentication"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendVerificationRequest"
+              },
+              "example": {
+                "email": "admin@blondmail.com"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "驗證信已發送",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/captcha": {
+      "get": {
+        "summary": "取得驗證碼圖片",
+        "deprecated": false,
+        "description": "登入前需先取得驗證碼",
+        "tags": [
+          "Authentication"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "驗證碼圖片",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaptchaResponse"
+                },
+                "example": {
+                  "id": "c9b3f0f0a9c54b7a8c8f0e9f1b2c3d4e",
+                  "image": "data:image/png;base64,iVBORw0KGgoAAA..."
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/user/login": {
+      "post": {
+        "summary": "使用者登入",
+        "deprecated": false,
+        "description": "使用帳號密碼及驗證碼登入,成功後會在 response body 回傳 Access Token,並在 HttpOnly Cookie 設定 Refresh Token",
+        "tags": [
+          "Authentication"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              },
+              "example": {
+                "username": "super@guysmail.com",
+                "password": "",
+                "captchaId": "98a8d727392b4be3a39d9d23a7f499c1",
+                "captcha": "R69E"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "登入成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                },
+                "example": {
+                  "success": true,
+                  "message": "登入成功",
+                  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                  "user": {
+                    "id": 11,
+                    "role": "MEMBER",
+                    "email": "user@example.com"
+                  }
+                }
+              }
+            },
+            "headers": {}
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "未授權或 Token 無效"
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/user/google_login": {
+      "post": {
+        "summary": "Google 第三方登入",
+        "deprecated": false,
+        "description": "使用 Google OAuth 登入",
+        "tags": [
+          "Authentication"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleLoginRequest"
+              },
+              "example": {
+                "credential": "<GOOGLE_ID_TOKEN>"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Google 登入成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "example": {
+                  "success": true,
+                  "message": "Google 登入成功",
+                  "userId": 123
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/user/request_password_reset": {
+      "post": {
+        "summary": "申請重設密碼",
+        "deprecated": false,
+        "description": "發送重設密碼的驗證碼到信箱",
+        "tags": [
+          "Authentication"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestPasswordResetRequest"
+              },
+              "example": {
+                "email": "ncchen99@blondmail.com"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "驗證碼已寄出",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "cooldown": {
+                      "type": "integer",
+                      "description": "冷卻秒數"
+                    }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "summary": "success",
+                    "value": {
+                      "success": true,
+                      "message": "驗證碼已寄出",
+                      "cooldown": 60
+                    }
+                  },
+                  "cooldown": {
+                    "summary": "cooldown",
+                    "value": {
+                      "success": false,
+                      "message": "請稍候 30 秒再試",
+                      "cooldown": 30
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/user/confirm_password_reset": {
+      "post": {
+        "summary": "確認重設密碼",
+        "deprecated": false,
+        "description": "使用驗證碼重設密碼",
+        "tags": [
+          "Authentication"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmPasswordResetRequest"
+              },
+              "example": {
+                "email": "ncchen99@blondmail.com",
+                "otp": "690450",
+                "newPassword": "QQ",
+                "confirmPassword": "QQ"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "密碼重設結果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "examples": {
+                  "success": {
+                    "summary": "success",
+                    "value": {
+                      "success": true,
+                      "message": "密碼重設成功,請使用新密碼登入"
+                    }
+                  },
+                  "failed": {
+                    "summary": "failed",
+                    "value": {
+                      "success": false,
+                      "message": "驗證碼錯誤"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "刷新 Access Token",
+        "deprecated": false,
+        "description": "當 Access Token 過期時,使用 HttpOnly Cookie 中的 Refresh Token 來獲取新的 Access Token",
+        "tags": [
+          "Session Management"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Token 刷新成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "accessToken": {
+                      "type": "string"
+                    },
+                    "tokenType": {
+                      "type": "string"
+                    },
+                    "expiresIn": {
+                      "type": "integer",
+                      "description": "過期時間(秒)"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/UserInfo"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "accessToken": "eyJhbGciOiJIUzI1Ni...",
+                  "tokenType": "Bearer",
+                  "expiresIn": 900,
+                  "user": {
+                    "id": 1,
+                    "email": "user@example.com",
+                    "role": "MEMBER"
+                  }
+                }
+              }
+            },
+            "headers": {}
+          },
+          "401": {
+            "description": "Refresh Token 無效",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": {
+                    "code": "AUTH_REFRESH_INVALID",
+                    "message": "Refresh Token 無效或已過期"
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Combination": []
+          }
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "登出",
+        "deprecated": false,
+        "description": "登出目前的 Session",
+        "tags": [
+          "Session Management"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "登出成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "example": {
+                  "success": true,
+                  "message": "登出成功"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Combination": []
+          }
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "summary": "取得當前使用者資訊",
+        "deprecated": false,
+        "description": "取得目前登入使用者的詳細資訊",
+        "tags": [
+          "Session Management"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "使用者資訊",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/UserDetailInfo"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "user": {
+                    "id": 1,
+                    "email": "user@example.com",
+                    "role": "MEMBER",
+                    "name": "王小明",
+                    "organization": "台南大學",
+                    "profession": "教師"
+                  }
+                }
+              }
+            },
+            "headers": {}
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "未授權或 Token 無效"
+          }
+        },
+        "security": [
+          {
+            "Combination": []
+          }
+        ]
+      }
+    },
+    "/auth/sessions": {
+      "get": {
+        "summary": "查詢所有 Session",
+        "deprecated": false,
+        "description": "查詢使用者的所有 Session 記錄",
+        "tags": [
+          "Session Management"
+        ],
+        "parameters": [
+          {
+            "name": "include_revoked",
+            "in": "query",
+            "description": "是否包含已撤銷的紀錄",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session 列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionListResponse"
+                },
+                "example": {
+                  "success": true,
+                  "totalCount": 2,
+                  "sessions": [
+                    {
+                      "id": "uuid-123",
+                      "createdAt": "2026-01-30 10:00:00",
+                      "lastUsedAt": "2026-01-30 15:30:00",
+                      "expiresAt": "2026-02-29 10:00:00",
+                      "userAgent": "Mozilla/5.0... Chrome/120.0...",
+                      "ipAddress": "1.2.3.4",
+                      "isActive": true,
+                      "isCurrent": true
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Combination": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "撤銷 Session (強制登出)",
+        "deprecated": false,
+        "description": "撤銷指定的 Session 或所有 Session",
+        "tags": [
+          "Session Management"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sessionId": {
+                    "type": "string",
+                    "description": "要撤銷的 Session ID"
+                  },
+                  "all": {
+                    "type": "boolean",
+                    "description": "是否撤銷所有 Session"
+                  },
+                  "exceptCurrent": {
+                    "type": "boolean",
+                    "description": "撤銷所有時是否排除當前 Session"
+                  }
+                }
+              },
+              "example": {
+                "sessionId": "uuid-123",
+                "all": true,
+                "exceptCurrent": true
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "撤銷成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "example": {
+                  "success": true,
+                  "message": "Session 已撤銷"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Combination": []
+          }
+        ]
+      }
+    },
+    "/api/resource/versions": {
+      "get": {
+        "summary": "取得版本列表",
+        "deprecated": false,
+        "description": "取得各教育階段的教材版本列表",
+        "tags": [
+          "Teaching Resources"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "版本列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "高中": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "國中": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "國小": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "高中": [
+                    "真平",
+                    "育達",
+                    "泰宇",
+                    "奇異果",
+                    "創新"
+                  ],
+                  "國中": [
+                    "真平",
+                    "康軒",
+                    "奇異果",
+                    "師昀",
+                    "全華",
+                    "豪風"
+                  ],
+                  "國小": [
+                    "真平",
+                    "康軒"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/resource/search": {
+      "post": {
+        "summary": "資源搜尋",
+        "deprecated": false,
+        "description": "搜尋教學資源。Header 可選填 Authorization。帶 Token 時 is_like 會回傳 true/false,沒帶 Token 時 is_like 恆為 false。所有欄位皆為選填,可單獨或組合使用。version 可為字串或陣列。",
+        "tags": [
+          "Teaching Resources"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer Token (選填)",
+            "required": false,
+            "example": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "stage": "高中",
+                "version": "真平",
+                "keyword": "測試資源",
+                "searchContent": "關鍵字",
+                "uploader_id": "5"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "搜尋結果。注意:圖片網址為 https://dev.taigiedu.com/backend/ + imageUrl,檔案網址為 https://dev.taigiedu.com/backend/ + fileUrl",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                },
+                "example": {
+                  "resources": [
+                    {
+                      "id": 17,
+                      "title": "測試用的檔案_論文",
+                      "imageUrl": "/static/previews/230a046459264560a6685c817fb9715f.png",
+                      "fileType": "pdf",
+                      "fileUrl": "/uploads/s40359-025-03124-x.pdf",
+                      "likes": 1,
+                      "downloads": 2,
+                      "uploader_id": 5,
+                      "uploader_name": "使用者",
+                      "tags": [
+                        "高中",
+                        "育達",
+                        "論文"
+                      ],
+                      "date": "2025-09-22 02:13:08",
+                      "grade": "高中",
+                      "version": "育達",
+                      "book": "114下冊",
+                      "contentType": "論文",
+                      "is_like": true
+                    }
+                  ],
+                  "totalItems": 1
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/resource/download/{resource_id}": {
+      "get": {
+        "summary": "下載資源",
+        "deprecated": false,
+        "description": "下載指定資源檔案,自動將下載次數 +1",
+        "tags": [
+          "Teaching Resources"
+        ],
+        "parameters": [
+          {
+            "name": "resource_id",
+            "in": "path",
+            "description": "資源 ID",
+            "required": true,
+            "example": 0,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "檔案下載",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/resource/like": {
+      "post": {
+        "summary": "點讚資源",
+        "deprecated": false,
+        "description": "對指定資源點讚或取消點讚",
+        "tags": [
+          "Teaching Resources"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "id": 17
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "點讚成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                },
+                "example": {
+                  "data": {
+                    "success": true,
+                    "message": "點讚成功",
+                    "likes": 5
+                  },
+                  "status": "success"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/resource/upload": {
+      "post": {
+        "summary": "上傳資源",
+        "deprecated": false,
+        "description": "上傳新的教學資源檔案。使用 multipart/form-data 格式。file 為必填,image 為選填。",
+        "tags": [
+          "Teaching Resources"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "uploader_id": {
+                    "type": "integer",
+                    "description": "上傳者 ID",
+                    "example": 0
+                  },
+                  "uploader_name": {
+                    "type": "string",
+                    "description": "上傳者名稱",
+                    "example": ""
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "資源標題",
+                    "example": ""
+                  },
+                  "grade": {
+                    "type": "string",
+                    "description": "年級",
+                    "example": ""
+                  },
+                  "version": {
+                    "type": "string",
+                    "description": "版本",
+                    "example": ""
+                  },
+                  "book": {
+                    "type": "string",
+                    "description": "書籍",
+                    "example": ""
+                  },
+                  "contentType": {
+                    "type": "string",
+                    "description": "內容類型",
+                    "example": ""
+                  },
+                  "fileType": {
+                    "type": "string",
+                    "description": "檔案類型",
+                    "example": ""
+                  },
+                  "likes": {
+                    "type": "integer",
+                    "description": "初始讚數(預設為 0)",
+                    "example": 0
+                  },
+                  "downloads": {
+                    "type": "integer",
+                    "description": "初始下載數(預設為 0)",
+                    "example": 0
+                  },
+                  "tags": {
+                    "type": "string",
+                    "description": "標籤,以逗號分隔",
+                    "example": ""
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "檔案(必填)",
+                    "example": ""
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "預覽圖片(選填)",
+                    "example": ""
+                  }
+                },
+                "required": [
+                  "uploader_id",
+                  "uploader_name",
+                  "title",
+                  "grade",
+                  "version",
+                  "book",
+                  "contentType",
+                  "fileType",
+                  "file"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "上傳成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                },
+                "example": {
+                  "data": {
+                    "success": true,
+                    "message": "上傳成功",
+                    "resourceId": 99
+                  },
+                  "status": "success"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Combination": []
+          }
+        ]
+      }
+    },
+    "/api/resource/delete": {
+      "post": {
+        "summary": "刪除資源",
+        "deprecated": false,
+        "description": "刪除指定的教學資源",
+        "tags": [
+          "Teaching Resources"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "resourceId": 1,
+                "username": "上傳者id"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "刪除成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "success": {
+                          "type": "boolean"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "success": true,
+                    "message": "刪除成功"
+                  },
+                  "status": "success"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Combination": []
+          }
+        ]
+      }
+    },
+    "/api/resource/report": {
+      "post": {
+        "summary": "檢舉資源",
+        "deprecated": false,
+        "description": "檢舉不當的教學資源",
+        "tags": [
+          "Teaching Resources"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "id": "17",
+                "username": "user123",
+                "report_reason": "涉及著作權疑慮",
+                "supplement": "詳細說明...",
+                "created_at": "2026-02-03T08:00:00.000Z"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "檢舉成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                },
+                "example": {
+                  "success": true,
+                  "message": "已收到檢舉,管理員將儘快處理",
+                  "report_id": "1"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/sentence_search": {
+      "post": {
+        "summary": "文本搜尋",
+        "deprecated": false,
+        "description": "在文本資料庫中搜尋關鍵字",
+        "tags": [
+          "Text Search"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SentenceSearchRequest"
+              },
+              "example": {
+                "text": "\"關鍵字\"",
+                "size": 1000,
+                "mark": true,
+                "tags": [
+                  "<b style='color:red;'>",
+                  "</b>"
+                ],
+                "lang": [
+                  "T",
+                  "K",
+                  "Z",
+                  "P"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "搜尋結果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SentenceSearchResponse"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/top_keywords": {
+      "post": {
+        "summary": "前五關鍵字",
+        "deprecated": false,
+        "description": "提取文本中的前五個關鍵字",
+        "tags": [
+          "Text Search"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TopKeywordsRequest"
+              },
+              "example": {
+                "text": "我愛台語"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "關鍵字列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopKeywordsResponse"
+                },
+                "example": {
+                  "data": [
+                    "台語",
+                    "我",
+                    "愛",
+                    "有趣",
+                    "真"
+                  ],
+                  "status": "success"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/submit_tc_feedback": {
+      "post": {
+        "summary": "文字轉換回饋",
+        "deprecated": false,
+        "description": "提交文字轉換的修正回饋",
+        "tags": [
+          "Text Search"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TcFeedbackRequest"
+              },
+              "example": {
+                "mode": "string",
+                "inputText": "string",
+                "correctedText": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "回饋已接受",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "text": "Successfully added feedback to database.",
+                  "status": "success"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/synthesize_speech": {
+      "post": {
+        "summary": "台語朗讀 (文字轉語音)",
+        "deprecated": false,
+        "description": "將台語文字轉換為語音",
+        "tags": [
+          "Taiwanese Tools - TTS"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TtsRequest"
+              },
+              "example": {
+                "tts_lang": "tb",
+                "tts_data": "欲合成為語音的文字"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Base64 編碼的音訊資料",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "description": "Base64 編碼的音訊內容"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/transcribe_speech": {
+      "post": {
+        "summary": "台語辨識 (語音轉文字)",
+        "deprecated": false,
+        "description": "將台語語音轉換為文字",
+        "tags": [
+          "Taiwanese Tools - STT"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SttTranscribeRequest"
+              },
+              "example": {
+                "stt_type": "base64",
+                "stt_lang": "tw",
+                "stt_data": "<base64_audio_data>"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "辨識出的文字",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SttTranscribeResponse"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/submit_stt_feedback": {
+      "post": {
+        "summary": "台語辨識回饋",
+        "deprecated": false,
+        "description": "提交語音辨識的修正回饋",
+        "tags": [
+          "Taiwanese Tools - STT"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SttFeedbackRequest"
+              },
+              "example": {
+                "audio_text": "校正後的文字",
+                "audio_lang": "tb",
+                "audio_data": "<base64_audio_data>"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "回饋已接受",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/convert_taibun": {
+      "post": {
+        "summary": "台語文字轉換",
+        "deprecated": false,
+        "description": "台語文字格式轉換 (漢羅/台羅/白話字/華文)",
+        "tags": [
+          "Taiwanese Tools - Translation"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaibunConvertRequest"
+              },
+              "example": {
+                "taibun_mode": "tbn2tl",
+                "taibun_data": "欲轉換的文字"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "轉換後的文字",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/idiom_search": {
+      "post": {
+        "summary": "俗諺語搜尋",
+        "deprecated": false,
+        "description": "搜尋台語俗諺語",
+        "tags": [
+          "Idioms"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdiomSearchRequest"
+              },
+              "example": {
+                "search_keyword": "食飯",
+                "category": "生活"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "搜尋結果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdiomSearchResponse"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/idiom_random": {
+      "post": {
+        "summary": "隨機俗諺語",
+        "deprecated": false,
+        "description": "取得隨機的俗諺語(用於輪播)",
+        "tags": [
+          "Idioms"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "隨機俗諺語",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdiomRandomResponse"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/culture/food": {
+      "post": {
+        "summary": "台語文化 - 飲食",
+        "deprecated": false,
+        "description": "取得台語飲食文化資料",
+        "tags": [
+          "Culture"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "飲食文化資料",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/culture/festival": {
+      "post": {
+        "summary": "台語文化 - 節慶",
+        "deprecated": false,
+        "description": "取得台語節慶文化資料",
+        "tags": [
+          "Culture"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "節慶文化資料",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/media": {
+      "post": {
+        "summary": "媒體與社群資源",
+        "deprecated": false,
+        "description": "取得台語相關媒體資源 (Podcast、Youtube 等)",
+        "tags": [
+          "Media"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "category": {
+                    "type": "string",
+                    "description": "資源分類 (不帶參數則回傳全部)"
+                  }
+                }
+              },
+              "example": {
+                "category": "Podcast"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "媒體資源列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string"
+                        },
+                        "url": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "properties": {}
+                },
+                "example": {
+                  "Podcast": [
+                    {
+                      "title": "台語新聞",
+                      "url": "https://...",
+                      "description": "每日台語新聞報導"
+                    }
+                  ],
+                  "Youtube": []
+                }
+              }
+            },
+            "headers": {}
+          },
+          "404": {
+            "description": "分類不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "error": "Category 'xxx' not found."
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/celebrity/list": {
+      "post": {
+        "summary": "取得名人列表",
+        "deprecated": false,
+        "description": "取得台語相關名人列表",
+        "tags": [
+          "Celebrity"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "名人列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "photo": {
+                        "type": "string"
+                      },
+                      "illustration": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "name": "王育德",
+                  "photo": "https://...",
+                  "illustration": "台語研究學者..."
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/celebrity/detail": {
+      "post": {
+        "summary": "取得名人詳細資料",
+        "deprecated": false,
+        "description": "取得指定名人的詳細資料",
+        "tags": [
+          "Celebrity"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CelebrityDetailRequest"
+              },
+              "example": {
+                "name": "王育德"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "名人詳細資料",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CelebrityDetailResponse"
+                },
+                "example": {
+                  "name": "王育德",
+                  "photo": "https://...",
+                  "illustration": "詳細介紹...",
+                  "birthDate": "1924-01-01",
+                  "works": [
+                    "台語研究",
+                    "..."
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/events/{date_string}": {
+      "get": {
+        "summary": "依日期字串獲取今日大事",
+        "deprecated": false,
+        "description": "取得指定日期的歷史事件",
+        "tags": [
+          "Events"
+        ],
+        "parameters": [
+          {
+            "name": "date_string",
+            "in": "path",
+            "description": "日期字串 (格式: YYYYMMDD)",
+            "required": true,
+            "example": "20251030",
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{8}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "事件列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventsResponse"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/events": {
+      "post": {
+        "summary": "POST 請求獲取今日大事",
+        "deprecated": false,
+        "description": "取得今日或指定日期的歷史事件",
+        "tags": [
+          "Events"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "date": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "日期 (格式: YYYY-MM-DD,不帶則查詢今天)"
+                  }
+                }
+              },
+              "examples": {
+                "today": {
+                  "value": {},
+                  "summary": "查詢今天"
+                },
+                "specific_date": {
+                  "value": {
+                    "date": "2025-10-30"
+                  },
+                  "summary": "查詢指定日期"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "事件列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventsResponse"
+                },
+                "examples": {
+                  "has_events": {
+                    "summary": "有事件",
+                    "value": {
+                      "status": "success",
+                      "date": "2025-10-30",
+                      "data": [
+                        "林茂生生日"
+                      ]
+                    }
+                  },
+                  "no_events": {
+                    "summary": "無事件",
+                    "value": {
+                      "status": "success",
+                      "date": "2025-10-30",
+                      "data": [
+                        "今日無大事"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {}
+          },
+          "400": {
+            "description": "請求錯誤",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "status": "error",
+                  "message": "invalid_json",
+                  "data": []
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/admin/member/list": {
+      "get": {
+        "summary": "會員管理列表",
+        "deprecated": false,
+        "description": "取得所有會員列表 (需要 ADMIN 權限)",
+        "tags": [
+          "Admin - Member"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "會員列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberListResponse"
+                },
+                "example": {
+                  "success": true,
+                  "totalCount": 10,
+                  "members": [
+                    {
+                      "id": "1",
+                      "name": "王小明",
+                      "email": "user@example.com",
+                      "dept": "台南大學",
+                      "reason": "教學使用",
+                      "timestamp": "2026-01-30 10:00:00",
+                      "status": "會員"
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "權限不足"
+          }
+        },
+        "security": [
+          {
+            "Combination": []
+          }
+        ]
+      }
+    },
+    "/admin/member/status": {
+      "post": {
+        "summary": "設定會員身分",
+        "deprecated": false,
+        "description": "設定會員為管理員或停用會員 (需要 SUPER_ADMIN 權限)",
+        "tags": [
+          "Admin - Member"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "action"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "會員 ID"
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "設置管理員",
+                      "停用會員",
+                      "恢復會員"
+                    ],
+                    "description": "操作動作"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "description": "操作原因"
+                  },
+                  "detail": {
+                    "type": "string",
+                    "description": "詳細說明"
+                  }
+                }
+              },
+              "example": {
+                "id": "54",
+                "action": "設置會員",
+                "reason": "重設...",
+                "detail": "細節說明..."
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "example": {
+                  "success": true,
+                  "message": "會員已設置為管理員"
+                }
+              }
+            },
+            "headers": {}
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "權限不足"
+          }
+        },
+        "security": [
+          {
+            "Combination": []
+          }
+        ]
+      }
+    },
+    "/admin/resource/list": {
+      "get": {
+        "summary": "資源管理列表",
+        "deprecated": false,
+        "description": "取得所有資源列表,包含已下架 (需要 ADMIN 權限)",
+        "tags": [
+          "Admin - Resource"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "資源列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {}
+                  }
+                }
+              }
+            },
+            "headers": {}
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "權限不足"
+          }
+        },
+        "security": [
+          {
+            "Combination": []
+          }
+        ]
+      }
+    },
+    "/admin/resource/status": {
+      "post": {
+        "summary": "資源狀態變更",
+        "deprecated": false,
+        "description": "下架或取消下架資源 (需要 ADMIN 權限)",
+        "tags": [
+          "Admin - Resource"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "action",
+                  "userID"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "資源 ID"
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "下架",
+                      "取消下架"
+                    ],
+                    "description": "操作動作"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "description": "操作原因"
+                  },
+                  "userID": {
+                    "type": "string",
+                    "description": "管理員 ID"
+                  }
+                }
+              },
+              "example": {
+                "id": "resource_id",
+                "action": "下架",
+                "reason": "版權問題",
+                "userID": "admin_id"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Combination": []
+          }
+        ]
+      }
+    },
+    "/admin/resource/add-book": {
+      "post": {
+        "summary": "新增課本版本",
+        "deprecated": false,
+        "description": "新增課本版本選項",
+        "tags": [
+          "Admin - Resource"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "stage",
+                  "book"
+                ],
+                "properties": {
+                  "stage": {
+                    "type": "string",
+                    "description": "學習階段"
+                  },
+                  "book": {
+                    "type": "string",
+                    "description": "版本名稱"
+                  }
+                }
+              },
+              "example": {
+                "stage": "高中",
+                "book": "龍騰"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "新增成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Combination": []
+          }
+        ]
+      }
+    },
+    "/admin/resource/add-content-type": {
+      "post": {
+        "summary": "新增內容類型",
+        "deprecated": false,
+        "description": "新增資源內容類型選項",
+        "tags": [
+          "Admin - Resource"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "type"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "內容類型名稱"
+                  }
+                }
+              },
+              "example": {
+                "type": "教案"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "新增成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Combination": []
+          }
+        ]
+      }
+    },
+    "/admin/audit/logs": {
+      "get": {
+        "summary": "審計日誌",
+        "deprecated": false,
+        "description": "查詢管理員操作審計日誌 (需要 ADMIN 權限)",
+        "tags": [
+          "Admin - Audit"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "每頁筆數",
+            "required": false,
+            "example": 0,
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "起始位置",
+            "required": false,
+            "example": 0,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "action_type",
+            "in": "query",
+            "description": "篩選動作類型",
+            "required": false,
+            "example": "MEMBER_STATUS_CHANGE",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "審計日誌列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditLogsResponse"
+                },
+                "example": {
+                  "success": true,
+                  "totalCount": 100,
+                  "logs": [
+                    {
+                      "id": 1,
+                      "action": "MEMBER_STATUS_CHANGE",
+                      "adminId": "admin_1",
+                      "targetId": "user_1",
+                      "timestamp": "2026-01-30 10:00:00",
+                      "detail": "設置為管理員"
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "UserInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "MEMBER",
+              "ADMIN",
+              "SUPER_ADMIN"
+            ]
+          }
+        }
+      },
+      "UserDetailInfo": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UserInfo"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "organization": {
+                "type": "string"
+              },
+              "profession": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "SessionInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastUsedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "userAgent": {
+            "type": "string"
+          },
+          "ipAddress": {
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "isCurrent": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SessionListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "totalCount": {
+            "type": "integer"
+          },
+          "sessions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SessionInfo"
+            }
+          }
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "password",
+          "confirmPassword",
+          "lastName",
+          "firstName",
+          "profession",
+          "organization",
+          "usagePurpose"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6
+          },
+          "confirmPassword": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "profession": {
+            "type": "string"
+          },
+          "professionOther": {
+            "type": "string",
+            "description": "自訂職業 (當 profession 為其他時)"
+          },
+          "organization": {
+            "type": "string"
+          },
+          "usagePurpose": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "custom": {
+                  "type": "string",
+                  "description": "自定義內容 (當 type 為其他時)"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ResendVerificationRequest": {
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "CaptchaResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "驗證碼 ID"
+          },
+          "image": {
+            "type": "string",
+            "description": "Base64 編碼的驗證碼圖片"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "username",
+          "password",
+          "captchaId",
+          "captcha"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "captchaId": {
+            "type": "string"
+          },
+          "captcha": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "JWT Access Token,需儲存於記憶體或 localStorage"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        }
+      },
+      "GoogleLoginRequest": {
+        "type": "object",
+        "required": [
+          "credential"
+        ],
+        "properties": {
+          "credential": {
+            "type": "string",
+            "description": "Google ID Token"
+          }
+        }
+      },
+      "RequestPasswordResetRequest": {
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "ConfirmPasswordResetRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "otp",
+          "newPassword",
+          "confirmPassword"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "otp": {
+            "type": "string",
+            "description": "驗證碼"
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 6
+          },
+          "confirmPassword": {
+            "type": "string"
+          }
+        }
+      },
+      "ResourceSearchRequest": {
+        "type": "object",
+        "properties": {
+          "stage": {
+            "type": "string",
+            "description": "學習階段 (選填)"
+          },
+          "version": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "description": "版本 (選填,可為字串或陣列)"
+          },
+          "keyword": {
+            "type": "string",
+            "description": "關鍵字 (選填)"
+          },
+          "searchContent": {
+            "type": "string",
+            "description": "搜尋內容 (選填)"
+          }
+        },
+        "description": "所有欄位皆為選填,可單獨或組合使用"
+      },
+      "ResourceSearchResponse": {
+        "type": "object",
+        "properties": {
+          "resources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "imageUrl": {
+                  "type": "string",
+                  "description": "圖片網址,需加上 base URL"
+                },
+                "fileType": {
+                  "type": "string"
+                },
+                "fileUrl": {
+                  "type": "string",
+                  "description": "檔案網址,需加上 base URL"
+                },
+                "likes": {
+                  "type": "integer"
+                },
+                "downloads": {
+                  "type": "integer"
+                },
+                "uploader_id": {
+                  "type": "integer"
+                },
+                "uploader_name": {
+                  "type": "string"
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "date": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "grade": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                },
+                "book": {
+                  "type": "string"
+                },
+                "contentType": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "totalItems": {
+            "type": "integer"
+          }
+        }
+      },
+      "ResourceUploadRequest": {
+        "type": "object",
+        "required": [
+          "uploader_id",
+          "uploader_name",
+          "title",
+          "grade",
+          "version",
+          "book",
+          "contentType",
+          "fileType",
+          "likes",
+          "downloads",
+          "tags",
+          "file"
+        ],
+        "properties": {
+          "uploader_id": {
+            "type": "integer"
+          },
+          "uploader_name": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "grade": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "book": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "fileType": {
+            "type": "string"
+          },
+          "likes": {
+            "type": "integer",
+            "default": 0
+          },
+          "downloads": {
+            "type": "integer",
+            "default": 0
+          },
+          "tags": {
+            "type": "string",
+            "description": "標籤,以逗號分隔"
+          },
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "description": "必選檔案"
+          },
+          "image": {
+            "type": "string",
+            "format": "binary",
+            "description": "可選圖片"
+          }
+        }
+      },
+      "ResourceDeleteRequest": {
+        "type": "object",
+        "required": [
+          "resourceId",
+          "username"
+        ],
+        "properties": {
+          "resourceId": {
+            "type": "integer"
+          },
+          "username": {
+            "type": "string",
+            "description": "上傳者 ID"
+          }
+        }
+      },
+      "SentenceSearchRequest": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "搜尋文字"
+          },
+          "size": {
+            "type": "integer",
+            "description": "結果數量",
+            "default": 1000
+          },
+          "mark": {
+            "type": "boolean",
+            "description": "是否標記關鍵字",
+            "default": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "標記用 HTML 標籤",
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "lang": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "T",
+                "K",
+                "Z",
+                "P"
+              ]
+            },
+            "description": "語言篩選"
+          }
+        }
+      },
+      "SentenceSearchResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "documents": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "Age": {
+                      "type": "string"
+                    },
+                    "Author": {
+                      "type": "string"
+                    },
+                    "Body": {
+                      "type": "string"
+                    },
+                    "Date": {
+                      "type": "string"
+                    },
+                    "Language": {
+                      "type": "object",
+                      "properties": {
+                        "K": {
+                          "type": "boolean"
+                        },
+                        "P": {
+                          "type": "boolean"
+                        },
+                        "T": {
+                          "type": "boolean"
+                        },
+                        "Z": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "Source": {
+                      "type": "string"
+                    },
+                    "Title": {
+                      "type": "string"
+                    },
+                    "Type": {
+                      "type": "string"
+                    },
+                    "Url": {
+                      "type": "string"
+                    },
+                    "highlight": {
+                      "type": "object",
+                      "properties": {
+                        "Body": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "Title": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "query_str": {
+                "type": "string"
+              }
+            }
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "TopKeywordsRequest": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "TopKeywordsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 5
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "TcFeedbackRequest": {
+        "type": "object",
+        "required": [
+          "mode",
+          "inputText",
+          "correctedText"
+        ],
+        "properties": {
+          "mode": {
+            "type": "string"
+          },
+          "inputText": {
+            "type": "string"
+          },
+          "correctedText": {
+            "type": "string"
+          }
+        }
+      },
+      "TtsRequest": {
+        "type": "object",
+        "required": [
+          "tts_lang",
+          "tts_data"
+        ],
+        "properties": {
+          "tts_lang": {
+            "type": "string",
+            "enum": [
+              "tb"
+            ],
+            "description": "語言 (目前支援漢羅 tb)"
+          },
+          "tts_data": {
+            "type": "string",
+            "description": "欲合成為語音的文字"
+          }
+        }
+      },
+      "SttTranscribeRequest": {
+        "type": "object",
+        "required": [
+          "stt_type",
+          "stt_lang",
+          "stt_data"
+        ],
+        "properties": {
+          "stt_type": {
+            "type": "string",
+            "enum": [
+              "base64"
+            ],
+            "description": "音訊資料類型"
+          },
+          "stt_lang": {
+            "type": "string",
+            "enum": [
+              "tw"
+            ],
+            "description": "語言"
+          },
+          "stt_data": {
+            "type": "string",
+            "description": "Base64 編碼的音訊資料"
+          }
+        }
+      },
+      "SttTranscribeResponse": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "辨識出的文字"
+          }
+        }
+      },
+      "SttFeedbackRequest": {
+        "type": "object",
+        "required": [
+          "audio_text",
+          "audio_lang",
+          "audio_data"
+        ],
+        "properties": {
+          "audio_text": {
+            "type": "string",
+            "description": "校正後的文字"
+          },
+          "audio_lang": {
+            "type": "string",
+            "enum": [
+              "tb",
+              "tl",
+              "poj"
+            ],
+            "description": "語言 (漢羅 tb、台羅 tl、白話字 poj)"
+          },
+          "audio_data": {
+            "type": "string",
+            "description": "Base64 編碼的音訊資料"
+          }
+        }
+      },
+      "TaibunConvertRequest": {
+        "type": "object",
+        "required": [
+          "taibun_mode",
+          "taibun_data"
+        ],
+        "properties": {
+          "taibun_mode": {
+            "type": "string",
+            "enum": [
+              "tbn2tl",
+              "tl2poj",
+              "poj2tl",
+              "tbn2zh",
+              "zh2tbn"
+            ],
+            "description": "轉換模式 (漢羅轉台羅、台羅轉白話字、白話字轉台羅、台文轉華文、華文轉台文)"
+          },
+          "taibun_data": {
+            "type": "string",
+            "description": "欲轉換的文字"
+          }
+        }
+      },
+      "IdiomSearchRequest": {
+        "type": "object",
+        "properties": {
+          "search_keyword": {
+            "type": "string",
+            "description": "搜尋關鍵字 (選填)"
+          },
+          "category": {
+            "type": "string",
+            "description": "分類 (選填)"
+          }
+        }
+      },
+      "IdiomSearchResponse": {
+        "type": "object",
+        "properties": {
+          "phrases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Type": {
+                  "type": "string"
+                },
+                "Category1": {
+                  "type": "string"
+                },
+                "Category2": {
+                  "type": "string"
+                },
+                "Category3": {
+                  "type": "string"
+                },
+                "Category4": {
+                  "type": "string"
+                },
+                "Data": {
+                  "type": "string",
+                  "description": "俗諺語內容"
+                },
+                "Explain": {
+                  "type": "string",
+                  "description": "解釋"
+                },
+                "Tai_lo": {
+                  "type": "string",
+                  "description": "台羅拼音"
+                },
+                "Pronunciation variants": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "word": {
+                        "type": "string"
+                      },
+                      "pronunciations": {
+                        "type": "object",
+                        "properties": {
+                          "lokkang": {
+                            "type": "string"
+                          },
+                          "tailam": {
+                            "type": "string"
+                          },
+                          "taipak": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "audio": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "Base64 音訊"
+                  }
+                }
+              }
+            }
+          },
+          "highlight": {
+            "type": "object",
+            "properties": {
+              "Data": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "IdiomRandomResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "Type": {
+                "type": "string"
+              },
+              "Data": {
+                "type": "string"
+              },
+              "Explain": {
+                "type": "string"
+              },
+              "Tai_lo": {
+                "type": "string"
+              },
+              "Pronunciation variants": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "CelebrityDetailRequest": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "名人姓名"
+          }
+        }
+      },
+      "CelebrityDetailResponse": {
+        "type": "object",
+        "properties": {
+          "basicInfo": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "photo": {
+                "type": "string"
+              },
+              "illustration": {
+                "type": "string"
+              },
+              "birthDate": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          },
+          "experience": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "works_categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "works_items": {
+            "type": "object",
+            "properties": {}
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "metaverse": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "awards": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "EventsResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "MemberListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "totalCount": {
+            "type": "integer"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "dept": {
+                  "type": "string",
+                  "description": "單位/組織"
+                },
+                "reason": {
+                  "type": "string",
+                  "description": "使用目的"
+                },
+                "timestamp": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "會員狀態"
+                }
+              }
+            }
+          }
+        }
+      },
+      "AuditLogsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "totalCount": {
+            "type": "integer"
+          },
+          "logs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "操作類型"
+                },
+                "adminId": {
+                  "type": "string",
+                  "description": "管理員 ID"
+                },
+                "targetId": {
+                  "type": "string",
+                  "description": "目標 ID"
+                },
+                "timestamp": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "detail": {
+                  "type": "object",
+                  "properties": {},
+                  "description": "操作詳情"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "請求參數錯誤",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "未授權或 Token 無效",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "權限不足",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "資源不存在",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "使用 JWT Access Token 進行認證。格式: `Authorization: Bearer <token>`"
+      },
+      "OAuth2Auth": {
+        "type": "oauth2",
+        "description": "用於 Apidog 等工具自動處理 Token 刷新。當 Access Token 過期時,工具會自動呼叫 /auth/refresh 獲取新 Token。",
+        "flows": {
+          "password": {
+            "tokenUrl": "/api/user/login",
+            "refreshUrl": "/auth/refresh",
+            "scopes": {
+              "admin": "管理員權限",
+              "user": "一般使用者權限"
+            }
+          }
+        }
+      },
+      "Combination": {
+        "group": [
+          {
+            "id": 463910
+          },
+          {
+            "id": 463536
+          }
+        ],
+        "type": "http"
+      }
+    }
+  },
+  "servers": [],
+  "security": []
+}

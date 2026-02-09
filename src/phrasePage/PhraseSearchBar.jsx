@@ -12,20 +12,21 @@ const PhraseSearchBar = ({ availableCategories = [], onCategoryFilter, allPhrase
   );
   const navigate = useNavigate();
 
-  // 當 availableCategories 變化且為初次載入時，設置全選狀態
+  // 處理初始載入與 URL 參數同步
   useEffect(() => {
-    if (availableCategories.length > 0 && !searchParams.get('query') && !searchParams.get('categories')) {
-      // 初次載入且沒有搜尋參數時，設為全選
+    const urlQuery = searchParams.get('query') || '';
+    const urlCategoriesParam = searchParams.get('categories');
+    
+    setQuery(urlQuery);
+
+    if (urlCategoriesParam !== null) {
+      // 如果 URL 有類別參數（即使是空的），以 URL 為準
+      setSelectedCategories(urlCategoriesParam ? urlCategoriesParam.split(',') : []);
+    } else if (availableCategories.length > 0 && !urlQuery) {
+      // 只有在 URL 完全沒有 categories 參數且沒有搜尋關鍵字時，才執行初始全選
       setSelectedCategories(availableCategories);
     }
-  }, [availableCategories]);
-
-  // 當 URL 參數變化時更新本地狀態
-  useEffect(() => {
-    setQuery(searchParams.get('query') || '');
-    const urlCategories = searchParams.get('categories') ? searchParams.get('categories').split(',') : [];
-    setSelectedCategories(urlCategories);
-  }, [searchParams]);
+  }, [searchParams, availableCategories]);
 
   const categories = availableCategories.length > 0 ? availableCategories : [
     '數字',

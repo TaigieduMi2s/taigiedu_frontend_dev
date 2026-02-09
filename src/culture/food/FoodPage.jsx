@@ -12,18 +12,18 @@ const FoodPage = () => {
     const [foods, setFoods] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    
+
     // 組件載入時獲取食物列表
     useEffect(() => {
         fetchFoodList();
     }, []);
-    
+
     // 從 API 獲取食物列表
     const fetchFoodList = async () => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await fetch("https://dev.taigiedu.com/backend/culture/food", {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/culture/food`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -42,7 +42,7 @@ const FoodPage = () => {
                 const formattedFoods = data.map((food, index) => ({
                     key: index, // 使用索引作為唯一標識，代替 id
                     name: food.name || '',
-                    image: food.image ? `https://dev.taigiedu.com${food.image}` : nofood,
+                    image: food.image ? `${import.meta.env.VITE_IMAGE_URL}${food.image}` : nofood,
                     pron: food.pron || '',
                     intro: food.intro_mandarin || '',
                     intro_taigi: food.intro_taigi || ''
@@ -94,13 +94,13 @@ const FoodPage = () => {
             ) : (
                 <div className="row g-4 pt-4">
                     {foods.map(food => (
-                        <div key={food.key} 
-                             className="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-custom-5"
-                             onClick={() => handleCardClick(food)}>
+                        <div key={food.key}
+                            className="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-custom-5"
+                            onClick={() => handleCardClick(food)}>
                             <div className="food-card">
                                 <div className="image-container">
-                                    <img 
-                                        src={food.image} 
+                                    <img
+                                        src={food.image}
                                         alt={food.name}
                                         className="food-image"
                                         onError={(e) => {

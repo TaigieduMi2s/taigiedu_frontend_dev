@@ -1,6 +1,7 @@
 import React from "react";
 import "./ResourceCard.css";
-import loveIcon from "../assets/Union (Stroke).svg";
+import loveIconFilled from "../assets/Union (Stroke).svg";
+import loveIconOutline from "../assets/resourcepage/heart-outline.svg";
 import downloadIcon from "../assets/arrow-down-circle.svg";
 import filePreviewDemo from "../assets/resourcepage/file_preview_demo.png"; // 預設圖片
 
@@ -13,6 +14,7 @@ const ResourceCard = ({
   uploader, // 這可能是從 uploader_name 傳入的
   tags = [],
   date,
+  isLiked = false,
   onCardClick, // 控制點擊事件的 prop
 }) => {
   const handleCardClick = () => {
@@ -22,6 +24,23 @@ const ResourceCard = ({
   };
 
   // 處理圖片 URL，如果是相對路徑則添加 base URL
+  const joinUrl = (base, path) => {
+    const normalizedBase = String(base || "").replace(/\/+$/, "");
+    let normalizedPath = String(path || "").replace(/^\/+/, "");
+
+    normalizedPath = normalizedPath.replace(/\/{2,}/g, "/");
+
+    if (normalizedPath.startsWith("backend/")) {
+      normalizedPath = normalizedPath.replace(/^backend\//, "");
+    }
+
+    if (normalizedBase.endsWith("/backend") && normalizedPath.startsWith("backend/")) {
+      normalizedPath = normalizedPath.replace(/^backend\//, "");
+    }
+
+    return `${normalizedBase}/${normalizedPath}`;
+  };
+
   const getFullImageUrl = (url) => {
     if (!url || url === "/src/assets/resourcepage/file_preview_demo.png") {
       return filePreviewDemo;
@@ -31,7 +50,7 @@ const ResourceCard = ({
       return url;
     }
     // 否則添加 base URL
-    return `https://dev.taigiedu.com/backend/${url}`;
+    return joinUrl(import.meta.env.VITE_API_URL, url);
   };
 
   return (
@@ -46,8 +65,8 @@ const ResourceCard = ({
           {/* 顯示喜歡數量 */}
           <div className="likes">
             <img
-              src={loveIcon}
-              alt="Likes"
+              src={isLiked ? loveIconFilled : loveIconOutline}
+              alt={isLiked ? "Liked" : "Not liked"}
               className="likes-icon"
             />
             <span>{likes}</span>

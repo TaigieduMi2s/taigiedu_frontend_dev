@@ -1,0 +1,433 @@
+/* 會員管理後台頁面樣式 */
+/* 注意：表格、載入、空狀態等通用樣式由 AdminDataTable 組件提供 */
+/* 此檔案僅定義該頁面特定的樣式 */
+
+/* 頁面容器 */
+.admin-member-page {
+    padding: 1rem;
+}
+
+/* 頁面標頭區 */
+.admin-header-main {
+    margin-bottom: 1.5rem;
+}
+
+.admin-header-main h5 {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 1rem;
+}
+
+.admin-header-main h5 span {
+    color: #333;
+    font-weight: 500;
+}
+
+/* 控制項區域 */
+.admin-controls-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* 搜尋輸入框 */
+.admin-search-input {
+    max-width: 420px;
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.admin-search-input:focus {
+    border-color: #2D92C1;
+    box-shadow: 0 0 0 3px rgba(45, 146, 193, 0.1);
+    outline: none;
+}
+
+/* 狀態篩選區 */
+.status-filter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-filter span {
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.admin-status-dropdown {
+    width: 160px;
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background-color: #fff;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.admin-status-dropdown:focus {
+    border-color: #2D92C1;
+    outline: none;
+}
+
+/* Modal 表單樣式 */
+.admin-form-label {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.admin-form-control {
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    padding: 0.625rem 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.admin-form-control:focus {
+    border-color: #2D92C1;
+    box-shadow: 0 0 0 3px rgba(45, 146, 193, 0.1);
+}
+
+/* 操作選單樣式 */
+.action-menu-container {
+    position: relative;
+    display: inline-block;
+}
+
+.action-menu-dropdown {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 4px;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    min-width: 160px;
+    overflow: hidden;
+}
+
+.action-menu-item {
+    display: block;
+    width: 100%;
+    padding: 10px 16px;
+    text-align: left;
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: #374151;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+}
+
+.action-menu-item:hover {
+    background-color: #F3F4F6;
+    color: #111827;
+}
+
+.action-menu-item:not(:last-child) {
+    border-bottom: 1px solid #F3F4F6;
+}
+
+/* 覆寫表格中的 action 按鈕樣式使其適應 icon */
+.admin-action-btn.menu-btn {
+    background: none;
+    border: none;
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #6B7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.admin-action-btn.menu-btn:hover {
+    background-color: #F3F4F6;
+    color: #111827;
+}
+
+/* 覆寫表格中的 action 欄位 overflow，讓下拉選單可見 */
+.admin-data-table tbody tr td.action-column .cell-content {
+    overflow: visible !important;
+}
+
+.admin-action-btn.menu-btn svg,
+.admin-action-btn.menu-btn img {
+    width: 20px;
+    height: 20px;
+}
+
+/* 恢復按鈕樣式 */
+.admin-action-btn.restore-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    color: #4A90A4;
+}
+
+.admin-action-btn.restore-btn:hover {
+    background-color: #E8F4F8;
+    color: #2C6B7C;
+}
+
+.admin-action-btn.restore-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* 停用彈窗樣式 */
+.disable-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.disable-modal {
+    background: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 700px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.disable-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.disable-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.disable-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.disable-modal-close:hover {
+    color: #111827;
+}
+
+.disable-modal-body {
+    display: flex;
+    padding: 24px;
+    gap: 32px;
+}
+
+.disable-modal-left {
+    flex: 1;
+}
+
+.disable-modal-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.disable-form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #4A90A4;
+    margin-bottom: 12px;
+}
+
+.disable-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.disable-radio-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #374151;
+}
+
+.disable-radio-label input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #4A90A4;
+    cursor: pointer;
+}
+
+.disable-textarea {
+    flex: 1;
+    min-height: 180px;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    resize: none;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.disable-textarea:focus {
+    outline: none;
+    border-color: #4A90A4;
+}
+
+.disable-modal-footer {
+    display: flex;
+    justify-content: center;
+    padding: 16px 24px 24px;
+}
+
+.disable-confirm-btn {
+    background-color: #4A90A4;
+    color: white;
+    border: none;
+    padding: 10px 48px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.disable-confirm-btn:hover {
+    background-color: #3A7A8E;
+}
+
+/* 指定管理員彈窗樣式 */
+.admin-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.admin-assign-modal {
+    background: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.admin-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.admin-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.admin-modal-close:hover {
+    color: #111827;
+}
+
+.admin-modal-body {
+    padding: 24px;
+}
+
+.admin-confirm-text {
+    font-size: 14px;
+    color: #4A90A4;
+    margin: 0 0 4px 0;
+}
+
+.admin-permission-note {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0 0 20px 0;
+}
+
+.admin-member-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.admin-member-info p {
+    margin: 0;
+    font-size: 14px;
+    color: #374151;
+}
+
+.admin-member-info p span {
+    color: #111827;
+}
+
+.admin-modal-footer {
+    display: flex;
+    justify-content: center;
+    padding: 16px 24px 24px;
+}
+
+.admin-confirm-btn {
+    background-color: #4A90A4;
+    color: white;
+    border: none;
+    padding: 10px 48px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.admin-confirm-btn:hover {
+    background-color: #3A7A8E;
+}

@@ -51,13 +51,13 @@ const TranslateTarget = ({
       showToast("沒有可播放的內容！", 'error');
       return;
     }
-  
+
     // 設置載入中狀態，但還不是播放中
     setIsLoading(true);
-  
+
     try {
       let ttsLang = "tb"; // 預設是漢羅
-    
+
       // switch (selectedLanguage) {
       //   case "台羅":
       //     ttsLang = "tl";
@@ -71,58 +71,58 @@ const TranslateTarget = ({
       //   default:
       //     ttsLang = "tb"; // 預設漢羅
       // }
-      
-      const response = await fetch("https://dev.taigiedu.com/backend/synthesize_speech", {
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/synthesize_speech`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          tts_lang: ttsLang, 
+          tts_lang: ttsLang,
           tts_data: content,
         }),
       });
-  
+
       if (!response.ok) {
         throw new Error(`HTTP 錯誤！狀態碼：${response.status}`);
       }
-  
+
       const synthesizedAudioBase64 = await response.text(); // API 回傳 Base64 音訊
-  
+
       // 創建音頻對象
       const audioSrc = `data:audio/wav;base64,${synthesizedAudioBase64}`;
       const audio = new Audio(audioSrc);
-      
+
       // 預先加載音頻
       await new Promise((resolve, reject) => {
         audio.onloadeddata = resolve;
         audio.onerror = reject;
-        
+
         // 10秒後如果還沒加載完成就超時
         const timeout = setTimeout(() => {
           reject(new Error("音訊加載超時"));
           showToast("音訊加載超時", 'error');
         }, 10000);
-        
+
         // 清除超時計時器
         audio.onloadeddata = () => {
           clearTimeout(timeout);
           resolve();
         };
       });
-      
+
       // 音頻加載完成，設置載入狀態為 false，播放狀態為 true
       setIsLoading(false);
       setIsPlaying(true);
-      
+
       // 播放音頻
       await audio.play();
-      
+
       // 監聽播放結束
       audio.onended = () => {
         setIsPlaying(false);
       };
-      
+
     } catch (error) {
       console.error("語音合成失敗:", error);
       showToast("語音合成或播放失敗，請稍後再試", 'error');
@@ -146,38 +146,37 @@ const TranslateTarget = ({
             </option>
           ))}
         </select>
-        <img 
-          src={chevronUpIcon} 
-          alt="dropdown arrow" 
+        <img
+          src={chevronUpIcon}
+          alt="dropdown arrow"
           className="dropdown-arrow"
         />
       </div>
 
       <div className="target-content-container">
         <div
-          className={`target-display-box ${
-            isEditable ? "editable" : "non-editable"
-          }`}
+          className={`target-display-box ${isEditable ? "editable" : "non-editable"
+            }`}
         >
           {content || <span className="tran-placeholder">轉換內容</span>}
 
           {isEditable && (
-            <button 
+            <button
               className={`play-audio-button ${isPlaying ? 'playing' : ''} ${isLoading ? 'loading' : ''}`}
-              onClick={handlePlayAudio} 
+              onClick={handlePlayAudio}
               disabled={isPlaying || isLoading}
               aria-label={isLoading ? "載入中" : isPlaying ? "播放中" : "播放音訊"}
             >
               {isLoading ? (
-                <img 
-                  src={loadingIcon} 
-                  className="loading-icon" 
+                <img
+                  src={loadingIcon}
+                  className="loading-icon"
                   alt="載入中"
                 />
               ) : (
-                <img 
-                  src={speakerIcon} 
-                  className="play-icon" 
+                <img
+                  src={speakerIcon}
+                  className="play-icon"
                   alt="播放"
                 />
               )}

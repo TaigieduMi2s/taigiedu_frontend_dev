@@ -58,7 +58,7 @@ const TranslateFeedback = ({
       };
 
       // 發送 API 請求
-      const response = await fetch('https://dev.taigiedu.com/backend/submit_tc_feedback', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/submit_tc_feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -117,7 +117,7 @@ const TranslateFeedback = ({
         </div>
 
         <div className="feedback-footer">
-          <button 
+          <button
             className={`feedback-submit-button ${isSubmitting ? 'submitting' : ''}`}
             onClick={handleSubmit}
             disabled={isSubmitting}

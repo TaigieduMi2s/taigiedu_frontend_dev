@@ -15,7 +15,7 @@ const FoodModal = ({ isOpen, onClose, food }) => {
 
             console.log('Sending TTS request:', parameters);
 
-            const response = await fetch('https://dev.taigiedu.com/backend/synthesize_speech', {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/synthesize_speech`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -50,13 +50,13 @@ const FoodModal = ({ isOpen, onClose, food }) => {
                         <div className="food-modal-header">
                             <div className="food-header-container">
                                 <div className="food-image-container">
-                                    <img 
-                                        src={food.image} 
-                                        alt={food.name} 
+                                    <img
+                                        src={food.image}
+                                        alt={food.name}
                                         className="food-modal-image"
                                         onError={(e) => {
                                             e.target.src = nofood;
-                                        }} 
+                                        }}
                                     />
                                 </div>
                                 <div className="food-header-content">
@@ -79,7 +79,7 @@ const FoodModal = ({ isOpen, onClose, food }) => {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             {food.intro_taigi && food.intro_taigi.trim() !== "" && (
                                 <div className="food-row-container mt-3">
                                     <div className="food-interpretation-container">

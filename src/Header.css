@@ -1,33 +1,262 @@
-body, html {
-    margin: 0;
-    padding: 20;
-    height: 100%; /* 確保整頁高度 */
+/* header區塊樣式 */
+.header {
+  width: 100%;
+  height: 58px;
+  background: linear-gradient(to right, #2C7FA6, #80C48F);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0 20px 0 0;
+  position: relative;
+  z-index: 1000;
+}
+
+/* logo樣式 */
+.logo {
+  height: 40px;
+  padding-left: 15px;
+}
+
+/* Header 右側區域 */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* 載入狀態 */
+.header-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+}
+
+.header-loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: headerSpin 0.8s linear infinite;
+}
+
+@keyframes headerSpin {
+  to {
+    transform: rotate(360deg);
   }
-  
-  .app {
-    display: flex;
-    flex-direction: column;
-    height: 100%; /* App高度填滿頁面 */
+}
+
+/* 登入按鈕 - 參考 Footer 按鈕樣式 */
+.header-login-button {
+  background: transparent;
+  border: 1px solid white;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  font-size: 14px;
+}
+
+.header-login-button:hover {
+  background-color: white;
+  color: #017AB1;
+}
+
+/* 用戶資訊區塊 */
+.header-user {
+  position: relative;
+}
+
+.header-user-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 6px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 9999px;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.header-user-button:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* 用戶頭像 */
+.header-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: white;
+  color: #2C7FA6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.header-user-name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.header-user-arrow {
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.header-user-arrow.open {
+  transform: rotate(180deg);
+}
+
+/* 用戶下拉選單 */
+.header-user-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  animation: menuSlideDown 0.2s ease-out;
+  z-index: 1001;
+}
+
+@keyframes menuSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
 
-  
-  /* header區塊樣式 */
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header-user-menu-info {
+  padding: 16px;
+  background: linear-gradient(135deg, #f8fffe, #f0f9ff);
+}
+
+.header-user-menu-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.header-user-menu-email {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+  word-break: break-all;
+}
+
+.header-user-menu-role {
+  display: inline-block;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #2C7FA6, #80C48F);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 20px;
+}
+
+.header-user-menu-divider {
+  height: 1px;
+  background: #eee;
+}
+
+.header-user-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.header-user-menu-item:hover {
+  background: #f5f5f5;
+  color: #2C7FA6;
+}
+
+.header-user-menu-item svg {
+  flex-shrink: 0;
+  color: #666;
+}
+
+.header-user-menu-item:hover svg {
+  color: #2C7FA6;
+}
+
+.header-user-menu-logout {
+  color: #e53935;
+}
+
+.header-user-menu-logout:hover {
+  background: #fff5f5;
+  color: #c62828;
+}
+
+.header-user-menu-logout svg {
+  color: #e53935;
+}
+
+.header-user-menu-logout:hover svg {
+  color: #c62828;
+}
+
+/* 登入彈窗包裝器 - 使用原本的 LoginPage */
+.header-login-modal-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
   .header {
-    width: 100%;
-    height: 58px;
-    background: linear-gradient(to right, #2C7FA6, #80C48F); /* 藍綠漸層背景 */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    justify-content: flex-start; 
-    box-sizing: border-box;
+    padding: 0 12px 0 0;
   }
-  
-  
-  /* logo樣式，根據需要調整大小 */
-  .logo {
-    height: 40px;
-    padding-left: 15px
+
+  .header-login-button {
+    padding: 8px 16px;
   }
-  
- 
+
+  .header-user-name {
+    display: none;
+  }
+
+  .header-user-button {
+    padding: 6px 10px 6px 6px;
+  }
+
+  .header-user-menu {
+    right: -8px;
+    min-width: 200px;
+  }
+}

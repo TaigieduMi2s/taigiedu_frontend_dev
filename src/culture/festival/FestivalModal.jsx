@@ -15,7 +15,7 @@ const FestivalModal = ({ isOpen, onClose, festival }) => {
 
       console.log('Sending TTS request:', parameters);
 
-      const response = await fetch('https://dev.taigiedu.com/backend/synthesize_speech', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/synthesize_speech`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
