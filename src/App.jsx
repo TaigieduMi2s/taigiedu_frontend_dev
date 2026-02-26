@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { ToastProvider } from './components/Toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute, { AdminRoute } from './components/ProtectedRoute';
+import envConfig from './config';
 import "./App.css";
 
 import Sidebar from "./Sidebar";
@@ -47,6 +48,18 @@ import ResourceHeaderPage from "./adminPage/adminContent/adminHome/adminresource
 const AppLayout = () => {
   const location = useLocation();
   const { isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (envConfig.features.enableRobotsNoindex) {
+      let meta = document.querySelector('meta[name="robots"]');
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.name = "robots";
+        document.head.appendChild(meta);
+      }
+      meta.content = "noindex, nofollow";
+    }
+  }, []);
 
   const isPreviewPage = location.pathname === '/file-preview';
   const isDownloadPage = location.pathname === '/download';

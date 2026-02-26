@@ -1,45 +1,50 @@
 # 部署配置說明
 
-## Base Path 配置
-
-本專案支援多環境部署,透過 `VITE_BASE_PATH` 環境變數來設定應用程式的基礎路徑。
-
-### 環境設定
-
-1. **本地開發環境**
-   - Base Path: `/`
-   - 創建 `.env.development` 文件:
-     ```
-     VITE_BASE_PATH=/
-     ```
-
-2. **GitHub Pages 部署**
-   - Base Path: `/taiwaneseOMG/`
-   - 已在 `.github/workflows/deploy.yml` 中自動設定
-   - 部署網址: `https://hsiehyoung.github.io/taiwaneseOMG/`
-
-3. **正式環境部署 (dev.taigiedu.com)**
-   - Base Path: `/`
-   - 創建 `.env.production` 文件:
-     ```
-     VITE_BASE_PATH=/
-     ```
-   - 部署網址: `https://dev.taigiedu.com/`
+本專案支援多環境部署，所有主要的環境變數與功能開關都集中由專案根目錄下的 `.env` 檔案管理。這包含「應用程式基礎路徑（Base Path）」與「功能開關配置（Feature Toggles）」。
 
 ### 如何設定
 
-1. 複製 `.env.example` 為對應的環境變數文件:
+1. **依據 `.env.example` 建立對應環境的設定檔：**
    ```bash
-   # 本地開發
+   # 本地開發與內部測試
    cp .env.example .env.development
-   
+
    # 正式環境
    cp .env.example .env.production
    ```
 
-2. 根據部署環境修改 `VITE_BASE_PATH` 的值
+2. **選擇部署環境並設定變數：**
 
-3. 執行對應的命令:
+   #### 1. 本地開發環境 (`.env.development`) / 測試環境 (`.env.local`)
+   此環境為開發或測試所用，將測試中功能開啟，且避免爬蟲收錄。
+   ```env
+   VITE_BASE_PATH=/
+   VITE_API_URL=https://dev.taigiedu.com/backend
+   VITE_IMAGE_URL=https://dev.taigiedu.com
+
+   # 功能開關（開啟測試功能、禁止搜尋引擎爬取）
+   VITE_ENABLE_UNSTABLE_FEATURES=true
+   VITE_ENABLE_ROBOTS_NOINDEX=true
+   ```
+
+   #### 2. 正式環境部署 (`.env.production`)
+   正式上線環境，關閉測試中不穩定的功能，同時開放搜尋引擎建立索引以提升 SEO 表現。
+   ```env
+   VITE_BASE_PATH=/
+   VITE_API_URL=https://api.taigiedu.com/backend
+   VITE_IMAGE_URL=https://taigiedu.com
+
+   # 功能開關（關閉不穩定功能、允許搜尋引擎爬取）
+   VITE_ENABLE_UNSTABLE_FEATURES=false
+   VITE_ENABLE_ROBOTS_NOINDEX=false
+   ```
+
+   #### 3. GitHub Pages 部署
+   針對 GitHub Pages：部署路徑已自動設定在 `.github/workflows/deploy.yml`。此環境下 `VITE_BASE_PATH` 為 `/taiwaneseOMG/`，因此部署網址為 `https://username.github.io/taiwaneseOMG/`。
+
+有關原始檔案提供的測試帳號 (`TEST_USER`, `TEST_PASS`) 與測試網址 (`BASE_URL`) 等用於 E2E 測試用的設定，請額外記錄於 `.env.local`。
+
+3. **執行對應的建置或啟動命令：**
    ```bash
    # 本地開發
    npm run dev

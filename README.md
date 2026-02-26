@@ -54,58 +54,24 @@ cd taiwaneseOMG
 npm install
 ```
 
-3. **設定環境變數**
+3. **設定環境變數與功能開關**
 
-根據您的開發需求，設置對應的環境變數檔案：
+本專案使用環境變數來控制基礎路徑、API 位置，以及特定功能（如朗讀、翻譯、逐字稿）的開啟與否。請參考 `.env.example`，根據您的開發需求建立對應的設定檔：
 
-#### 開發環境 (.env.development)
+- **開發環境 (`.env.development`)**：
+  供本地開發時使用。預設開啟測試中功能，並防止頁面被索引。
+  ```bash
+  cp .env.example .env.development
+  ```
+- **正式環境 (`.env.production`)**：
+  供正式上線使用。需手動將測試功能及防爬蟲等標籤關閉 (`false`)。
+  ```bash
+  cp .env.example .env.production
+  ```
+- **測試環境 (`.env.local`)**：
+  這份檔案通常不會進入版本控制。用於放置 Playwright 測試帳號（`TEST_USER`、`TEST_PASS`）與測試目標的 URL（`BASE_URL`）。
 
-在專案根目錄建立 `.env.development` 檔案：
-
-```env
-# 開發環境設定
-VITE_BASE_PATH=/
-VITE_API_URL=https://dev.taigiedu.com/backend
-VITE_IMAGE_URL=https://dev.taigiedu.com
-```
-
-#### 正式環境 (.env.production)
-
-在專案根目錄建立 `.env.production` 檔案：
-
-```env
-# 正式環境設定
-VITE_BASE_PATH=/
-VITE_API_URL=https://api.taigiedu.com/backend
-VITE_IMAGE_URL=https://taigiedu.com
-```
-
-**環境變數說明：**
-
-- `VITE_BASE_PATH`: 應用程式的基礎路徑
-  - 本地/正式環境：`/`
-  - GitHub Pages 部署：`/taiwaneseOMG/`
-- `VITE_API_URL`: 後端 API 伺服器位址
-- `VITE_IMAGE_URL`: 圖片資源伺服器位址
-
-#### E2E 測試環境 (.env.local)
-
-在專案根目錄建立 `.env.local` 檔案（用於 Playwright 測試）：
-
-```env
-# E2E 測試設定
-BASE_URL=http://localhost:3000
-TEST_USER=your_test_username
-TEST_PASS=your_test_password
-```
-
-**測試環境變數說明：**
-
-- `BASE_URL`: 測試目標 URL（本地開發或 Staging 環境）
-- `TEST_USER`: 測試用帳號
-- `TEST_PASS`: 測試用密碼
-
-⚠️ **安全提醒**：請勿將 `.env.local` 提交到版本控制系統，此檔案已加入 `.gitignore`
+> 💡 **進階部署說明**：對於詳細的環境變數定義與教學，請參閱 [部署設定文件 (docs/DEPLOYMENT.md)](docs/DEPLOYMENT.md)。
 
 ### 啟動開發伺服器
 

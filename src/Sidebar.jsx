@@ -12,16 +12,19 @@ import cultureIcon from "./assets/sidebar_icon/文化.svg";
 import socialMediaIcon from "./assets/sidebar_icon/媒體與社群資源.svg";
 import examIcon from "./assets/sidebar_icon/認證考試.svg";
 import chevronUpIcon from "./assets/chevron-up.svg";
+import envConfig from "./config";
 
 const Sidebar = () => {
-  const basePath = import.meta.env.BASE_URL || '/';
+  const basePath = envConfig.basePath;
   const [activeItem, setActiveItem] = useState(null); // 用於追蹤哪個選單被選取
   const [activeSubItem, setActiveSubItem] = useState(null);
   const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
   const navigate = useNavigate(); // 使用 React Router 的 navigate
   const location = useLocation(); // 監聽當前路由變化
 
-  const menuItems = [
+  const isUnstableFeaturesEnabled = envConfig.features.enableUnstableFeatures;
+
+  const allMenuItems = [
     { id: 1, label: "主頁搜尋", icon: homeIcon, path: "/" },
     { id: 2, label: "台語逐字稿", icon: transcriptIcon, path: "/transcript" },
     { id: 3, label: "台語朗讀", icon: readIcon, path: "/read" },
@@ -42,6 +45,13 @@ const Sidebar = () => {
     { id: 9, label: "媒體與社群資源", icon: socialMediaIcon, path: "/socialmedia" },
     { id: 10, label: "認證考試", icon: examIcon, path: "/exam" },
   ];
+
+  const menuItems = allMenuItems.filter(item => {
+    if (!isUnstableFeaturesEnabled) {
+      if ([2, 3, 4].includes(item.id)) return false;
+    }
+    return true;
+  });
 
   // 當 URL 變更時，根據當前路徑來設定 activeItem
   useEffect(() => {
@@ -101,7 +111,7 @@ const Sidebar = () => {
               className={`menu-icon ${activeItem === item.id ? "active-icon" : ""}`}
             />
             {item.label}
-            {item.isExternal && (
+            {/* {item.isExternal && (
               <svg
                 className="external-icon size-5"
                 xmlns="http://www.w3.org/2000/svg"
@@ -113,7 +123,7 @@ const Sidebar = () => {
                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25" />
 
               </svg>
-            )}
+            )} */}
             {item.hasSubmenu && (
               <span className={`arrow ${isSubMenuOpen ? 'up' : 'down'}`}>
                 <img src={chevronUpIcon} />
