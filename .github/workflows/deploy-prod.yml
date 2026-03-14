@@ -23,7 +23,7 @@ jobs:
           npm install
           # 產生正式環境的 .env
           echo "VITE_BASE_PATH=/" > .env
-          echo "VITE_API_URL=https://api.taigiedu.com/backend" >> .env
+          echo "VITE_API_URL=https://www.taigiedu.com/backend" >> .env
           echo "VITE_IMAGE_URL=https://taigiedu.com" >> .env
           echo "VITE_ENABLE_UNSTABLE_FEATURES=false" >> .env
           echo "VITE_ENABLE_ROBOTS_NOINDEX=false" >> .env
