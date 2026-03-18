@@ -34,7 +34,7 @@ const Sidebar = () => {
     { id: 7, label: "台語出名人", icon: celebrityIcon, isExternal: true, url: "https://famous.taigiedu.com/" },
     {
       id: 8,
-      label: "台語文化",
+      label: "節慶飲食",
       icon: cultureIcon,
       hasSubmenu: true,
       submenuItems: [
