@@ -46,7 +46,7 @@ export const testData = {
         { label: '台語教學資源共享平台', path: '/resource' },
         { label: '台語俗諺語', path: '/phrase' },
         { label: '台語出名人', path: '/celebrity' },
-        { label: '台語文化', hasSubmenu: true },
+        { label: '節慶飲食', hasSubmenu: true },
         { label: '媒體與社群資源', path: '/socialmedia' },
         { label: '認證考試', path: '/exam' },
     ],

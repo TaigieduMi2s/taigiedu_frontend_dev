@@ -65,9 +65,9 @@ test.describe('Sidebar 導航功能', () => {
         await expect(newPage).toHaveURL(/famous.taigiedu.com/);
     });
 
-    test('「台語文化」子選單展開並導航', async ({ page }) => {
-        // 點擊「台語文化」展開子選單
-        const cultureMenu = page.locator('.menu-item', { hasText: '台語文化' });
+    test('「節慶飲食」子選單展開並導航', async ({ page }) => {
+        // 點擊「節慶飲食」展開子選單
+        const cultureMenu = page.locator('.menu-item', { hasText: '節慶飲食' });
         await cultureMenu.click();
 
         // 等待子選單展開
