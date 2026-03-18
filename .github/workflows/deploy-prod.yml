@@ -29,6 +29,17 @@ jobs:
           echo "VITE_ENABLE_ROBOTS_NOINDEX=false" >> .env
           npm run build
 
+      - name: Check SSH key exists
+        run: |
+          if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
+            echo "❌ SSH_PRIVATE_KEY is empty!"
+            exit 1
+          else
+            echo "✅ SSH_PRIVATE_KEY is set (length: ${#KEY})"
+          fi
+        env:
+          KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
       - name: Deploy to Production Server via SSH
         uses: appleboy/scp-action@master
         with:
