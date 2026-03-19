@@ -17,6 +17,8 @@ const Header = () => {
   const location = useLocation();
 
   const isAdminPage = location.pathname.startsWith('/admin');
+  const adminMenuTarget = isAdminPage ? '/' : '/admin';
+  const adminMenuLabel = isAdminPage ? '回到官網' : '後台管理';
 
   // 處理登出
   const handleLogout = async () => {
@@ -129,14 +131,14 @@ const Header = () => {
                   {isAdmin() && (
                     <>
                       <Link
-                        to="/admin"
+                        to={adminMenuTarget}
                         className="header-user-menu-item"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                           <path d="M7.333 2H2.667A.667.667 0 002 2.667v4.666c0 .369.298.667.667.667h4.666A.667.667 0 008 7.333V2.667A.667.667 0 007.333 2zM13.333 2H8.667A.667.667 0 008 2.667v2.666c0 .369.298.667.667.667h4.666a.667.667 0 00.667-.667V2.667A.667.667 0 0013.333 2zM13.333 8H8.667A.667.667 0 008 8.667v4.666c0 .369.298.667.667.667h4.666a.667.667 0 00.667-.667V8.667A.667.667 0 0013.333 8zM7.333 10H2.667A.667.667 0 002 10.667v2.666c0 .369.298.667.667.667h4.666A.667.667 0 008 13.333v-2.666A.667.667 0 007.333 10z" stroke="currentColor" strokeWidth="1.2" />
                         </svg>
-                        後台管理
+                        {adminMenuLabel}
                       </Link>
                       <div className="header-user-menu-divider"></div>
                     </>
