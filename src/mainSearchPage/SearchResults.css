@@ -1,396 +1,409 @@
 .search-results {
-    max-width: 1200px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .results-table {
-    display: table;
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .results-row {
-    display: table-row;
-  }
-  
-  .results-row.header {
-    font-weight: bold;
-    background-color: #f5f5f5;
-  }
-  
-  .results-row > div {
-    display: table-cell;
-    padding: 10px;
-    border: 1px solid #ddd;
-  }
+	max-width: 1200px;
+	margin: 20px auto;
+	padding: 20px;
+	background-color: #fff;
+	border-radius: 8px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
 
-  .content {
-		height: 100px;
-		border: 1px solid #000;
-		margin: 0 8px;
-	}
+.results-table {
+	display: table;
+	width: 100%;
+	border-collapse: collapse;
+}
 
-	a,
-	a:hover {
-		color: inherit;
-		text-decoration: none;
-	}
+.results-row {
+	display: table-row;
+}
 
+.results-row.header {
+	font-weight: bold;
+	background-color: #f5f5f5;
+}
 
-	/* Dropdown Button */
-	.dropdown {
-		position: relative;
-		padding: 0;
-		width: 150px;
-		height: 3.7em;
-		border-radius: 30px;
-		background-color: #ADD9E6;
-		border-style: none;
-	}
+.results-row>div {
+	display: table-cell;
+	padding: 10px;
+	border: 1px solid #ddd;
+}
 
-	.dropdown>.dropBtn {
-		padding: 0;
-		width: 150px;
-		height: 52px;
-		border-radius: 30px;
-		background-color: #ADD9E6;
-		border-style: none;
-		font-size: 20px;
-	}
+.content {
+	height: 100px;
+	border: 1px solid #000;
+	margin: 0 8px;
+}
+
+a,
+a:hover {
+	color: inherit;
+	text-decoration: none;
+}
 
 
-	.dropdown-content {
-		display: none;
-		position: absolute;
-        top:36px;
-		width: 100%;
-		height: 500px;
-        min-width: 100%;
-		/*  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);*/
-		z-index: 1;
-		background-image: url("./static/img/phrase_dropdown.svg");
-		background-size: Contain;
-		background-position: bottom;
-		background-repeat: no-repeat;
-	}
+/* Dropdown Button */
+.dropdown {
+	position: relative;
+	padding: 0;
+	width: 150px;
+	height: 3.7em;
+	border-radius: 30px;
+	background-color: #ADD9E6;
+	border-style: none;
+}
 
-	.column {
-		float: left;
-		width: 136px;
-		/* 設定每個欄位的寬度為50% */
-		padding: 5px;
-		padding-top: 25px;
-		box-sizing: border-box;
-	}
-
-	/* Links inside the dropdown */
-	.dropdown-content a {
-		color: black;
-		padding: 5px 10px;
-		width: 140px;
-		text-decoration: none;
-		display: block;
-	}
-
-	label {
-		display: block;
-		color: black;
-		font-size: 16px;
-		margin: 5px 0;
-	}
+.dropdown>.dropBtn {
+	padding: 0;
+	width: 150px;
+	height: 52px;
+	border-radius: 30px;
+	background-color: #ADD9E6;
+	border-style: none;
+	font-size: 20px;
+}
 
 
-	/* Show the dropdown menu on hover */
-	.dropdown:hover .dropdown-content {
-		display: block;
-	}
+.dropdown-content {
+	display: none;
+	position: absolute;
+	top: 36px;
+	width: 100%;
+	height: 500px;
+	min-width: 100%;
+	/*  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);*/
+	z-index: 1;
+	background-image: url("./static/img/phrase_dropdown.svg");
+	background-size: Contain;
+	background-position: bottom;
+	background-repeat: no-repeat;
+}
 
-	/* Change color of dropdown links on hover */
-	.dropdown-content a:hover {
-		background-color: #ddd;
-	}
+.column {
+	float: left;
+	width: 136px;
+	/* 設定每個欄位的寬度為50% */
+	padding: 5px;
+	padding-top: 25px;
+	box-sizing: border-box;
+}
 
-	/* Change the background color of the dropdown button when the dropdown content is shown */
-	.dropdown:hover .dropbtn {
-		background-color: #ADD9E6;
-	}
+/* Links inside the dropdown */
+.dropdown-content a {
+	color: black;
+	padding: 5px 10px;
+	width: 140px;
+	text-decoration: none;
+	display: block;
+}
 
-	.menuTitle {
-		font-size: 22px;
-		font-family: 'Huninn', 'NotoSansTC', sans-serif;
-		font-weight: 400;
-		color: #000;
-		
-	}
-
-	.menuText {
-		font-size: 22px;
-		font-family: 'Huninn', 'NotoSansTC', sans-serif;
-		font-weight: 400;
-		color: #000;
-	}
-
-	.selectionText {
-		font-size: 20px;
-		font-family: 'Huninn', 'NotoSansTC', sans-serif;
-		font-weight: 500;
-		color: #000;
-		text-align: left;
-	}
-
-	.Title {
-		font-size: 2.5rem;
-		font-weight: bold;
-		margin-bottom: 0;
-	}
-	.SearchResultTitle {
-		font-size: 2.3rem;
-		font-weight: bold;
-		margin-bottom: 0;
-	}
-    .modal-content {
-			border: solid;
-			border-width: 4px;
-			border-color: #84C6DA;
-			border-radius: 20px;
-			
-			min-width: 800px; 
-			min-height: 200px;
-			
-		}
-
-		.modal-header {
-			border: none;
-		}
-
-		.modal-close{
-			text-align: right;
-			margin-top: 10px;
-			margin-right: 10px;
-			padding-top: 0px;
-		}
-
-		.modal-detail{
-			/* 上右下左 */
-			padding: 0px 20px 20px 20px;
-		}
-        .popupTitle {
-		font-size: 2rem; font-weight: bold; margin-bottom: 0;
-	}
-	.selected-page{
-			background-color: #84C6DA;
-		}
-
-	.selected-page {
-		background-color: #84C6DA;
-	}
-
-	.content {
-		height: 100px;
-		border: 1px solid #000;
-		margin: 0 8px;
-	}
-
-	.imgBorder {
-		overflow: hidden;
-		width: 100%;
-		height: 60px;
-	}
-
-	.imgSize {
-		width: 100%;
-		height: 160px;
-		object-fit: cover;
-	}
-
-	.imgTitle {
-		font-size: 12px;
-		font-family: 'Huninn', 'NotoSansTC', sans-serif;
-		/* font-weight: bold; */
-		/* overflow:hidden; white-space: nowrap; text-overflow: ellipsis; */
-		-webkit-line-clamp: 2;
-		overflow: hidden;
-		display: -webkit-box;
-		-webkit-box-orient: vertical;
-		white-space: normal;
-	}
-
-	.sentenceCard {
-		width: 100%;
-		background-color: #dfeaf2;
-    	border-bottom:  1px solid #eaf4f9;
-    	color:#000
-	}
-
-  .titleCard {
-    height:50px;
-		width: 100%;
-    padding-right: 1rem;
-    padding-left: 1rem;
-    padding-top: 0.7rem;
-		background-color: #2D92C1;
-    color:#fff;
-    font-size: 18px;
-		font-weight: bold;
-    border-radius: 8px 8px 0px 0px;
-	}
+label {
+	display: block;
+	color: black;
+	font-size: 16px;
+	margin: 5px 0;
+}
 
 
-	.sentenceTitle {
-		font-size: 16px;
-		font-weight: bold;
-		/* overflow:hidden; white-space: nowrap; text-overflow: ellipsis; */
-		-webkit-line-clamp: 1;
-		overflow: hidden;
-		display: -webkit-box;
-		-webkit-box-orient: vertical;
-		white-space: normal;
-	}
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {
+	display: block;
+}
 
-	.sentenceContent {
-		font-size: 16px;
-    font-family: 'Huninn', 'NotoSansTC', sans-serif;
-		/* overflow:hidden; white-space: nowrap; text-overflow: ellipsis; */
-		-webkit-line-clamp: 1;
-		overflow: hidden;
-		display: -webkit-box;
-		-webkit-box-orient: vertical;
-		white-space: normal;
-	}
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {
+	background-color: #ddd;
+}
 
-  ul.pagination li a.wide-link {
-    width: 90px; /* 設置你想要的寬度 */
-  }
+/* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown:hover .dropbtn {
+	background-color: #ADD9E6;
+}
 
-	ul.pagination li a {
-		text-align: center;
-		width: 48px;
-		border-radius: 5px;
-		color: #000;
-		border-color: rgba(0, 0, 0, 0);
-		background-color: rgba(0, 0, 0, 0);
-		;
-	}
+.menuTitle {
+	font-size: 22px;
+	font-family: 'Huninn', 'NotoSansTC', sans-serif;
+	font-weight: 400;
+	color: #000;
+
+}
+
+.menuText {
+	font-size: 22px;
+	font-family: 'Huninn', 'NotoSansTC', sans-serif;
+	font-weight: 400;
+	color: #000;
+}
+
+.selectionText {
+	font-size: 20px;
+	font-family: 'Huninn', 'NotoSansTC', sans-serif;
+	font-weight: 500;
+	color: #000;
+	text-align: left;
+}
+
+.Title {
+	font-size: 2.5rem;
+	font-weight: bold;
+	margin-bottom: 0;
+}
+
+.SearchResultTitle {
+	font-size: 2.3rem;
+	font-weight: bold;
+	margin-bottom: 0;
+}
+
+.modal-content {
+	border: solid;
+	border-width: 4px;
+	border-color: #84C6DA;
+	border-radius: 20px;
+
+	min-width: 800px;
+	min-height: 200px;
+
+}
+
+.modal-header {
+	border: none;
+}
+
+.modal-close {
+	text-align: right;
+	margin-top: 10px;
+	margin-right: 10px;
+	padding-top: 0px;
+}
+
+.modal-detail {
+	/* 上右下左 */
+	padding: 0px 20px 20px 20px;
+}
+
+.popupTitle {
+	font-size: 2rem;
+	font-weight: bold;
+	margin-bottom: 0;
+}
+
+.selected-page {
+	background-color: #84C6DA;
+}
+
+.selected-page {
+	background-color: #84C6DA;
+}
+
+.content {
+	height: 100px;
+	border: 1px solid #000;
+	margin: 0 8px;
+}
+
+.imgBorder {
+	overflow: hidden;
+	width: 100%;
+	height: 60px;
+}
+
+.imgSize {
+	width: 100%;
+	height: 160px;
+	object-fit: cover;
+}
+
+.imgTitle {
+	font-size: 12px;
+	font-family: 'Huninn', 'NotoSansTC', sans-serif;
+	/* font-weight: bold; */
+	/* overflow:hidden; white-space: nowrap; text-overflow: ellipsis; */
+	-webkit-line-clamp: 2;
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	white-space: normal;
+}
+
+.sentenceCard {
+	width: 100%;
+	background-color: #dfeaf2;
+	border-bottom: 1px solid #eaf4f9;
+	color: #000
+}
+
+.titleCard {
+	height: 50px;
+	width: 100%;
+	padding-right: 1rem;
+	padding-left: 1rem;
+	padding-top: 0.7rem;
+	background-color: #2D92C1;
+	color: #fff;
+	font-size: 18px;
+	font-weight: bold;
+	border-radius: 8px 8px 0px 0px;
+}
 
 
-	.lastbutton {
-		width: 35px;
-		border-radius: 5px;
-		border-color: rgba(0, 0, 0, 0);
-		background-color: rgba(0, 0, 0, 0);
-		;
-	}
+.sentenceTitle {
+	font-size: 16px;
+	font-weight: bold;
+	/* overflow:hidden; white-space: nowrap; text-overflow: ellipsis; */
+	-webkit-line-clamp: 1;
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	white-space: normal;
+}
 
-	ul.pagination li a:hover {
-		background-color: rgba(0, 0, 0, 0);
-		color: #2D92C1;
-		border-color: rgba(0, 0, 0, 0);
-	}
+.sentenceContent {
+	font-size: 16px;
+	font-family: 'Huninn', 'NotoSansTC', sans-serif;
+	/* overflow:hidden; white-space: nowrap; text-overflow: ellipsis; */
+	-webkit-line-clamp: 1;
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	white-space: normal;
+}
 
-	ul.pagination li a.active {
-		border-radius: 5px;
-		border-color: rgba(0, 0, 0, 0);
-	}
+ul.pagination li a.wide-link {
+	width: 90px;
+	/* 設置你想要的寬度 */
+}
 
-	.page-item.active .page-link {
-		border-radius: 5px 5px 5px 5px;
-		z-index: 1;
-		color: #fff;
-		background-color: #2D92C1;
-		border-color: rgba(0, 0, 0, 0);
-		cursor: pointer;
+ul.pagination li a {
+	text-align: center;
+	width: 48px;
+	border-radius: 5px;
+	color: #000;
+	border-color: rgba(0, 0, 0, 0);
+	background-color: rgba(0, 0, 0, 0);
+	;
+}
 
-	}
-	.page-link:hover {
-		background-color: rgba(0, 0, 0, 0);
-		color: #2D92C1;
-		border-color: rgba(0, 0, 0, 0);
-		cursor: pointer;  /* Add cursor pointer */
-	}
 
-	a,
-	a:hover {
-		color: inherit;
-		text-decoration: none;
-	}
-	.languageRadio{
-		width:50em;
-	}
-	.form-check-input[type=radio] {
-		margin-top: 1rem;
-	}
-	.pagination-container {
-		display: flex;
-		justify-content: center;
-		position: relative;
-		padding: 0 120px;  /* Make space for back/next buttons */
-	}
-	
-	.pagination-container {
-		display: flex;
-		justify-content: center;
-	}
-	
-	.pagination {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 5px;
-	}
-	
-	.page-numbers {
-		display: flex;
-		gap: 5px;
-	}
-	
-	.back-button,
-	.next-button {
-		display: flex;
-		align-items: center;
-	}
-	
-	.invisible {
-		visibility: hidden;
-	}
-	
-	.page-link {
-		border: none;
-		padding: 0.5rem 1rem;
-	}
+.lastbutton {
+	width: 35px;
+	border-radius: 5px;
+	border-color: rgba(0, 0, 0, 0);
+	background-color: rgba(0, 0, 0, 0);
+	;
+}
 
-	/* 圖片按鈕樣式 */
-	.icon-link {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.5rem;
-		border: none;
-		background: transparent;
-	}
+ul.pagination li a:hover {
+	background-color: rgba(0, 0, 0, 0);
+	color: #2D92C1;
+	border-color: rgba(0, 0, 0, 0);
+}
 
-	.pagination-icon {
-		width: 20px;
-		height: 20px;
-		transition: opacity 0.2s ease;
-	}
+ul.pagination li a.active {
+	border-radius: 5px;
+	border-color: rgba(0, 0, 0, 0);
+}
 
-	.pagination-icon:hover {
-		opacity: 0.7;
-	}
+.page-item.active .page-link {
+	border-radius: 5px 5px 5px 5px;
+	z-index: 1;
+	color: #fff;
+	background-color: #2D92C1;
+	border-color: rgba(0, 0, 0, 0);
+	cursor: pointer;
 
-	/* 右箭頭鏡像效果 */
-	.right-arrow {
-		transform: scaleX(-1);
-	}
+}
 
-	/* 按鈕間距調整 */
-	.first-page-button,
-	.back-button,
-	.next-button,
-	.last-page-button {
-		margin: 0 5px;
-	}
+.page-link:hover {
+	background-color: rgba(0, 0, 0, 0);
+	color: #2D92C1;
+	border-color: rgba(0, 0, 0, 0);
+	cursor: pointer;
+	/* Add cursor pointer */
+}
+
+a,
+a:hover {
+	color: inherit;
+	text-decoration: none;
+}
+
+.languageRadio {
+	width: 50em;
+}
+
+.form-check-input[type=radio] {
+	margin-top: 1rem;
+}
+
+.pagination-container {
+	display: flex;
+	justify-content: center;
+	position: relative;
+	padding: 0 120px;
+	/* Make space for back/next buttons */
+}
+
+.pagination-container {
+	display: flex;
+	justify-content: center;
+}
+
+.pagination {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
+}
+
+.page-numbers {
+	display: flex;
+	gap: 5px;
+}
+
+.back-button,
+.next-button {
+	display: flex;
+	align-items: center;
+}
+
+.invisible {
+	visibility: hidden;
+}
+
+.page-link {
+	border: none;
+	padding: 0.5rem 1rem;
+}
+
+/* 圖片按鈕樣式 */
+.icon-link {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.5rem;
+	border: none;
+	background: transparent;
+}
+
+.pagination-icon {
+	width: 20px;
+	height: 20px;
+	transition: opacity 0.2s ease;
+}
+
+.pagination-icon:hover {
+	opacity: 0.7;
+}
+
+/* 右箭頭鏡像效果 */
+.right-arrow {
+	transform: scaleX(-1);
+}
+
+/* 按鈕間距調整 */
+.first-page-button,
+.back-button,
+.next-button,
+.last-page-button {
+	margin: 0 5px;
+}

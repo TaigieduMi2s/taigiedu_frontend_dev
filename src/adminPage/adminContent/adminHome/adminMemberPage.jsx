@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useAuth } from '../../../contexts/AuthContext';
 import { createPortal } from 'react-dom';
 import { createColumnHelper } from '@tanstack/react-table';
 import { useToast } from '../../../components/Toast';
@@ -16,7 +17,8 @@ const columnHelper = createColumnHelper();
 // 超級管理員白名單（若後端提供 isSuperAdmin 欄位，亦會一起判斷）
 const SUPER_ADMIN_WHITELIST = [
   'admin@example.com',
-  'root@example.com'
+  'root@example.com',
+  'myating0623@gmail.com'
 ];
 
 /**
@@ -175,7 +177,7 @@ const ActionCell = ({
                   handleAssignAdmin(row.original);
                 }}
               >
-                指定擔任管理員
+                {row.original.status === '管理員' ? '解除管理員身分' : '指定擔任管理員'}
               </button>
             </div>,
             document.body
@@ -233,23 +235,22 @@ const AdminMemberPage = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [activeMenuId]);
 
-  // 判斷超級管理員：
-  // 1) 從 localStorage 讀取 currentUser（若存在 isSuperAdmin=true，則為超管）
-  // 2) 或 email 在白名單 SUPER_ADMIN_WHITELIST 中且角色為 admin
-  const currentUser = useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem('currentUser') || '{}');
-    } catch {
-      return {};
-    }
-  }, []);
+  const { user: authUser, checkSuperAdmin } = useAuth();
 
   const isSuperAdmin = useMemo(() => {
-    const email = currentUser?.email || '';
-    const role = currentUser?.role || '';
-    const flag = currentUser?.isSuperAdmin === true;
-    return flag || (role === 'admin' && SUPER_ADMIN_WHITELIST.includes(email));
-  }, [currentUser]);
+    // 1. 優先使用 AuthContext 的判斷 (會檢查 role === 'SUPER_ADMIN')
+    if (typeof checkSuperAdmin === 'function' && checkSuperAdmin()) return true;
+
+    // 2. 檢查目前登入用戶的屬性 (包含大小寫相容處理)
+    const email = authUser?.email?.toLowerCase() || '';
+    const role = authUser?.role?.toUpperCase() || '';
+
+    // 如果 role 是 SUPER_ADMIN 或在白名單內
+    const isWhitelisted = SUPER_ADMIN_WHITELIST.map(e => e.toLowerCase()).includes(email);
+    const hasSuperRole = role === 'SUPER_ADMIN' || authUser?.isSuperAdmin === true;
+
+    return hasSuperRole || isWhitelisted;
+  }, [authUser, checkSuperAdmin]);
 
   // API base URL
   const apiBaseUrl = import.meta.env.VITE_API_URL || "https://dev.taigiedu.com/backend";
@@ -393,16 +394,20 @@ const AdminMemberPage = () => {
     setActiveMenuId(null);
   }, []);
 
-  // 確認指定擔任管理員
+  // 確認指定擔任管理員或解除管理員身分
   const confirmAssignAdmin = useCallback(async () => {
+    const isDemoting = adminTarget?.status === '管理員';
+    const action = isDemoting ? '恢復會員' : '設置管理員';
+    const successMsg = isDemoting ? `已解除 ${adminTarget.name} 的管理員身分` : `已將 ${adminTarget.name} 指定為管理員`;
+
     try {
       // 呼叫 API
       const response = await authenticatedFetch(`${apiBaseUrl}/admin/member/status`, {
         method: 'POST',
         body: JSON.stringify({
           id: String(adminTarget.id),
-          action: '設置管理員',
-          reason: '指定為管理員',
+          action: action,
+          reason: isDemoting ? '解除管理員權限' : '指定為管理員',
           detail: ''
         })
       });
@@ -853,20 +858,24 @@ const AdminMemberPage = () => {
         <div className="admin-modal-overlay" onClick={() => setShowAdminModal(false)}>
           <div className="admin-assign-modal" onClick={(e) => e.stopPropagation()}>
             <div className="admin-modal-header">
-              <h3>指定管理員</h3>
+              <h3>{adminTarget?.status === '管理員' ? '解除管理員身分' : '指定管理員'}</h3>
               <button
                 className="admin-modal-close"
                 onClick={() => setShowAdminModal(false)}
               >
-                ×
+                &times;
               </button>
             </div>
             <div className="admin-modal-body">
               <p className="admin-confirm-text">
-                *您確定要將此會員指定為「管理員」？
+                {adminTarget?.status === '管理員'
+                  ? '*您確定要解除此人員的「管理員」身分？'
+                  : '*您確定要將此會員指定為「管理員」？'}
               </p>
               <p className="admin-permission-note">
-                （其管理權限包含：使用者內容審查與下架處理、管理會員名單與權限指派）
+                {adminTarget?.status === '管理員'
+                  ? '（解除後該帳號將回歸為一般會員身分，並喪失後台管理權限）'
+                  : '（其管理權限包含：使用者內容審查與下架處理、管理會員名單與權限指派）'}
               </p>
               <div className="admin-member-info">
                 <p><span>姓名：</span>{adminTarget.name}</p>
