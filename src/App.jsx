@@ -29,6 +29,7 @@ import LoginPage from "./resourcePage/LoginPage";
 import RegisterPage from "./resourcePage/RegisterPage";
 import CelebrityDetails from "./celebrity/CelebrityDetails";
 import TermsPage from "./TermsPage.jsx";
+import TeamPage from "./TeamPage.jsx";
 import PolicyPage from "./PolicyPage.jsx";
 import AdminMain from "./adminPage/adminMain";
 import AdminSidebar from "./adminPage/adminSidebar";
@@ -84,6 +85,7 @@ const AppLayout = () => {
           <Route path="/download" element={<DownloadPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/policy" element={<PolicyPage />} />
+          <Route path="/team" element={<TeamPage />} />
           <Route
             path="/delete-resource"
             element={
