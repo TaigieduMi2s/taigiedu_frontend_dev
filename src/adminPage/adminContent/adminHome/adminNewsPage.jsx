@@ -3,12 +3,14 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { useToast } from '../../../components/Toast';
 import AdminDataTable from '../../../components/AdminDataTable';
 import AdminModal from '../../../components/AdminModal';
+import { authenticatedFetch } from '../../../services/authService';
 import './adminNewsPage.css';
 import editIcon from '../../../assets/adminPage/pencil.svg';
 import deleteIcon from '../../../assets/adminPage/trash.svg';
 import addIcon from '../../../assets/adminPage/plus.svg';
 import uturnIcon from '../../../assets/adminPage/uturn.svg';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/backend';
 const columnHelper = createColumnHelper();
 
 const NEWS_CATEGORIES_KEY = 'newsCategories';
@@ -62,8 +64,35 @@ const AdminNewsPage = () => {
     setShowAddModal(true);
   }, []);
 
+  const fetchNews = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await authenticatedFetch(`${API_BASE_URL}/admin/main-search/news`);
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || '載入失敗');
+      }
+      const formatted = result.data.map(item => ({
+        id: item.id,
+        category: item.category,
+        content: item.content,
+        link: item.link,
+        timestamp: item.timestamp || 'N/A',
+        status: item.status === 'publish' ? 'published' : item.status === 'archive' ? 'archived' : item.status,
+      }));
+      setAllNews(formatted);
+    } catch (error) {
+      showToast(`載入最新消息失敗: ${error.message}`, 'error');
+      setAllNews([]);
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [showToast]);
+
   // 刪除/恢復按鈕點擊
-  const handleDeleteClick = useCallback((itemId) => {
+  const handleDeleteClick = useCallback(async (itemId) => {
     const isRestoreAction = statusFilter === 'archived';
 
     const confirmMessage = isRestoreAction
@@ -75,25 +104,24 @@ const AdminNewsPage = () => {
     }
 
     try {
-      setAllNews(prevInfo => {
-        const updatedInfo = prevInfo.map(item =>
-          item.id === itemId
-            ? { ...item, status: isRestoreAction ? 'published' : 'archived' }
-            : item
-        );
-        return updatedInfo;
+      const response = await authenticatedFetch(`${API_BASE_URL}/admin/main-search/news/modify`, {
+        method: 'POST',
+        body: JSON.stringify({
+          id: String(itemId),
+          action: isRestoreAction ? '2' : '1',
+        }),
       });
-
-      const successMessage = isRestoreAction
-        ? '快訊已成功復原！'
-        : '快訊已成功下架！';
-
-      showToast(successMessage, 'success');
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || '操作失敗');
+      }
+      showToast(isRestoreAction ? '快訊已成功復原！' : '快訊已成功下架！', 'success');
+      await fetchNews();
     } catch (error) {
       console.error(isRestoreAction ? "復原失敗:" : "下架失敗:", error);
       showToast(`${isRestoreAction ? "復原" : "下架"}失敗: ${error.message}`, 'error');
     }
-  }, [statusFilter, showToast]);
+  }, [statusFilter, showToast, fetchNews]);
 
   // 使用 useMemo 定義表格欄位
   const columns = useMemo(() => {
@@ -171,72 +199,47 @@ const AdminNewsPage = () => {
   }, [statusFilter, handleEditClick, handleDeleteClick]);
 
   // 拖曳結束處理
-  const handleDragEnd = useCallback((activeId, overId) => {
+  const handleDragEnd = useCallback(async (activeId, overId) => {
     if (!overId) return;
 
-    setNewsList((items) => {
-      const oldIndex = items.findIndex(item => item.id === activeId);
-      const newIndex = items.findIndex(item => item.id === overId);
+    const oldIndex = newsList.findIndex(item => item.id === activeId);
+    const newIndex = newsList.findIndex(item => item.id === overId);
+    if (oldIndex === -1 || newIndex === -1) return;
 
-      if (oldIndex === -1 || newIndex === -1) return items;
+    // 計算新順序
+    const reordered = [...newsList];
+    const [removed] = reordered.splice(oldIndex, 1);
+    reordered.splice(newIndex, 0, removed);
 
-      const newItems = [...items];
-      const [removed] = newItems.splice(oldIndex, 1);
-      newItems.splice(newIndex, 0, removed);
-
-      // 同步更新 allNews 的順序
-      setAllNews(prevAllInfo => {
-        const tempAllInfo = [...prevAllInfo];
-        const activeItemInAll = tempAllInfo.find(item => item.id === activeId);
-        const overItemInAll = tempAllInfo.find(item => item.id === overId);
-
-        if (!activeItemInAll || !overItemInAll) return prevAllInfo;
-
-        const oldAllIndex = tempAllInfo.indexOf(activeItemInAll);
-        const newAllIndex = tempAllInfo.indexOf(overItemInAll);
-
-        const [removedAll] = tempAllInfo.splice(oldAllIndex, 1);
-        tempAllInfo.splice(newAllIndex, 0, removedAll);
-        return tempAllInfo;
-      });
-
-      return newItems;
+    // 樂觀更新本地狀態
+    setNewsList(reordered);
+    setAllNews(prevAllInfo => {
+      const tempAllInfo = [...prevAllInfo];
+      const activeItemInAll = tempAllInfo.find(item => item.id === activeId);
+      const overItemInAll = tempAllInfo.find(item => item.id === overId);
+      if (!activeItemInAll || !overItemInAll) return prevAllInfo;
+      const oldAllIndex = tempAllInfo.indexOf(activeItemInAll);
+      const newAllIndex = tempAllInfo.indexOf(overItemInAll);
+      const [removedAll] = tempAllInfo.splice(oldAllIndex, 1);
+      tempAllInfo.splice(newAllIndex, 0, removedAll);
+      return tempAllInfo;
     });
-  }, []);
 
-  const fetchNews = useCallback(() => {
-    setIsLoading(true);
-    setError(null);
-
-    setTimeout(() => {
-      try {
-        const mockData = [
-          { id: 1, category: "教育部", title: "台語教學推廣最新活動", url: "https://example.com/news1", timestamp: "2024/03/15 10:30:00", status: "published" },
-          { id: 2, category: "成大", title: "語言文化研討會報名", url: "https://example.com/news2", timestamp: "2024/03/14 14:20:00", status: "published" },
-          { id: 3, category: "教育部", title: "教材更新公告", url: "https://example.com/news3", timestamp: "2024/03/13 09:15:00", status: "published" },
-          { id: 4, category: "成大", title: "校園活動速報", url: "https://example.com/news4", timestamp: "2024/03/12 16:45:00", status: "published" },
-          { id: 5, category: "教育部", title: "已下架的快訊1", url: "https://example.com/archive1", timestamp: "2024/03/11 11:30:00", status: "archived" },
-          { id: 6, category: "成大", title: "已下架的快訊2", url: "https://example.com/archive2", timestamp: "2024/03/10 15:20:00", status: "archived" }
-        ];
-
-        const formattedData = mockData.map(item => ({
-          id: item.id,
-          category: item.category,
-          content: item.title,
-          link: item.url,
-          timestamp: item.timestamp || 'N/A',
-          status: item.status || 'published'
-        }));
-        setAllNews(formattedData);
-      } catch (error) {
-        showToast(`載入最新消息失敗: ${error.message}`, 'error');
-        setNewsList([]);
-        setError(error.message);
-      } finally {
-        setIsLoading(false);
+    // 通知後端新順序
+    try {
+      const response = await authenticatedFetch(`${API_BASE_URL}/admin/main-search/news/change`, {
+        method: 'POST',
+        body: JSON.stringify({ ids: reordered.map(item => String(item.id)) }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || '排序更新失敗');
       }
-    }, 800);
-  }, [showToast]);
+    } catch (error) {
+      showToast(`排序更新失敗: ${error.message}`, 'error');
+      fetchNews(); // 回滾到後端真實順序
+    }
+  }, [newsList, showToast, fetchNews]);
 
   useEffect(() => {
     fetchNews();
@@ -339,7 +342,7 @@ const AdminNewsPage = () => {
     showToast(`類別已從「${oldName}」更新為「${trimmed}」`, 'success');
   };
 
-  const handleFormSubmit = (event) => {
+  const handleFormSubmit = async (event) => {
     event.preventDefault();
     if (!newCategory || !newContent || !newLink) {
       showToast('請填寫所有欄位', 'warning');
@@ -351,30 +354,40 @@ const AdminNewsPage = () => {
       showToast('請輸入有效的 URL', 'warning');
       return;
     }
-    const now = new Date();
-    const timestamp = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
-    if (isEditing && currentEditItem) {
-      setAllNews(prevInfo => prevInfo.map(item =>
-        item.id === currentEditItem.id
-          ? { ...item, category: newCategory, content: newContent, link: newLink }
-          : item
-      ));
-      showToast('快訊已成功更新！', 'success');
-    } else {
-      const newId = 'news-' + Date.now();
-      const newItem = {
-        id: newId,
-        category: newCategory,
-        content: newContent,
-        link: newLink,
-        timestamp: timestamp,
-        status: 'published'
-      };
-      setAllNews(prevInfo => [newItem, ...prevInfo]);
-      showToast('新快訊已成功新增！', 'success');
+    try {
+      if (isEditing && currentEditItem) {
+        const response = await authenticatedFetch(`${API_BASE_URL}/admin/main-search/news/modify`, {
+          method: 'POST',
+          body: JSON.stringify({
+            id: String(currentEditItem.id),
+            action: '3',
+            category: newCategory,
+            content: newContent,
+            link: newLink,
+          }),
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || '更新失敗');
+        showToast('快訊已成功更新！', 'success');
+      } else {
+        const response = await authenticatedFetch(`${API_BASE_URL}/admin/main-search/news/add`, {
+          method: 'POST',
+          body: JSON.stringify({
+            category: newCategory,
+            content: newContent,
+            link: newLink,
+          }),
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || '新增失敗');
+        showToast('新快訊已成功新增！', 'success');
+      }
+      handleModalClose();
+      await fetchNews();
+    } catch (error) {
+      showToast(`操作失敗: ${error.message}`, 'error');
     }
-    handleModalClose();
   };
 
   const handleStatusFilterChange = (event) => {
