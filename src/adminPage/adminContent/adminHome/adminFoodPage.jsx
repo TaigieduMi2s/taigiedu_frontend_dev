@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useToast } from '../../../components/Toast';
+import { authenticatedFetch } from '../../../services/authService';
 import AdminModal from '../../../components/AdminModal';
 import AdminDataTable from '../../../components/AdminDataTable';
 import './adminFoodPage.css';
@@ -10,12 +11,32 @@ import addIcon from '../../../assets/adminPage/plus.svg';
 import uturnIcon from '../../../assets/adminPage/uturn.svg';
 import speakerIcon from '../../../assets/speaker-wave.svg';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/backend';
+
 const getFileNameFromUrl = (url) => {
   try {
     const u = new URL(url);
     const last = u.pathname.split('/').filter(Boolean).pop();
     return last || '';
   } catch { return ''; }
+};
+
+const fileToBase64 = (file) => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(reader.result);
+  reader.onerror = reject;
+  reader.readAsDataURL(file);
+});
+
+const blobUrlToBase64 = async (blobUrl) => {
+  const response = await fetch(blobUrl);
+  const blob = await response.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 };
 
 const AdminFoodPage = () => {
@@ -34,22 +55,19 @@ const AdminFoodPage = () => {
   const [newTwDesc, setNewTwDesc] = useState('');
   const [newAudioUrl, setNewAudioUrl] = useState('');
   // TTS 與錄音流程狀態
-  const [ttsGenerated, setTtsGenerated] = useState(false); // 是否已產生語音（TTS）
-  const [ttsPlaying, setTtsPlaying] = useState(false);     // 目前是否在播放 TTS
-  const [usingRecording, setUsingRecording] = useState(false); // 是否已切換成自行錄音模式
+  const [ttsGenerated, setTtsGenerated] = useState(false);
+  const [ttsPlaying, setTtsPlaying] = useState(false);
+  const [usingRecording, setUsingRecording] = useState(false);
   const fileInputRef = useRef(null);
   const [isEditing, setIsEditing] = useState(false);
   const [currentEditItem, setCurrentEditItem] = useState(null);
   const [audioRef, setAudioRef] = useState(null);
   const [playingId, setPlayingId] = useState(null);
   const ttsUtterRef = useRef(null);
-  // ttsProgress 為估算播放進度（目前 UI 僅以播放中條填滿，保留供未來細化）
   const [ttsProgress, setTtsProgress] = useState(0);
   // 錄音狀態
   const [recState, setRecState] = useState('idle'); // idle | recording | review
   const mediaRecorderRef = useRef(null);
-  // recordChunks 暫存錄音片段（目前僅用於組成 blob，後續可擴充顯示大小等）
-  const [recordChunks, setRecordChunks] = useState([]); // eslint-disable-line no-unused-vars
   const [recordUrl, setRecordUrl] = useState('');
   const recordedAudioRef = useRef(null);
   const [recordPlaying, setRecordPlaying] = useState(false);
@@ -61,7 +79,6 @@ const AdminFoodPage = () => {
   }, [allFood, statusFilter]);
 
   const handlePlayAudio = useCallback((item) => {
-    // 同一列再次點擊 => 停止
     if (playingId === item.id) {
       if (audioRef) { try { audioRef.pause(); audioRef.currentTime = 0; } catch { /* ignore */ } }
       if (ttsUtterRef.current) { try { window.speechSynthesis.cancel(); } catch { /* ignore */ } }
@@ -69,7 +86,6 @@ const AdminFoodPage = () => {
       return;
     }
 
-    // 停掉上一段
     if (audioRef) { try { audioRef.pause(); } catch { /* ignore */ } }
     if (ttsUtterRef.current) { try { window.speechSynthesis.cancel(); } catch { /* ignore */ } }
 
@@ -103,30 +119,44 @@ const AdminFoodPage = () => {
     };
   }, [audioRef]);
 
-  const fetchFood = useCallback(() => {
-    setIsLoading(true); setError(null);
-    setTimeout(() => {
-      try {
-        const mockData = [
-          // 目前項目
-          { id: 1, zhName: "米糕", twName: "bí-ko", imageUrl: "https://picsum.photos/seed/ricecake/120/90", imageName: "米糕圖1.jpeg", zhDesc: "甜糯米蒸後，加入滷…", twDesc: "甜糯米蒸。蒸米蒸熟…", audioUrl: "https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav", timestamp: "2025/04/01 23:55:00", status: "published" },
-          { id: 2, zhName: "鹹酥雞", twName: "kiâm-soo-ke", imageUrl: "https://picsum.photos/seed/pork/120/90", imageName: "鹹酥雞.jpeg", zhDesc: "一種小吃…將豬肚內小塊…", twDesc: "一種小吃。將豬肚內肉…", audioUrl: "https://www2.cs.uic.edu/~i101/SoundFiles/Trumpet.mp3", timestamp: "2025/04/01 23:55:00", status: "published" },
-          // 刪除紀錄（示範）
-          { id: 3, zhName: "草仔粿", twName: "cháu-á-kué", imageUrl: "https://picsum.photos/seed/cake/120/90", imageName: "草仔粿.jpg", zhDesc: "糯米與艾草製作…", twDesc: "糯米對合艾草…", audioUrl: "https://www2.cs.uic.edu/~i101/SoundFiles/ImperialMarch60.wav", timestamp: "2025/03/20 10:30:00", status: "archived" },
-          { id: 4, zhName: "碗粿", twName: "uán-kué", imageUrl: "https://picsum.photos/seed/wankue/120/90", imageName: "碗粿.jpeg", zhDesc: "米漿蒸熟配滷汁…", twDesc: "米漿蒸熟，配滷…", audioUrl: "https://www2.cs.uic.edu/~i101/SoundFiles/CantinaBand60.wav", timestamp: "2025/03/18 09:15:00", status: "archived" }
-        ];
-        const formatted = mockData.map(i => ({ id: i.id, zhName: i.zhName, twName: i.twName, imageUrl: i.imageUrl || '', imageName: i.imageName || '', zhDesc: i.zhDesc || '', twDesc: i.twDesc || '', audioUrl: i.audioUrl || '', timestamp: i.timestamp || 'N/A', status: i.status || 'published' }));
-        setAllFood(formatted);
-      } catch (e) {
-        showToast(`載入飲食資料失敗: ${e.message}`, 'error');
-        setError(e.message);
-      } finally { setIsLoading(false); }
-    }, 600);
+  const fetchFood = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await authenticatedFetch(`${API_BASE_URL}/admin/culture/food`);
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || '載入失敗');
+      }
+      const formatted = result.food_data.map(item => ({
+        id: item.id,
+        zhName: item.name || '',
+        twName: item.name_tl || '',
+        imageUrl: item.figure || '',
+        imageName: item.figure ? getFileNameFromUrl(item.figure) : '',
+        zhDesc: item.intro_mandarin || '',
+        twDesc: item.intro_taigi || '',
+        audioUrl: item.audio_data || '',
+        ttsText: '',
+        timestamp: item.timestamp || 'N/A',
+        status: item.status === 'publish' ? 'published' : item.status === 'archive' ? 'archived' : item.status,
+      }));
+      setAllFood(formatted);
+    } catch (e) {
+      showToast(`載入飲食資料失敗: ${e.message}`, 'error');
+      setAllFood([]);
+      setError(e.message);
+    } finally {
+      setIsLoading(false);
+    }
   }, [showToast]);
 
   useEffect(() => { fetchFood(); }, [fetchFood]);
 
-  const handleAddClick = () => { if (foodList.length >= 12 && statusFilter === 'published') { showToast('目前飲食項目已滿 12 個，請先刪除一個再新增。', 'warning'); return; } setShowAddModal(true); };
+  const handleAddClick = () => {
+    setShowAddModal(true);
+  };
+
   const handleEditClick = (item) => {
     setIsEditing(true);
     setCurrentEditItem(item);
@@ -138,12 +168,12 @@ const AdminFoodPage = () => {
     setNewZhDesc(item.zhDesc || '');
     setNewTwDesc(item.twDesc || '');
     setNewAudioUrl(item.audioUrl || '');
-    // 若原本有 ttsText，視為已產生 TTS
     setTtsGenerated(!!item.ttsText);
     setUsingRecording(false);
     setTtsPlaying(false);
     setShowAddModal(true);
   };
+
   const handleModalClose = () => {
     setShowAddModal(false);
     setNewZhName(''); setNewTwName('');
@@ -163,29 +193,24 @@ const AdminFoodPage = () => {
     setNewImageName(f.name);
   };
 
-  // 產生 TTS 語音（僅標記，不立即播放）
   const handleGenerateTTS = () => {
     if (!newTwName) { showToast('請先輸入「名稱(台羅)」', 'warning'); return; }
     if (!('speechSynthesis' in window)) { showToast('此瀏覽器不支援語音播放', 'warning'); return; }
-    // 取消任何現有 TTS 播放
     try { window.speechSynthesis.cancel(); } catch { /* ignore */ }
     setTtsGenerated(true);
     setUsingRecording(false);
     setTtsPlaying(false);
   };
 
-  // 播放或停止已產生之 TTS
   const handlePlayTTSInline = () => {
     if (!ttsGenerated) return;
     if (!('speechSynthesis' in window)) { showToast('此瀏覽器不支援語音播放', 'warning'); return; }
-    // 若正在播放 => 停止
     if (ttsPlaying) {
       try { window.speechSynthesis.cancel(); } catch { /* ignore */ }
       setTtsPlaying(false);
       setTtsProgress(0);
       return;
     }
-    // 開始播放
     try { window.speechSynthesis.cancel(); } catch { /* ignore */ }
     const utter = new SpeechSynthesisUtterance(newTwName);
     try {
@@ -193,7 +218,6 @@ const AdminFoodPage = () => {
       const zhVoice = voices.find(v => /zh|cmn|nan/i.test(v.lang));
       if (zhVoice) utter.voice = zhVoice; utter.lang = (zhVoice && zhVoice.lang) || 'zh-TW';
     } catch { /* ignore */ }
-    // 估算一個大致播放時間來顯示進度（粗略）：每字 0.08s
     const est = Math.max(1, Math.round((newTwName || '').length * 0.08 * 1000));
     const start = Date.now();
     const timer = setInterval(() => {
@@ -208,7 +232,6 @@ const AdminFoodPage = () => {
     setTtsPlaying(true);
   };
 
-  // 捨棄生成發音，改用自行錄音模式
   const handleDiscardTTS = () => {
     try { window.speechSynthesis.cancel(); } catch { /* ignore */ }
     setTtsGenerated(false);
@@ -217,7 +240,6 @@ const AdminFoodPage = () => {
     setUsingRecording(true);
   };
 
-  // 錄音控制
   const startRecording = async () => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       showToast('此瀏覽器不支援錄音', 'warning'); return;
@@ -230,10 +252,8 @@ const AdminFoodPage = () => {
       mr.onstop = () => {
         const blob = new Blob(chunks, { type: 'audio/webm' });
         const url = URL.createObjectURL(blob);
-        setRecordChunks(chunks);
         setRecordUrl(url);
         setRecState('review');
-        // 停掉進行中的播放狀態
         setRecordPlaying(false); setRecordProgress(0);
       };
       mr.start();
@@ -258,7 +278,6 @@ const AdminFoodPage = () => {
 
   const handlePlayRecorded = () => {
     if (!recordUrl) return;
-    // 切換播放/停止
     if (recordPlaying) {
       if (recordedAudioRef.current) { try { recordedAudioRef.current.pause(); recordedAudioRef.current.currentTime = 0; } catch { /* ignore */ } }
       setRecordPlaying(false); setRecordProgress(0);
@@ -275,58 +294,89 @@ const AdminFoodPage = () => {
   };
 
   const handleReRecord = () => {
-    // 釋放舊的 Object URL
     if (recordUrl) { try { URL.revokeObjectURL(recordUrl); } catch { /* ignore */ } }
-    setRecordUrl(''); setRecordChunks([]); setRecordPlaying(false); setRecordProgress(0);
+    setRecordUrl(''); setRecordPlaying(false); setRecordProgress(0);
     setRecState('idle');
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (!newZhName || !newTwName || !newZhDesc || !newTwDesc) { showToast('請填寫必填欄位', 'warning'); return; }
-    const now = new Date();
-    const ts = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-    if (isEditing && currentEditItem) {
-      const updated = {
-        ...currentEditItem,
-        zhName: newZhName,
-        twName: newTwName,
-        imageUrl: newImageFile ? URL.createObjectURL(newImageFile) : newImageUrl,
-        imageName: newImageFile ? newImageFile.name : newImageName,
-        zhDesc: newZhDesc,
-        twDesc: newTwDesc,
-        audioUrl: usingRecording ? (recordUrl || '') : newAudioUrl,
-        ttsText: (!usingRecording && ttsGenerated) ? newTwName : ''
-      };
-      setAllFood(prev => prev.map(i => i.id === currentEditItem.id ? updated : i));
-      showToast('項目已更新', 'success');
-    } else {
-      const newItem = {
-        id: 'food-' + Date.now(),
-        zhName: newZhName,
-        twName: newTwName,
-        imageUrl: newImageFile ? URL.createObjectURL(newImageFile) : '',
-        imageName: newImageFile ? newImageFile.name : '',
-        zhDesc: newZhDesc,
-        twDesc: newTwDesc,
-        audioUrl: usingRecording ? (recordUrl || '') : '',
-        ttsText: (!usingRecording && ttsGenerated) ? newTwName : '',
-        timestamp: ts,
-        status: 'published'
-      };
-      setAllFood(prev => [newItem, ...prev]);
-      showToast('新飲食項目已新增', 'success');
+    if (!newZhName || !newTwName || !newZhDesc || !newTwDesc) {
+      showToast('請填寫必填欄位', 'warning'); return;
     }
-    handleModalClose();
+
+    try {
+      // 準備圖片資料
+      let figureData = newImageUrl || '';
+      if (newImageFile) {
+        figureData = await fileToBase64(newImageFile);
+      }
+
+      // 準備音訊資料
+      let audioData = '';
+      if (usingRecording && recordUrl) {
+        audioData = await blobUrlToBase64(recordUrl);
+      } else if (!usingRecording && !ttsGenerated) {
+        audioData = newAudioUrl || '';
+      }
+
+      if (isEditing && currentEditItem) {
+        const response = await authenticatedFetch(`${API_BASE_URL}/admin/culture/food/modify`, {
+          method: 'POST',
+          body: JSON.stringify({
+            id: String(currentEditItem.id),
+            action: '3',
+            name: newZhName,
+            name_tl: newTwName,
+            intro_mandarin: newZhDesc,
+            intro_taigi: newTwDesc,
+            figure: figureData,
+            audio_data: audioData,
+          }),
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || '更新失敗');
+        showToast('項目已更新', 'success');
+      } else {
+        const response = await authenticatedFetch(`${API_BASE_URL}/admin/culture/food/add`, {
+          method: 'POST',
+          body: JSON.stringify({
+            name: newZhName,
+            name_tl: newTwName,
+            intro_mandarin: newZhDesc,
+            intro_taigi: newTwDesc,
+            figure: figureData,
+            audio_data: audioData,
+          }),
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || '新增失敗');
+        showToast('新飲食項目已新增', 'success');
+      }
+
+      handleModalClose();
+      await fetchFood();
+    } catch (e) {
+      showToast(`操作失敗: ${e.message}`, 'error');
+    }
   };
 
-  const handleDeleteClick = (itemId) => {
+  const handleDeleteClick = async (itemId) => {
     const isRestore = statusFilter === 'archived';
     const confirmMsg = isRestore ? '確定要復原此筆已下架的項目嗎？' : '確定要下架此筆項目嗎？';
     if (!window.confirm(confirmMsg)) return;
     try {
-      setAllFood(prev => prev.map(i => i.id === itemId ? { ...i, status: isRestore ? 'published' : 'archived' } : i));
+      const response = await authenticatedFetch(`${API_BASE_URL}/admin/culture/food/modify`, {
+        method: 'POST',
+        body: JSON.stringify({
+          id: String(itemId),
+          action: isRestore ? '2' : '1',
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.message || '操作失敗');
       showToast(isRestore ? '項目已復原' : '項目已下架', 'success');
+      await fetchFood();
     } catch (e) {
       console.error(isRestore ? '復原失敗:' : '下架失敗:', e);
       showToast(`${isRestore ? '復原' : '下架'}失敗: ${e.message}`, 'error');
@@ -335,7 +385,7 @@ const AdminFoodPage = () => {
 
   const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
 
-  // 拖曳處理
+  // 拖曳處理（本地排序，API 無 change endpoint）
   const handleDragEnd = useCallback((activeId, overId) => {
     if (!overId) return;
 
@@ -351,7 +401,6 @@ const AdminFoodPage = () => {
     });
   }, []);
 
-  // 定義表格欄位
   const columns = useMemo(() => [
     {
       id: 'edit',
@@ -437,7 +486,7 @@ const AdminFoodPage = () => {
   return (
     <div className="admin-test-page p-4">
       <div className="admin-header-main">
-        <h5 className="mb-3 text-secondary">首頁搜尋 &gt; 飲食 &gt; <span>{statusFilter === 'published' ? '目前項目' : '刪除紀錄'}</span></h5>
+        <h5 className="mb-3 text-secondary">台語文化 &gt; 飲食 &gt; <span>{statusFilter === 'published' ? '目前項目' : '刪除紀錄'}</span></h5>
         <div className="admin-controls-row">
           <button className="btn btn-primary me-3 admin-add-button" onClick={handleAddClick}>
             <img src={addIcon} alt="新增項目" />新增項目
@@ -464,7 +513,6 @@ const AdminFoodPage = () => {
         emptyState={{ message: '目前沒有飲食資料' }}
       />
 
-      {/* 使用 AdminModal 組件 */}
       <AdminModal
         isOpen={showAddModal}
         onClose={handleModalClose}

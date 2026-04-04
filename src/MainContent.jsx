@@ -130,8 +130,7 @@ const MainContent = () => {
       console.log("考試資訊API回傳:", data);
 
       if (Array.isArray(data)) {
-        // 顯示所有資料
-        setExamInfo(data);
+        setExamInfo(data.slice(0, 12));
       } else {
         console.error("考試資訊API回傳格式錯誤:", data);
         setExamInfo([]);
@@ -167,8 +166,7 @@ const MainContent = () => {
       console.log("活動快訊API回傳:", data);
 
       if (Array.isArray(data)) {
-        // 顯示所有資料
-        setNewsInfo(data);
+        setNewsInfo(data.slice(0, 12));
       } else {
         console.error("活動快訊API回傳格式錯誤:", data);
         setNewsInfo([]);

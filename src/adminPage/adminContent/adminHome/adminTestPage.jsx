@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { createColumnHelper } from '@tanstack/react-table';
 import { useToast } from '../../../components/Toast';
+import { authenticatedFetch } from '../../../services/authService';
 import AdminDataTable from '../../../components/AdminDataTable';
 import AdminModal from '../../../components/AdminModal';
 import './adminTestPage.css';
@@ -9,8 +9,7 @@ import deleteIcon from '../../../assets/adminPage/trash.svg';
 import addIcon from '../../../assets/adminPage/plus.svg';
 import uturnIcon from '../../../assets/adminPage/uturn.svg';
 
-
-const columnHelper = createColumnHelper();
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/backend';
 
 const AdminTestPage = () => {
     const { showToast } = useToast();
@@ -28,6 +27,33 @@ const AdminTestPage = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [currentEditItem, setCurrentEditItem] = useState(null);
 
+    const fetchTestInfo = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const response = await authenticatedFetch(`${API_BASE_URL}/admin/main-search/test`);
+            const result = await response.json();
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || '載入失敗');
+            }
+            const formatted = result.data.map(item => ({
+                id: item.id,
+                category: item.category,
+                content: item.content,
+                link: item.link,
+                timestamp: item.timestamp || 'N/A',
+                status: item.status === 'publish' ? 'published' : item.status === 'archive' ? 'archived' : item.status,
+            }));
+            setAllTestInfo(formatted);
+        } catch (error) {
+            showToast(`載入考試資訊失敗: ${error.message}`, 'error');
+            setAllTestInfo([]);
+            setError(error.message);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [showToast]);
+
     // 編輯按鈕點擊
     const handleEditClick = useCallback((item) => {
         setIsEditing(true);
@@ -39,7 +65,7 @@ const AdminTestPage = () => {
     }, []);
 
     // 刪除/恢復按鈕點擊
-    const handleDeleteClick = useCallback((itemId) => {
+    const handleDeleteClick = useCallback(async (itemId) => {
         const isRestoreAction = statusFilter === 'archived';
 
         const confirmMessage = isRestoreAction
@@ -51,25 +77,19 @@ const AdminTestPage = () => {
         }
 
         try {
-            setAllTestInfo(prevInfo => {
-                const updatedInfo = prevInfo.map(item =>
-                    item.id === itemId
-                        ? { ...item, status: isRestoreAction ? 'published' : 'archived' }
-                        : item
-                );
-                return updatedInfo;
+            const response = await authenticatedFetch(`${API_BASE_URL}/admin/main-search/test/modify`, {
+                method: 'POST',
+                body: JSON.stringify({ id: String(itemId), action: isRestoreAction ? '2' : '1' }),
             });
-
-            const successMessage = isRestoreAction
-                ? '公告已成功復原！'
-                : '目前公告已成功刪除！';
-
-            showToast(successMessage, 'success');
+            const result = await response.json();
+            if (!response.ok || !result.success) throw new Error(result.message || '操作失敗');
+            showToast(isRestoreAction ? '公告已成功復原！' : '公告已成功刪除！', 'success');
+            await fetchTestInfo();
         } catch (error) {
             console.error(isRestoreAction ? "復原失敗:" : "刪除失敗:", error);
             showToast(`${isRestoreAction ? "復原" : "刪除"}失敗: ${error.message}`, 'error');
         }
-    }, [statusFilter, showToast]);
+    }, [statusFilter, showToast, fetchTestInfo]);
 
     // 定義表格欄位
     const columns = useMemo(() => {
@@ -134,124 +154,44 @@ const AdminTestPage = () => {
     }, [statusFilter, handleEditClick, handleDeleteClick]);
 
     // 拖曳結束處理
-    const handleDragEnd = useCallback((activeId, overId) => {
+    const handleDragEnd = useCallback(async (activeId, overId) => {
         if (!overId) return;
 
-        setTestInfo((items) => {
-            const oldIndex = items.findIndex(item => item.id === activeId);
-            const newIndex = items.findIndex(item => item.id === overId);
+        const oldIndex = testInfo.findIndex(item => item.id === activeId);
+        const newIndex = testInfo.findIndex(item => item.id === overId);
 
-            if (oldIndex === -1 || newIndex === -1) return items;
+        if (oldIndex === -1 || newIndex === -1) return;
 
-            const newItems = [...items];
-            const [removed] = newItems.splice(oldIndex, 1);
-            newItems.splice(newIndex, 0, removed);
+        const reordered = [...testInfo];
+        const [removed] = reordered.splice(oldIndex, 1);
+        reordered.splice(newIndex, 0, removed);
 
-            // 同步更新 allTestInfo 的順序
-            setAllTestInfo(prevAllInfo => {
-                const tempAllInfo = [...prevAllInfo];
-                const activeItemInAll = tempAllInfo.find(item => item.id === activeId);
-                const overItemInAll = tempAllInfo.find(item => item.id === overId);
-
-                if (!activeItemInAll || !overItemInAll) return prevAllInfo;
-
-                const oldAllIndex = tempAllInfo.indexOf(activeItemInAll);
-                const newAllIndex = tempAllInfo.indexOf(overItemInAll);
-
-                const [removedAll] = tempAllInfo.splice(oldAllIndex, 1);
-                tempAllInfo.splice(newAllIndex, 0, removedAll);
-                return tempAllInfo;
-            });
-
-            return newItems;
+        setTestInfo(reordered);
+        setAllTestInfo(prevAllInfo => {
+            const tempAllInfo = [...prevAllInfo];
+            const activeItemInAll = tempAllInfo.find(item => item.id === activeId);
+            const overItemInAll = tempAllInfo.find(item => item.id === overId);
+            if (!activeItemInAll || !overItemInAll) return prevAllInfo;
+            const oldAllIndex = tempAllInfo.indexOf(activeItemInAll);
+            const newAllIndex = tempAllInfo.indexOf(overItemInAll);
+            const [removedAll] = tempAllInfo.splice(oldAllIndex, 1);
+            tempAllInfo.splice(newAllIndex, 0, removedAll);
+            return tempAllInfo;
         });
-    }, []);
 
-    const fetchTestInfo = useCallback(() => {
-        setIsLoading(true);
-        setError(null);
+        try {
+            const response = await authenticatedFetch(`${API_BASE_URL}/admin/main-search/test/change`, {
+                method: 'POST',
+                body: JSON.stringify({ ids: reordered.map(item => String(item.id)) }),
+            });
+            const result = await response.json();
+            if (!response.ok || !result.success) throw new Error(result.message || '排序更新失敗');
+        } catch (error) {
+            showToast(`排序更新失敗: ${error.message}`, 'error');
+            fetchTestInfo();
+        }
+    }, [testInfo, showToast, fetchTestInfo]);
 
-        // 模擬 API 請求延遲
-        setTimeout(() => {
-            try {
-                // 固定的測試資料
-                const mockData = [
-                    {
-                        id: 1,
-                        category: "教育部",
-                        title: "112年度台語能力認證考試",
-                        url: "https://example.com/test1",
-                        timestamp: "2024/03/15 10:30:00",
-                        status: "published"
-                    },
-                    {
-                        id: 2,
-                        category: "成大",
-                        title: "台語文學測驗報名開始",
-                        url: "https://example.com/test2",
-                        timestamp: "2024/03/14 14:20:00",
-                        status: "published"
-                    },
-                    {
-                        id: 3,
-                        category: "教育部",
-                        title: "台語教學師資培訓課程",
-                        url: "https://example.com/test3",
-                        timestamp: "2024/03/13 09:15:00",
-                        status: "published"
-                    },
-                    {
-                        id: 4,
-                        category: "成大",
-                        title: "台語語音學研習營",
-                        url: "https://example.com/test4",
-                        timestamp: "2024/03/12 16:45:00",
-                        status: "published"
-                    },
-                    {
-                        id: 5,
-                        category: "教育部",
-                        title: "已刪除的測試公告1",
-                        url: "https://example.com/deleted1",
-                        timestamp: "2024/03/11 11:30:00",
-                        status: "archived"
-                    },
-                    {
-                        id: 6,
-                        category: "成大",
-                        title: "已刪除的測試公告2",
-                        url: "https://example.com/deleted2",
-                        timestamp: "2024/03/10 15:20:00",
-                        status: "archived"
-                    }
-                ];
-
-                console.log("使用模擬資料:", mockData);
-
-                if (Array.isArray(mockData)) {
-                    const formattedData = mockData.map(item => ({
-                        id: item.id,
-                        category: item.category,
-                        content: item.title,
-                        link: item.url,
-                        timestamp: item.timestamp || 'N/A',
-                        status: item.status || 'published'
-                    }));
-                    setAllTestInfo(formattedData);
-                } else {
-                    console.error("模擬資料格式錯誤:", mockData);
-                    setTestInfo([]);
-                    setError("考試資訊載入失敗，請稍後再試。");
-                }
-            } catch (error) {
-                showToast(`載入考試資訊失敗: ${error.message}`, 'error');
-                setTestInfo([]);
-                setError(error.message);
-            } finally {
-                setIsLoading(false);
-            }
-        }, 1000);
-    }, [showToast]);
 
     useEffect(() => {
         fetchTestInfo();
@@ -283,7 +223,7 @@ const AdminTestPage = () => {
         setNewLink('');
     };
 
-    const handleFormSubmit = (event) => {
+    const handleFormSubmit = async (event) => {
         event.preventDefault();
         if (!newCategory || !newContent || !newLink) {
             showToast('請填寫所有欄位', 'warning');
@@ -295,36 +235,30 @@ const AdminTestPage = () => {
             showToast('請輸入有效的 URL', 'warning');
             return;
         }
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
-        const timestamp = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
 
-        if (isEditing && currentEditItem) {
-            setAllTestInfo(prevInfo => prevInfo.map(item =>
-                item.id === currentEditItem.id
-                    ? { ...item, category: newCategory, content: newContent, link: newLink }
-                    : item
-            ));
-            showToast('公告已成功更新！', 'success');
-        } else {
-            const newId = 'new-' + Date.now();
-            const newItem = {
-                id: newId,
-                category: newCategory,
-                content: newContent,
-                link: newLink,
-                timestamp: timestamp,
-                status: 'published'
-            };
-            setAllTestInfo(prevInfo => [newItem, ...prevInfo]);
-            showToast('新公告已成功新增！', 'success');
+        try {
+            if (isEditing && currentEditItem) {
+                const response = await authenticatedFetch(`${API_BASE_URL}/admin/main-search/test/modify`, {
+                    method: 'POST',
+                    body: JSON.stringify({ id: String(currentEditItem.id), action: '3', category: newCategory, content: newContent, link: newLink }),
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.message || '更新失敗');
+                showToast('公告已成功更新！', 'success');
+            } else {
+                const response = await authenticatedFetch(`${API_BASE_URL}/admin/main-search/test/add`, {
+                    method: 'POST',
+                    body: JSON.stringify({ category: newCategory, content: newContent, link: newLink }),
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.message || '新增失敗');
+                showToast('新公告已成功新增！', 'success');
+            }
+            handleModalClose();
+            await fetchTestInfo();
+        } catch (error) {
+            showToast(`操作失敗: ${error.message}`, 'error');
         }
-        handleModalClose();
     };
 
     const handleStatusFilterChange = (event) => {
