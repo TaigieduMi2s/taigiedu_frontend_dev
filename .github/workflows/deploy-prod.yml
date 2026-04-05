@@ -31,4 +31,5 @@ jobs:
 
       - name: Sync to Server
         run: |
+          whoami
           rsync -av --delete ${{ github.workspace }}/dist/ /var/www/taigiedu_frontend/
