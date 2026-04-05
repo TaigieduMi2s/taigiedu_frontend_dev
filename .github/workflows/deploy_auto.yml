@@ -70,19 +70,6 @@ jobs:
           echo "VITE_ENABLE_ROBOTS_NOINDEX=true" >> .env
           npm run build
 
-      - name: Deploy to Server via SSH
-        if: env.HAS_UPDATE == 'true' || github.event_name == 'workflow_dispatch'
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 122
-          
-          source: "dist/*"
-          
-          # 🔥【關鍵修改 2】部署路徑改到系統公用目錄
-          # 確保你的伺服器已經執行過 sudo chown p76131092 ...
-          target: "/var/www/taigiedu_dev/dist"
-          
-          strip_components: 1
+      - name: Sync to Server
+        run: |
+          rsync -av --delete ${{ github.workspace }}/dist/ /var/www/taigiedu_frontend_dev/
