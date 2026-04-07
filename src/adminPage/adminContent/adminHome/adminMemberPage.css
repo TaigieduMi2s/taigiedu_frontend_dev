@@ -450,8 +450,5 @@
 
 /* 確保表格有足夠的最小寬度來顯示所有欄位 */
 .admin-member-page .admin-data-table {
-    min-width: 1400px;
-    /* 增加最小寬度確保所有欄位可見 */
-    width: max-content;
     table-layout: auto;
 }

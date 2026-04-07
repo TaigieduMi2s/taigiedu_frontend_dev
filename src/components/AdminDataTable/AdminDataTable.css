@@ -2,8 +2,27 @@
 
 /* 表格容器 */
 .admin-table-responsive {
-    overflow-x: auto;
+    overflow-x: scroll;
     width: 100%;
+}
+
+/* 強制在 macOS/WebKit 上常駐顯示水平捲軸 */
+.admin-table-responsive::-webkit-scrollbar {
+    height: 8px;
+}
+
+.admin-table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.admin-table-responsive::-webkit-scrollbar-thumb {
+    background: #b0bec5;
+    border-radius: 4px;
+}
+
+.admin-table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #78909c;
 }
 
 /* 表格主體 */

@@ -9,8 +9,12 @@ body {
     padding: 0;
     height: 100%;
     width: 100%;
-    overflow-x: hidden;
-    /* 防止水平滾動條導致的白邊 */
+    overflow-x: hidden; /* 防止水平滾動條導致的白邊 */
+}
+
+.admin-content-scroll {
+    overflow-x: auto;
+    min-width: 0;
 }
 
 .app {

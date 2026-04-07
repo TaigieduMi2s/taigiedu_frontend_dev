@@ -69,11 +69,21 @@ const AppLayout = () => {
   const isAdminPage = location.pathname === '/admin';
   const isAdminContent = location.pathname.startsWith('/admin/');
 
+  useEffect(() => {
+    if (isAdminPage || isAdminContent) {
+      document.body.classList.add('admin-body');
+    } else {
+      document.body.classList.remove('admin-body');
+    }
+    return () => document.body.classList.remove('admin-body');
+  }, [isAdminPage, isAdminContent]);
+
   return (
     <div className="app">
       <Header />
       <div className={`maincontent ${isPreviewPage || isDownloadPage || isCelebrityDetail || isAdminPage ? 'preview-page' : ''}`}>
         {!isPreviewPage && !isDownloadPage && !isCelebrityDetail && (isAdminContent ? <AdminSidebar /> : isAdminPage ? null : <Sidebar />)}
+        <div className={isAdminContent ? 'admin-content-scroll' : ''}>
         <Routes>
           <Route path="/" element={<MainContent />} />
           <Route path="/search" element={<MainSearchPage />} />
@@ -227,6 +237,7 @@ const AppLayout = () => {
             }
           />
         </Routes>
+        </div>
       </div>
       <Footer />
     </div>
