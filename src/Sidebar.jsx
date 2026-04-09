@@ -57,6 +57,8 @@ const Sidebar = () => {
   ];
 
   const menuItems = allMenuItems.filter(item => {
+    // 隱藏「本站特色資源」
+    if (item.id === 11) return false;
     if (!isUnstableFeaturesEnabled) {
       if ([2, 3, 4].includes(item.id)) return false;
     }

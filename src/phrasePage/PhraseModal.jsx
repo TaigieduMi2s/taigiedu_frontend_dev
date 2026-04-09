@@ -103,11 +103,9 @@ const PhraseModal = ({ isOpen, onClose, phrase, pronunciation, interpretation, p
       const response = await fetch(`${import.meta.env.VITE_API_URL}/synthesize_speech`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(parameters),
-        cache: 'no-store',
         signal
       });
 
@@ -135,24 +133,22 @@ const PhraseModal = ({ isOpen, onClose, phrase, pronunciation, interpretation, p
     }
   };
 
-  const playVariationAudio = async (word, pronun) => {
+  const playVariationAudio = async (word, pronun, location) => {
     try {
       console.log(`播放方音差: ${word} - ${pronun}`);
-      const parameters = {
-        tts_lang: 'tb',
-        tts_data: pronun,
-        tts_request_id: Date.now()
-      };
+      const isLukang = location === 'lokkang';
+      const endpoint = isLukang ? '/synthesize_speech_lukang' : '/synthesize_speech';
+      const parameters = isLukang
+        ? { tts_data: pronun }
+        : { tts_lang: 'tb', tts_data: pronun, tts_request_id: Date.now() };
       console.log('發送方音差 TTS 請求:', parameters);
       const { requestId, signal } = beginTtsRequest();
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/synthesize_speech`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(parameters),
-        cache: 'no-store',
         signal
       });
 
@@ -241,7 +237,7 @@ const PhraseModal = ({ isOpen, onClose, phrase, pronunciation, interpretation, p
                         <img
                           src={megaphoneIcon}
                           className="pronun-speaker-icon"
-                          onClick={() => playVariationAudio(wordItem.word, wordItem.pronunciations[location])}
+                          onClick={() => playVariationAudio(wordItem.word, wordItem.pronunciations[location], location)}
                           alt="播放"
                         />
                       </td>
