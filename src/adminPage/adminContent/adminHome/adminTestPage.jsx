@@ -197,10 +197,13 @@ const AdminTestPage = () => {
         fetchTestInfo();
     }, [fetchTestInfo]);
 
-    // 根據狀態篩選資料
+    // 根據狀態篩選資料（published 限制顯示前 12 筆，與前台一致）
     useEffect(() => {
         if (allTestInfo.length > 0 || isLoading === false) {
-            const filteredData = allTestInfo.filter(item => item.status === statusFilter);
+            let filteredData = allTestInfo.filter(item => item.status === statusFilter);
+            if (statusFilter === 'published') {
+                filteredData = filteredData.slice(0, 12);
+            }
             setTestInfo(filteredData);
         }
     }, [allTestInfo, statusFilter, isLoading]);
@@ -208,7 +211,7 @@ const AdminTestPage = () => {
     // 新增功能
     const handleAddClick = () => {
         if (testInfo.length >= 12 && statusFilter === 'published') {
-            showToast('目前公告數量已滿12個項目，請先到目前公告刪除一個公告再進行上傳。', 'warning');
+            showToast('目前公告數量已滿12個項目，請先刪除一個再新增。', 'warning');
             return;
         }
         setShowAddModal(true);
