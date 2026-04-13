@@ -343,6 +343,7 @@ a:hover {
     align-items: center;
     justify-content: center;
     gap: 5px;
+    flex-wrap: wrap;
 }
 
 .invisible {

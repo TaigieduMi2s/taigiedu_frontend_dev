@@ -1,10 +1,19 @@
 .transcript-page {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-
+  min-height: 100vh;
   padding: 60px;
   background-color: #f5f5f5;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .transcript-page {
+    padding: 16px;
+    min-height: 100vh;
+    height: auto;
+  }
 }
 
 .error-toast {

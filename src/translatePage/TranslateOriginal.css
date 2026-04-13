@@ -94,3 +94,26 @@
   height: 20px;
   pointer-events: none; /* 讓箭頭不會阻擋點擊事件 */
 }
+
+/* ===== RWD - Mobile (max-width: 768px) ===== */
+@media (max-width: 768px) {
+  .translate-content {
+    gap: 16px;
+  }
+  
+  .language-dropdown {
+    width: 100%;
+    max-width: 200px;
+  }
+  
+  .original-input-box {
+    height: 200px;
+    min-height: 200px;
+    max-height: 200px;
+    padding: 12px;
+  }
+
+  .original-input-box::placeholder {
+    padding-top: 50px;
+  }
+}

@@ -155,12 +155,6 @@ audio {
     transform: translateX(100%);
     opacity: 0;
   }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
 @keyframes fadeOut {
   from {
     opacity: 1;
@@ -169,3 +163,56 @@ audio {
     opacity: 0;
   }
 } */
+
+/* ===== RWD - Mobile (max-width: 768px) ===== */
+@media (max-width: 768px) {
+  .read-content {
+    gap: 12px;
+  }
+
+  .input-box {
+    padding: 16px;
+    margin: 16px 0 0 0;
+    font-size: 16px;
+    box-shadow: inset 0 0 0 4px #f2f2f2;
+    min-height: 200px;
+  }
+
+  .input-box.小 {
+    font-size: 15px;
+  }
+
+  .input-box.中 {
+    font-size: 18px;
+  }
+
+  .input-box.大 {
+    font-size: 22px;
+  }
+
+  .remaining-chars {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .audio-button-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .generate-audio-button {
+    width: auto;
+    min-width: 120px;
+    height: 36px;
+    font-size: 14px;
+    padding: 8px 12px;
+    flex: 1;
+  }
+
+  .audio-player {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+}

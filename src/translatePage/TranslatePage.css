@@ -71,3 +71,36 @@
     transform: rotate(360deg);
   }
 }
+
+/* ===== RWD - Mobile (max-width: 768px) ===== */
+@media (max-width: 768px) {
+  .translate-page {
+    padding: 16px;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    height: auto;
+    overflow-x: hidden;
+  }
+
+  .translate-button {
+    margin: 8px 0;
+    transform: rotate(90deg); /* 手機版將按鈕旋轉 90 度讓箭頭向下 */
+  }
+
+  .translate-button > .translate-content-wrapper > img {
+     /* 如果要讓文字不跟著轉，可能需要額外處理，這裡簡單讓整顆按鈕旋轉 90 度 */
+  }
+  
+  /* 如果只轉箭頭不轉文字 */
+  .translate-button {
+    transform: none; 
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .translate-button .translate-arrow {
+    transform: rotate(90deg);
+    transition: transform 0.3s;
+  }
+}

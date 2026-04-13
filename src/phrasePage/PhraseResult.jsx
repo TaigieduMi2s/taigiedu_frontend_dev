@@ -139,7 +139,7 @@ const PhraseResult = ({ phrases = [], loading, error }) => {
 	return (
 		<div>
 			<div className="row pt-0 px-0" id="phraseResult">
-				<div className="col-6">
+				<div className="col-12 col-md-6">
 					{leftPhrases.map((phrase, index) => (
 						<a key={`left-${index}`} href="#" onClick={(e) => showDetail(e, phrase)}>
 							<div className="row px-3 py-3 my-2 phaseCard cardContainer">
@@ -149,7 +149,7 @@ const PhraseResult = ({ phrases = [], loading, error }) => {
 					))}
 				</div>
 
-				<div className="col-6">
+				<div className="col-12 col-md-6">
 					{rightPhrases.map((phrase, index) => (
 						<a key={`right-${index}`} href="#" onClick={(e) => showDetail(e, phrase)}>
 							<div className="row px-3 py-3 my-2 phaseCard cardContainer">

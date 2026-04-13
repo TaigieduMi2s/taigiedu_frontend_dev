@@ -108,13 +108,6 @@
   height: 24px;
   color: var(--text-light, #9ca3af);
   z-index: 10;
-  transition: transform 0.1s ease;
-}
-
-.search-icon:active,
-.search-icon:focus {
-  transform: translateY(-50%) scale(0.95);
-  outline: none;
 }
 
 /* ─── 關鍵字標籤按鈕列 ──────────────────────────────────── */
@@ -398,7 +391,7 @@
   }
 
   .hero-wrapper {
-    height: 340px;
+    height: 280px;
     border-radius: 0;
   }
 
@@ -445,7 +438,7 @@
   }
 
   .hero-wrapper {
-    height: 320px;
+    height: 250px;
     border-radius: 0;
   }
 
@@ -477,7 +470,7 @@
   }
 
   .search-input {
-    font-size: 0.9rem;
+    font-size: 1rem;
     padding: 0.65rem 2.5rem 0.65rem 0.875rem;
   }
 

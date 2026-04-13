@@ -107,3 +107,62 @@ input[type="radio"]:hover {
   height: 60px;
   font-size: 26px;
 }
+
+/* ===== RWD - Mobile (max-width: 768px) ===== */
+@media (max-width: 768px) {
+  .read-header h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .read-mode-area {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .mode-selection {
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    width: 100%;
+  }
+
+  .mode-selection span {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .mode-selection label {
+    font-size: 14px;
+    padding: 2px;
+    gap: 3px;
+  }
+
+  input[type="radio"] {
+    width: 18px;
+    height: 18px;
+  }
+
+  .font-size-control {
+    gap: 8px;
+    align-self: flex-end;
+  }
+
+  .font-size-button.小 {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .font-size-button.中 {
+    width: 38px;
+    height: 38px;
+    font-size: 17px;
+  }
+
+  .font-size-button.大 {
+    width: 46px;
+    height: 46px;
+    font-size: 20px;
+  }
+}
