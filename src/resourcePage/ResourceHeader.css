@@ -126,8 +126,7 @@
 }
 
 .res-upload-button,
-.res-delete-button,
-.res-login-button {
+.res-delete-button {
   display: flex;
   width: 140px;
   height: 48px;
@@ -157,8 +156,7 @@
 }
 
 
-.res-upload-button:hover,
-.res-login-button:hover {
+.res-upload-button:hover {
   background-color: #005f8d;
 }
 
@@ -177,17 +175,7 @@
   opacity: 1;
 }
 
-/* 登出按鈕樣式 */
-.res-login-button.logout-button {
-  background-color: #e74c3c;
-  /* 紅色背景 */
-  color: white;
-}
 
-.res-login-button.logout-button:hover {
-  background-color: #c0392b;
-  /* 深紅色 hover 效果 */
-}
 
 /* 響應式優化 */
 @media (max-width: 1200px) {
@@ -204,8 +192,8 @@
   }
 
   .res-search-container {
-    order: -1;
-    /* 搜尋框移到前面 */
+    order: -2;
+    /* 搜尋框移到最前面 */
     width: 100%;
     max-width: 100%;
   }
@@ -213,24 +201,58 @@
 
 @media (max-width: 768px) {
   .resource-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 8px;
+    align-items: center;
   }
 
-  .grade-dropdown,
-  .version-dropdown {
+  .res-search-container {
+    grid-column: span 2;
+    width: 100%;
+    height: 44px;
+  }
+
+  .dropdown-container {
+    grid-column: span 2;
     width: 100%;
   }
 
-  .res-upload-button,
-  .res-delete-button,
-  .res-login-button {
+  .grade-dropdown {
     width: 100%;
+    height: 44px;
+    font-size: 14px;
+  }
+
+  .multiselect-wrapper.resource-multi {
+    grid-column: span 1;
+    width: 100% !important;
+  }
+
+  .resource-multi .select-header {
+    width: 100% !important;
+    height: 44px;
+    font-size: 14px;
+    padding: 8px 12px;
   }
 
   .res-button-container {
-    flex-direction: column;
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 8px;
+    width: 100%;
+    justify-content: stretch;
   }
+
+  .res-upload-button,
+  .res-delete-button {
+    width: 100% !important;
+    height: 40px;
+    font-size: 13px;
+    padding: 8px 4px;
+    margin: 0;
+  }
+
+
 }

@@ -130,11 +130,7 @@ const ResourceHeader = ({ onUploadOpen, isLoggedIn, onSearch }) => {
     navigate("/delete-resource");
   };
 
-  // 登出處理 - 使用 AuthContext 的 logout
-  const handleLogout = async () => {
-    await logout();
-    showToast("已成功登出", "success");
-  };
+
 
   return (
     <div className="resource-header">
@@ -202,15 +198,7 @@ const ResourceHeader = ({ onUploadOpen, isLoggedIn, onSearch }) => {
 
       {/* 上傳/刪除我的資源按鈕 */}
       <div className="res-button-container">
-        {/* 只在登入狀態下顯示登出按鈕 */}
-        {isLoggedIn && (
-          <button
-            className="res-login-button logout-button"
-            onClick={handleLogout}
-          >
-            登出
-          </button>
-        )}
+
 
         <button className="res-upload-button" onClick={handleUpload}>
           上傳我的資源
