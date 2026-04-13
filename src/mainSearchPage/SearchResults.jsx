@@ -117,38 +117,27 @@ const SearchResults = ({
           <div className="col-12">
             <div className="results-table-container">
               <div className="results-table-minimal">
+                
                 <div className="row mx-0">
-                  {/* 桌機左列 header */}
-                  <div className="col-md-6 d-none d-md-block p-0">
-                    <div className="row titleCard mx-0">
+                  {/* 左側列 (桌機版顯示含序號，手機版顯示無序號且是唯一標題) */}
+                  <div className="col-12 col-md-6 px-1">
+                    {/* 桌機版專用左側標題 */}
+                    <div className="row titleCard mx-0 d-none d-md-flex">
                       <div className="col-1 text-center">#</div>
                       <div className="col-3">資源出處</div>
                       <div className="col-8">內容</div>
                     </div>
-                  </div>
-                  {/* 桌機右列 header */}
-                  <div className="col-md-6 d-none d-md-block p-0">
-                    <div className="row titleCard mx-0">
-                      <div className="col-1 text-center">#</div>
-                      <div className="col-3">資源出處</div>
+                    {/* 手機版專用共用標題 */}
+                    <div className="row titleCard mx-0 d-flex d-md-none">
+                      <div className="col-4">資源出處</div>
                       <div className="col-8">內容</div>
                     </div>
-                  </div>
-                </div>
 
-                {/* 手機版標題列 - 僅顯示一次 */}
-                <div className="row titleCard d-flex d-md-none mx-0">
-                  <div className="col-4">資源出處</div>
-                  <div className="col-8">內容</div>
-                </div>
-
-                <div className="row mx-0">
-                  <div className="col-12 col-md-6 p-0">
                     {leftResults.map((result, index) => (
-                      <div key={result.id} className="px-0 px-md-1 mb-1">
+                      <div key={result.id} className="mb-1">
                         <a href={result.url} target="_blank" rel="noopener noreferrer" className="search-result-link">
                           <div className="row py-3 sentenceCard cardContainer h-100 mx-0">
-                            <div className="col-1 d-none d-md-block p-0 text-muted small">
+                            <div className="col-1 d-none d-md-block p-0 text-muted small text-center">
                               {(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
                             </div>
                             <div className="col-4 col-md-3 p-0 sentenceTitle">
@@ -162,13 +151,23 @@ const SearchResults = ({
                       </div>
                     ))}
                   </div>
-                  <div className="col-12 col-md-6 p-0">
+
+                  {/* 右側列 (桌機版顯示含序號標題。手機版無標題，僅接續列出資料) */}
+                  <div className="col-12 col-md-6 px-1">
+                    {/* 桌機版專用右側標題 */}
+                    <div className="row titleCard mx-0 d-none d-md-flex">
+                      <div className="col-1 text-center">#</div>
+                      <div className="col-3">資源出處</div>
+                      <div className="col-8">內容</div>
+                    </div>
+
                     {rightResults.map((result, index) => (
-                      <div key={result.id} className="px-0 px-md-1 mb-1">
+                      <div key={result.id} className="mb-1">
                         <a href={result.url} target="_blank" rel="noopener noreferrer" className="search-result-link">
                           <div className="row py-3 sentenceCard cardContainer h-100 mx-0">
-                            <div className="col-1 d-none d-md-block p-0 text-muted small">
-                              {(currentPage - 1) * ITEMS_PER_PAGE + (leftResults.length) + index + 1}
+                            {/* 桌機顯示序號，手機隱藏 (以保持與左側手機版排版一致) */}
+                            <div className="col-1 d-none d-md-block p-0 text-muted small text-center">
+                              {(currentPage - 1) * ITEMS_PER_PAGE + leftResults.length + index + 1}
                             </div>
                             <div className="col-4 col-md-3 p-0 sentenceTitle">
                               {result.resource}
