@@ -12,12 +12,13 @@
 
 .dropdown-container {
   position: relative;
-  display: inline-block;
+  display: flex;
+  width: 148px; /* 確保容器有固定寬度，或在 RWD 中調整 */
 }
 
 .language-dropdown {
   display: flex;
-  width: 148px;
+  width: 100%; /* 填滿容器寬度 */
   height: 48px;
   padding: 12px 16px;
   align-items: center;
@@ -101,9 +102,13 @@
     gap: 16px;
   }
   
+  .dropdown-container {
+    width: 100%;
+  }
+  
   .language-dropdown {
     width: 100%;
-    max-width: 200px;
+    max-width: none;
   }
   
   .original-input-box {

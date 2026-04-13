@@ -1,6 +1,5 @@
 .read-content {
   display: flex;
-  flex: 1; /* 填滿剩餘空間 */
   flex-direction: column;
   align-items: flex-start;
   gap: 16px;
@@ -12,7 +11,7 @@
 .input-box {
   padding: 22px;
   align-self: stretch;
-  flex: 1; /* 填滿剩餘空間 */
+  height: 400px; /* 固定高度，不再隨畫面拉長 */
   margin: 30px 0px 0px 0px;
 
   font-size: 18px;

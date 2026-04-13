@@ -113,3 +113,46 @@
 .admin-modal-body .mb-3:last-child {
     margin-bottom: 0 !important;
 }
+
+/* ─── RWD ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .modal-dialog.modal-dialog-centered {
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        height: 100% !important;
+        display: flex;
+        align-items: stretch;
+    }
+    
+    .admin-modal-content.modal-content {
+        height: 100vh !important;
+        max-height: 100vh !important;
+        width: 100vw !important;
+        border-radius: 0 !important;
+        border: none !important;
+        padding: 0 !important;
+    }
+    
+    .admin-modal-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .admin-modal-body {
+        padding: 1rem;
+        max-height: none !important;
+        flex: 1;
+        overflow-y: auto;
+    }
+    
+    .admin-modal-footer {
+        padding: 0.75rem 1rem;
+        display: flex;
+        gap: 10px;
+    }
+    
+    .admin-modal-footer .btn {
+        flex: 1;
+    }
+}

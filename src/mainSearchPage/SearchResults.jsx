@@ -115,64 +115,43 @@ const SearchResults = ({
           
           {singleColumn ? (
             <div className="col-12 search-results-single-column">
-              <div className="row titleCard cardContainer">
-                <div className="col-3 p-0">資源出處</div>
-                <div className="col-9 p-0">內容</div>
-              </div>
-              {currentResults.map((result) => (
-                <a
-                  key={result.id}
-                  href={result.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <div className="row px-3 py-3 sentenceCard cardContainer">
-                    <div className="col-3 p-0 sentenceTitle">
-                      {result.resource}
-                    </div>
-                    <div className="col-9 p-0 sentenceContent">
-                      {renderContent(result.content)}
-                    </div>
+              <div className="results-table-container">
+                <div className="results-table-minimal">
+                  <div className="row titleCard cardContainer">
+                    <div className="col-3 p-0">資源出處</div>
+                    <div className="col-9 p-0">內容</div>
                   </div>
-                </a>
-              ))}
+                  {currentResults.map((result) => (
+                    <a
+                      key={result.id}
+                      href={result.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <div className="row px-3 py-3 sentenceCard cardContainer">
+                        <div className="col-3 p-0 sentenceTitle">
+                          {result.resource}
+                        </div>
+                        <div className="col-9 p-0 sentenceContent">
+                          {renderContent(result.content)}
+                        </div>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : (
             <>
               {/* 左欄位 */}
-              <div className="col-6">
-                <div className="row titleCard cardContainer">
-                  <div className="col-3 p-0">資源出處</div>
-                  <div className="col-9 p-0">內容</div>
-                </div>
-                {leftResults.map((result) => (
-                  <a
-                    key={result.id}
-                    href={result.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <div className="row px-3 py-3 sentenceCard cardContainer">
-                      <div className="col-3 p-0 sentenceTitle">
-                        {result.resource}
-                      </div>
-                      <div className="col-9 p-0 sentenceContent">
-                        {renderContent(result.content)}
-                      </div>
-                    </div>
-                  </a>
-                ))}
-              </div>
-
-              {/* 右欄位 */}
-              <div className="col-6">
-                {rightResults.length > 0 && (
-                  <>
+              <div className="col-12 col-md-6 mb-4 mb-md-0">
+                <div className="results-table-container">
+                  <div className="results-table-minimal">
                     <div className="row titleCard cardContainer">
                       <div className="col-3 p-0">資源出處</div>
                       <div className="col-9 p-0">內容</div>
                     </div>
-                    {rightResults.map((result) => (
+                    {leftResults.map((result) => (
                       <a
                         key={result.id}
                         href={result.url}
@@ -189,7 +168,38 @@ const SearchResults = ({
                         </div>
                       </a>
                     ))}
-                  </>
+                  </div>
+                </div>
+              </div>
+
+              {/* 右欄位 */}
+              <div className="col-12 col-md-6">
+                {rightResults.length > 0 && (
+                  <div className="results-table-container">
+                    <div className="results-table-minimal">
+                      <div className="row titleCard cardContainer">
+                        <div className="col-3 p-0">資源出處</div>
+                        <div className="col-9 p-0">內容</div>
+                      </div>
+                      {rightResults.map((result) => (
+                        <a
+                          key={result.id}
+                          href={result.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <div className="row px-3 py-3 sentenceCard cardContainer">
+                            <div className="col-3 p-0 sentenceTitle">
+                              {result.resource}
+                            </div>
+                            <div className="col-9 p-0 sentenceContent">
+                              {renderContent(result.content)}
+                            </div>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             </>

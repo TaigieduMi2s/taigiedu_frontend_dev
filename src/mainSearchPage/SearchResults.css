@@ -408,6 +408,17 @@ a:hover {
 	margin: 0 5px;
 }
 
+.results-table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 20px;
+}
+
+.results-table-minimal {
+  min-width: 500px; /* 確保在小螢幕上可以左右滾動，而不是擠在一起 */
+}
+
 /* ─── RWD ───────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .search-results {
@@ -416,16 +427,9 @@ a:hover {
     border-radius: var(--radius-md, 8px);
   }
 
-  /* 讓搜尋結果區塊可以左右滑動 */
-  .results-table {
-    display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    white-space: nowrap;
-  }
-
   .titleCard {
-    font-size: 16px;
+    font-size: 15px;
+    padding: 0.5rem;
   }
 
   .sentenceTitle,
@@ -435,6 +439,7 @@ a:hover {
 
   .pagination-container {
     padding: 0 8px;
+    margin-top: 20px;
   }
 
   /* 加大分頁按鈕點擊區 */
@@ -445,5 +450,6 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0.5rem;
   }
 }
