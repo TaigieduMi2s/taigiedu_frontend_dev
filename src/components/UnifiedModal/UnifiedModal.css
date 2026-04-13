@@ -1,0 +1,136 @@
+/* ─── 統一彈窗基礎樣式 (Unified Modal Base Styles) ─── */
+
+.unified-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease-in-out;
+}
+
+.unified-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.unified-modal-container {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 650px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalScaleIn 0.25s ease-out;
+}
+
+@keyframes modalScaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* 關閉按鈕 */
+.unified-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #f3f4f6;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #4b5563;
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+.unified-modal-close:hover {
+    background: #e5e7eb;
+    color: #111827;
+    transform: rotate(90deg);
+}
+
+/* ──────────────────────────────────────────────────────────
+   統一資訊列樣式 (Unified Info Row Styles)
+   ────────────────────────────────────────────────────────── */
+
+.unified-info-row {
+    display: flex;
+    margin-top: 20px;
+    gap: 15px;
+    align-items: flex-start;
+}
+
+.unified-info-label {
+    background-color: var(--color-primary, #2d92c1);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    white-space: nowrap;
+    min-width: 100px;
+    text-align: center;
+    display: inline-block;
+}
+
+.unified-info-text {
+    flex: 1;
+    line-height: 1.6;
+    color: var(--text-secondary, #4b5563);
+    font-size: 17px;
+}
+
+/* ─── RWD ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .unified-modal-overlay {
+        padding: 0;
+    }
+
+    .unified-modal-container {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        border-radius: 0;
+        margin: 0;
+        padding: 20px;
+        padding-top: 60px; /* 為關閉按鈕留空間 */
+        max-height: 100vh;
+    }
+
+    .unified-modal-close {
+        top: 16px;
+        right: 16px;
+        width: 40px;
+        height: 40px;
+        font-size: 28px;
+    }
+
+    .unified-info-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .unified-info-label {
+        width: 100%;
+    }
+}

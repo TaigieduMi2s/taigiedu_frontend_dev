@@ -1,19 +1,21 @@
 .page-container {
-    padding-left: 10%;
-    padding-right: 10%;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 5%;
 }
 
 .search-bar-container {
     width: 100%;
+    max-width: 1000px;
+    margin: 20px auto 0 auto;
     display: flex;
     justify-content: center;
-    padding-top: 2%;
-    margin-bottom: 0;
 }
   
 .phrase-results-container {
     width: 100%;
-    margin-top: 0;
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
 /* ─── RWD ───────────────────────────────────────────────── */
