@@ -520,8 +520,8 @@ const AdminSocialmediaPage = () => {
 
         <div className="mb-3">
           <label className="form-label admin-form-label">*圖片</label>
-          <div className="d-flex align-items-center gap-3">
-            <label className="btn btn-primary text-white mb-0" style={{ cursor: 'pointer', fontSize: '14px', padding: '6px 16px' }}>
+          <div className="upload-wrapper mb-2">
+            <label className="upload-btn">
               <input
                 type="file"
                 accept="image/jpeg,image/png"
@@ -530,7 +530,7 @@ const AdminSocialmediaPage = () => {
               />
               上傳檔案
             </label>
-            <span className="text-muted" style={{ fontSize: '13px' }}>
+            <span className="upload-hint">
               ※限 JPG、PNG 可上傳，限制 2MB。
             </span>
           </div>

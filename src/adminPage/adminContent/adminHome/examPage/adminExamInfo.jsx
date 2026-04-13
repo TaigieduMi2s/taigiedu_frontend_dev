@@ -334,8 +334,8 @@ const AdminExamInfo = () => {
 
         <div className="mb-3">
           <label className="form-label admin-form-label">*圖片</label>
-          <div className="d-flex align-items-center gap-3">
-            <label className="btn btn-primary text-white mb-0" style={{ cursor: 'pointer', fontSize: '14px', padding: '6px 16px' }}>
+          <div className="upload-wrapper mb-2">
+            <label className="upload-btn">
               <input
                 type="file"
                 accept="image/jpeg,image/png"
@@ -344,9 +344,7 @@ const AdminExamInfo = () => {
               />
               上傳檔案
             </label>
-            <span className="text-muted" style={{ fontSize: '13px' }}>
-              ※限 JPG、PNG 可上傳，限制 2MB。
-            </span>
+            <span className="upload-hint">※限 JPG、PNG 可上傳，限制 2MB。</span>
           </div>
           {(imageName || imageUrl) && (
             <div className="mt-3 d-inline-flex flex-column align-items-center" style={{ border: '1px solid #e0e0e0', borderRadius: '8px', padding: '8px', backgroundColor: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.06)' }}>

@@ -578,10 +578,8 @@ const AdminFoodPage = () => {
         <div className="mb-3">
           <label className="form-label admin-form-label">*圖片</label>
           <div className="d-flex align-items-center gap-3">
-            <label className="btn btn-primary text-white mb-0" style={{ cursor: 'pointer', fontSize: '14px', padding: '6px 16px' }}>
-              <input ref={fileInputRef} type="file" accept="image/jpeg,image/png" className="d-none" onChange={handleFileChange} />
-              上傳檔案
-            </label>
+            <button type="button" className="btn btn-outline-secondary" onClick={handleReplaceFileClick}>上傳檔案</button>
+            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png" className="d-none" onChange={handleFileChange} />
             <span className="text-muted" style={{ fontSize: '13px' }}>
               ※限 JPG、PNG 可上傳，限制 2MB。
             </span>
