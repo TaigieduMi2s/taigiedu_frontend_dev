@@ -77,10 +77,13 @@
   .translate-page {
     padding: 16px;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     gap: 16px;
     height: auto;
     overflow-x: hidden;
+    min-height: auto;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .translate-button {

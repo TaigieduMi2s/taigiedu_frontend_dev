@@ -266,6 +266,9 @@
 @media (max-width: 768px) {
   .translate-content {
     gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
   }
   
   .dropdown-container {
@@ -275,17 +278,22 @@
   .language-dropdown {
     width: 100%;
     max-width: none;
+    font-size: 16px;
   }
   
   .target-display-box {
-    height: 200px;
-    min-height: 200px;
-    max-height: 200px;
+    height: 180px;
+    min-height: 180px;
+    max-height: 180px;
+    font-size: 16px;
   }
 
   .copy-button-translate,
   .tran-feedback-button {
-    width: auto;
-    min-width: 120px;
+    width: 100%;
+    max-width: 300px;
+    align-self: center;
+    min-width: 0;
+    font-size: 15px;
   }
 }

@@ -199,15 +199,25 @@ audio {
     flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .generate-audio-button {
     width: auto;
-    min-width: 120px;
+    min-width: 0;
     height: 36px;
     font-size: 14px;
-    padding: 8px 12px;
+    padding: 8px 14px;
+    flex: none;
+  }
+
+  .audio-button-container audio {
     flex: 1;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
   }
 
   .audio-player {

@@ -249,3 +249,48 @@
 .forgot-password-link:hover {
   color: #236d8f;
 }
+
+/* ─── 統一 Modal 模式下的樣式 ─── */
+.login-unified-modal {
+  max-width: 480px;
+}
+
+.login-modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+}
+
+/* ─── 表單標籤 ─── */
+.form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.form-label-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-label-required {
+  color: #e53935;
+  margin-right: 2px;
+}
+
+/* ─── RWD ─── */
+@media (max-width: 768px) {
+  .login-modal-container {
+    width: 92%;
+    height: auto;
+    max-height: 90vh;
+  }
+
+  .login-submit-button,
+  .register-button {
+    width: 100%;
+  }
+}
