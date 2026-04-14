@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import './HorizontalScrollRow.css';
 
@@ -16,22 +16,44 @@ const HorizontalScrollRow = ({ children, className = '' }) => {
     dragFree: true,
     containScroll: 'trimSnaps',
   });
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    const updateScrollState = () => {
+      setCanScrollPrev(emblaApi.canScrollPrev());
+      setCanScrollNext(emblaApi.canScrollNext());
+    };
+
+    updateScrollState();
+    emblaApi.on('reInit', updateScrollState);
+    emblaApi.on('select', updateScrollState);
+
+    return () => {
+      emblaApi.off('reInit', updateScrollState);
+      emblaApi.off('select', updateScrollState);
+    };
+  }, [emblaApi]);
+
   return (
     <div className={`hsr-root ${className}`}>
-      {/* 左箭頭 */}
-      <button
-        className="hsr-arrow hsr-arrow-prev"
-        onClick={scrollPrev}
-        aria-label="往前"
-      >
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-          <path d="M12.5 5L7.5 10L12.5 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
+      {/* 僅在左側有被隱藏內容時顯示左箭頭 */}
+      {canScrollPrev && (
+        <button
+          className="hsr-arrow hsr-arrow-prev"
+          onClick={scrollPrev}
+          aria-label="往前"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M12.5 5L7.5 10L12.5 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      )}
 
       {/* 捲動容器 */}
       <div className="hsr-viewport" ref={emblaRef}>
@@ -44,16 +66,18 @@ const HorizontalScrollRow = ({ children, className = '' }) => {
         </div>
       </div>
 
-      {/* 右箭頭 */}
-      <button
-        className="hsr-arrow hsr-arrow-next"
-        onClick={scrollNext}
-        aria-label="往後"
-      >
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-          <path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
+      {/* 僅在可繼續向右捲動時顯示右箭頭 */}
+      {canScrollNext && (
+        <button
+          className="hsr-arrow hsr-arrow-next"
+          onClick={scrollNext}
+          aria-label="往後"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      )}
     </div>
   );
 };

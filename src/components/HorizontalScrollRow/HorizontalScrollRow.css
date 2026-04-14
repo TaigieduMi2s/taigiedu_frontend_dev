@@ -4,8 +4,7 @@
 
 .hsr-root {
   position: relative;
-  display: flex;
-  align-items: stretch;
+  width: 100%;
 }
 
 /* ─── Embla 捲動視窗 ─── */
@@ -35,36 +34,40 @@
 
 /* ─── 導航箭頭 ─── */
 .hsr-arrow {
-  flex-shrink: 0;
   width: 36px;
   height: 36px;
-  border-radius: 50%;
   border: 1px solid #dde4ed;
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
   color: #4b5563;
+  border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s, opacity 0.2s;
-  align-self: center;
-  flex-shrink: 0;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  z-index: 1;
+  transition: color 0.2s ease, opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  padding: 0;
+  opacity: 0.96;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.12);
 }
 
 .hsr-arrow:hover {
-  background: #2d92c1;
-  color: white;
-  border-color: #2d92c1;
+  color: #2d92c1;
+  background: #ffffff;
+  border-color: #c9d8e8;
+  opacity: 1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.16);
 }
 
 .hsr-arrow-prev {
-  margin-right: 6px;
+  left: 4px;
 }
 
 .hsr-arrow-next {
-  margin-left: 6px;
+  right: 4px;
 }
 
 /* ─── RWD：手機版隱藏箭頭（用滑動操作） ─── */
