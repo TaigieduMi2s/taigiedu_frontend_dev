@@ -38,3 +38,18 @@
   margin-top: 24px;
   color: #777;
 }
+
+/* ─── RWD ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .policy-container {
+    padding: 24px 12px;
+  }
+
+  .policy-content h1 {
+    font-size: 22px;
+  }
+
+  .policy-content h2 {
+    font-size: 17px;
+  }
+}

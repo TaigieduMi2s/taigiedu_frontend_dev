@@ -3,7 +3,7 @@
     align-items: center;
     gap: 10px;
     margin: 20px auto;
-    max-width: 800px;
+    max-width: 1000px; /* Increase desktop width */
     padding: 10px;
     border-radius: 8px;
     background-color: #f9f9f9;
@@ -31,16 +31,16 @@
     align-items: center;
     width: 100%;
     position: relative;
+    gap: 15px; /* Add desktop gap */
   }
 
   .search-input {
     flex: 1;
-    padding: 8px 12px;
+    padding: 0.75rem 1rem;
     border: 1px solid #ddd;
-    border-radius: 5px;
-    border-right: none;
+    border-radius: 10px;
     outline: none;
-    transition: border-color 0.3s;
+    transition: all 0.3s;
   }
   
   .search-input:focus {
@@ -64,10 +64,12 @@
   .search-icon {
     width: 32px;
     height: 32px;
+    transition: opacity 0.2s ease;
+    cursor: pointer;
   }
   
   .search-icon:hover {
-    transform: scale(1.1);
+    opacity: 0.65;
   }
   
   .search-container {
@@ -82,3 +84,37 @@
   .bar-selectspace{
     width:250px;
   }
+
+/* ─── RWD ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .search-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px;
+    margin: 0 0 16px 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0;
+  }
+
+  .input-container {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .bar-selectspace {
+    width: 100%;
+    padding: 0;
+  }
+
+  .category-select {
+    width: 100%;
+  }
+
+  .search-container {
+    max-width: 100%;
+    width: 100%;
+  }
+}

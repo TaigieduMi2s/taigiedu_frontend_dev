@@ -8,7 +8,7 @@ import adminLogo from "./assets/adminPage/Logo + Title2.svg";
 // 導入原本的 LoginPage
 import LoginPage from "./resourcePage/LoginPage";
 
-const Header = () => {
+const Header = ({ onMenuToggle, sidebarOpen }) => {
   const { user, isAuthenticated, isLoading, logout, isAdmin } = useAuth();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -19,6 +19,9 @@ const Header = () => {
   const isAdminPage = location.pathname.startsWith('/admin');
   const adminMenuTarget = isAdminPage ? '/' : '/admin';
   const adminMenuLabel = isAdminPage ? '回到官網' : '後台管理';
+
+  // 是否顯示漢堡選單（非 admin 頁才顯示）
+  const showHamburger = !isAdminPage;
 
   // 處理登出
   const handleLogout = async () => {
@@ -74,14 +77,31 @@ const Header = () => {
   return (
     <>
       <header className="header" data-testid="header">
-        <Link to={isAdminPage ? "/admin" : "/"}>
-          <img
-            src={isAdminPage ? adminLogo : logo}
-            alt="Logo"
-            className="logo"
-            data-testid="header-logo"
-          />
-        </Link>
+        <div className="header-left">
+          {/* 漢堡選單按鈕（mobile only） */}
+          {showHamburger && (
+            <button
+              className={`header-hamburger${sidebarOpen ? ' is-open' : ''}`}
+              onClick={onMenuToggle}
+              aria-label={sidebarOpen ? '關閉選單' : '開啟選單'}
+              aria-expanded={sidebarOpen}
+              data-testid="header-hamburger"
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+          )}
+
+          <Link to={isAdminPage ? "/admin" : "/"}>
+            <img
+              src={isAdminPage ? adminLogo : logo}
+              alt="Logo"
+              className="logo"
+              data-testid="header-logo"
+            />
+          </Link>
+        </div>
 
         <div className="header-right">
           {isLoading ? (

@@ -2,7 +2,7 @@
     background: #fff;
     padding: 20px 0;
     position: sticky;
-    top: 0;
+    top: var(--header-height, 58px);
     z-index: 100;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -14,13 +14,14 @@
 
 .dropdown-container {
     position: relative;
-    display: inline-block;
+    display: flex;
+    width: 148px;
 }
 
 .exam-type-dropdown {
     position: relative;
     display: flex;
-    width: 148px;
+    width: 100%;
     height: 48px;
     padding: 12px 16px;
     align-items: center;
@@ -66,7 +67,7 @@
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    z-index: 1000;
+    z-index: 500;
     max-height: 300px;
     overflow-y: auto;
 }
@@ -130,44 +131,63 @@
 
 .exam-category-title {
     color: #017AB1;
-    font-size: 24px;
-    margin: 30px 0 20px 0;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
     padding: 0;
 }
 
-.exam-card {
-    background: none;
-    border: none;
-    padding: 10px;
-    transition: transform 0.2s;
-    box-shadow: none;
-    cursor: pointer;
-}
-
-.exam-card:hover {
-    transform: translateY(-5px);
+/* ─── 各 Section 外層 ─── */
+.exam-sections {
+    padding-bottom: 32px;
 }
 
 .exam-section {
-    margin-bottom: 40px;
+    padding: 28px 0 8px;
+    border-top: 1px solid #f0f4f8;
 }
 
-.exam-section:first-of-type {
-    margin-top: 20px;
+.exam-section:first-child {
+    border-top: none;
+    padding-top: 20px;
 }
 
-.exam-report-issue {
+.exam-section-header {
     display: flex;
     align-items: center;
-    gap: 5px;
+    justify-content: space-between;
+    padding: 0 20px 16px;
 }
 
-.exam-image-container {
-    position: relative;
-    width: 100%;
-    padding-bottom: 77.1%;
+/* ─── 捲動列外層 padding ─── */
+.exam-section .hsr-root {
+    padding: 0 12px;
+}
+
+/* ─── 單張卡片（寬度由 hsr-slide 決定，卡片填滿） ─── */
+.exam-card {
+    width: 160px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 10px;
     overflow: hidden;
-    border-radius: 0;
+    background: white;
+    border: 1px solid #eef2f6;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.exam-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(1, 122, 177, 0.14);
+}
+
+/* 圖片區（4:3 比例） */
+.exam-image-container {
+    width: 100%;
+    padding-bottom: 75%;
+    position: relative;
+    overflow: hidden;
+    background: #f0f4f8;
 }
 
 .exam-image {
@@ -177,4 +197,92 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.exam-card:hover .exam-image {
+    transform: scale(1.05);
+}
+
+/* 文字區 */
+.exam-card-body {
+    padding: 10px;
+}
+
+.exam-card-badge {
+    display: inline-block;
+    background: #e8f4fb;
+    color: #017AB1;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-bottom: 4px;
+}
+
+.exam-card-title {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #2d3748;
+    margin: 0;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    font-weight: 500;
+}
+
+.exam-report-issue {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* ─── RWD ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .exam-header-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .dropdown-container {
+    width: 100%;
+  }
+
+  .exam-type-dropdown,
+  .exam-custom-dropdown {
+    width: 100%;
+  }
+
+  .exam-search-container {
+    max-width: 100%;
+    flex-grow: 1;
+  }
+
+  .exam-section-header {
+    padding: 0 16px 12px;
+  }
+
+  .exam-section .hsr-root {
+    padding: 0 4px;
+  }
+
+  .exam-category-title {
+    font-size: 17px;
+  }
+
+  .exam-card {
+    width: 136px;
+  }
+}
+
+@media (max-width: 380px) {
+  .exam-card {
+    width: 120px;
+  }
+
+  .exam-card-title {
+    font-size: 12px;
+  }
 }

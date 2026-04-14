@@ -1,60 +1,65 @@
+/* ============================================================
+   Sidebar.css — 側邊欄樣式（含 RWD）
+   ============================================================ */
+
+/* ─── 基礎 sidebar 容器 ─────────────────────────────────── */
 .sidebar {
-  background-color: #DFEAF2;
+  background-color: var(--bg-sidebar);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   height: 100%;
+  /* 限制在格線欄寬內，不外溢 */
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  z-index: var(--z-sidebar);
 }
 
-/* 每個 menu item 的樣式 */
+/* ─── 每個 menu item 的樣式 ─────────────────────────────── */
 .menu-item {
   display: flex;
   align-items: center;
-  background-color: #DFEAF2;
+  background-color: var(--bg-sidebar);
   border: none;
-  color: black;
+  color: #000;
   padding: 15px;
   text-align: left;
   font-size: 14px;
   cursor: pointer;
   width: 100%;
   box-sizing: border-box;
-  transition: background-color 0.3s ease;
+  transition: background-color var(--transition-slow);
   border-radius: 0;
-  /* 移除圓角 */
 }
 
 .menu-item:hover,
 .submenu-item:hover {
-  background-color: #c8d0e7;
-  /* 選單 hover 時的顏色 */
+  background-color: var(--bg-sidebar-hover);
 }
-
 
 /* 選取的按鈕樣式 */
 .menu-item.active,
 .submenu-item.active {
-  background-color: #2D92C1;
+  background-color: var(--color-primary);
   color: white;
 }
 
-
-/* 圖標的樣式 */
+/* ─── 圖標的樣式 ────────────────────────────────────────── */
 .menu-icon {
   width: 20px;
   height: 20px;
   margin-left: 10px;
   margin-right: 5px;
-  transition: filter 0.3s ease;
+  flex-shrink: 0;
+  transition: filter var(--transition-slow);
 }
 
-/* 當 active 時變成白色 */
 .active-icon {
   filter: brightness(0) invert(1);
-  /* 將 icon 變成白色 */
 }
 
-
+/* ─── 展開箭頭 ──────────────────────────────────────────── */
 .menu-item {
   position: relative;
 }
@@ -62,7 +67,7 @@
 .arrow {
   position: absolute;
   right: 15px;
-  transition: transform 0.3s ease;
+  transition: transform var(--transition-slow);
   font-size: 12px;
 }
 
@@ -70,6 +75,7 @@
   transform: rotate(-180deg);
 }
 
+/* ─── 子選單 ────────────────────────────────────────────── */
 .submenu {
   overflow: hidden;
   transition: max-height 0.3s ease-out;
@@ -78,33 +84,34 @@
 .submenu-item {
   display: flex;
   align-items: center;
-  background-color: #e8eef4;
+  background-color: var(--bg-sidebar-sub);
   border: none;
-  color: black;
+  color: #000;
   padding: 12px 15px 12px 50px;
   text-align: left;
   font-size: 14px;
   cursor: pointer;
   width: 100%;
-  transition: background-color 0.3s ease;
+  transition: background-color var(--transition-slow);
 }
 
 .submenu-item.active:hover {
-  background-color: #017AB1;
+  background-color: var(--color-primary-dark);
   color: white;
 }
 
+/* ─── 箭頭圖片 ──────────────────────────────────────────── */
 .arrow img {
   width: 20px;
   height: 20px;
-  transition: filter 0.3s ease;
+  transition: filter var(--transition-slow);
 }
 
 .menu-item.active .arrow img {
   filter: brightness(0) invert(1);
-  /* Makes SVG white */
 }
 
+/* ─── 外部連結圖示 ──────────────────────────────────────── */
 .external-icon {
   width: 14px;
   height: 14px;
@@ -120,4 +127,30 @@
 
 .menu-item.active .external-icon {
   filter: brightness(0) invert(1);
+}
+
+/* ─── RWD：手機版 sidebar（滑入式 drawer）────────────────── */
+
+/*
+  手機版 (≤768px)：
+  - .sidebar 脫離 grid，固定在左側，預設隱藏(translateX(-100%)）
+  - .sidebar.sidebar-open 時滑入
+*/
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    height: calc(100vh - var(--header-height));
+    width: var(--sidebar-width);
+    max-width: 80vw;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-lg);
+    z-index: var(--z-sidebar);
+  }
+
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+  }
 }

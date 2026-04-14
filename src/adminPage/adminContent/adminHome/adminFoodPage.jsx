@@ -14,11 +14,20 @@ import speakerIcon from '../../../assets/speaker-wave.svg';
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/backend';
 
 const getFileNameFromUrl = (url) => {
+  if (!url) return '';
   try {
     const u = new URL(url);
-    const last = u.pathname.split('/').filter(Boolean).pop();
-    return last || '';
-  } catch { return ''; }
+    return u.pathname.split('/').filter(Boolean).pop() || '';
+  } catch { 
+    return url.split('/').filter(Boolean).pop() || ''; 
+  }
+};
+
+const getFullImageUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('blob:')) return path;
+  const filename = path.split('/').filter(Boolean).pop();
+  return `https://dev.taigiedu.com/backend/static/food/${filename}`;
 };
 
 const fileToBase64 = (file) => new Promise((resolve, reject) => {
@@ -132,11 +141,11 @@ const AdminFoodPage = () => {
         id: item.id,
         zhName: item.name || '',
         twName: item.name_tl || '',
-        imageUrl: item.figure || '',
+        imageUrl: getFullImageUrl(item.figure),
         imageName: item.figure ? getFileNameFromUrl(item.figure) : '',
         zhDesc: item.intro_mandarin || '',
         twDesc: item.intro_taigi || '',
-        audioUrl: item.audio_data || '',
+        audioUrl: getFullImageUrl(item.audio_data),
         ttsText: '',
         timestamp: item.timestamp || 'N/A',
         status: item.status === 'publish' ? 'published' : item.status === 'archive' ? 'archived' : item.status,
@@ -307,9 +316,11 @@ const AdminFoodPage = () => {
 
     try {
       // 準備圖片資料
-      let figureData = newImageUrl || '';
+      let figureData = '';
       if (newImageFile) {
         figureData = await fileToBase64(newImageFile);
+      } else if (newImageName) {
+        figureData = newImageName;
       }
 
       // 準備音訊資料
@@ -565,15 +576,22 @@ const AdminFoodPage = () => {
           </div>
         </div>
         <div className="mb-3">
-          <label className="form-label admin-form-label">圖片</label>
+          <label className="form-label admin-form-label">*圖片</label>
           <div className="d-flex align-items-center gap-3">
-            <div className="file-cell">
-              <img src={jpgIcon} alt="JPG檔" className="file-icon-image" />
-              <span className="file-name">{newImageName || '未選擇檔案'}</span>
-            </div>
             <button type="button" className="btn btn-outline-secondary" onClick={handleReplaceFileClick}>上傳檔案</button>
-            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
+            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png" className="d-none" onChange={handleFileChange} />
+            <span className="text-muted" style={{ fontSize: '13px' }}>
+              ※限 JPG、PNG 可上傳，限制 2MB。
+            </span>
           </div>
+          {(newImageUrl || newImageFile) && (
+            <div className="mt-3 d-inline-flex flex-column align-items-center" style={{ border: '1px solid #e0e0e0', borderRadius: '8px', padding: '8px', backgroundColor: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.06)' }}>
+              <img src={newImageFile ? URL.createObjectURL(newImageFile) : newImageUrl} alt="圖片預覽" style={{ maxHeight: '130px', maxWidth: '100%', objectFit: 'contain', borderRadius: '4px' }} />
+              <div className="mt-2 text-secondary text-truncate" style={{ maxWidth: '200px', fontSize: '13px' }} title={newImageName || '圖片'}>
+                {newImageName || '圖片'}
+              </div>
+            </div>
+          )}
         </div>
         <div className="mb-3">
           <label htmlFor="newZhDesc" className="form-label admin-form-label">*華文釋義</label>

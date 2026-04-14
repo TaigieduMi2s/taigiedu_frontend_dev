@@ -193,3 +193,49 @@
 .feedback-submit-button:hover {
   background: #0056b3;
 }
+
+/* ─── RWD ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .tran-feedback-modal {
+    width: 100%;
+    height: 100%;
+    max-width: 100% !important;
+    border-radius: 0;
+    padding: 16px;
+    padding-top: 50px;
+  }
+
+  .tran-feedback-header {
+    margin-bottom: 10px;
+  }
+
+  .close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 32px;
+  }
+
+  .feedback-body {
+    flex-direction: column;
+    gap: 16px;
+    padding: 10px;
+    overflow-y: auto;
+    margin-top: 10px;
+  }
+
+  .feedback-original,
+  .feedback-target {
+    flex: none;
+    width: 100%;
+  }
+
+  .feedback-content-container {
+    min-height: 200px;
+  }
+
+  .feedback-submit-button {
+    width: 100%;
+    height: 48px;
+  }
+}

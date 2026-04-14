@@ -299,6 +299,13 @@ a:hover {
     margin: 20px 0;
 }
 
+.phrase-pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+    padding-bottom: 8px;
+}
+
 /* 圖片按鈕樣式 */
 .icon-link {
     display: flex;
@@ -343,6 +350,7 @@ a:hover {
     align-items: center;
     justify-content: center;
     gap: 5px;
+    flex-wrap: wrap;
 }
 
 .invisible {

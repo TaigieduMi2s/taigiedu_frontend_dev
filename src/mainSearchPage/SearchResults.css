@@ -1,409 +1,259 @@
-.search-results {
-	max-width: 1200px;
-	margin: 20px auto;
-	padding: 20px;
-	background-color: #fff;
-	border-radius: 8px;
-	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+/* =========================================================
+   SearchResults.css — Google 搜尋結果風格
+   ========================================================= */
+
+/* ─── 狀態畫面（載入 / 錯誤 / 無結果） ─── */
+.sr-state-wrapper {
+  width: 100%;
+  padding: 60px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
-.results-table {
-	display: table;
-	width: 100%;
-	border-collapse: collapse;
+.sr-state-text {
+  font-size: 18px;
+  color: #3c4043;
+  margin: 16px 0 8px;
 }
 
-.results-row {
-	display: table-row;
+.sr-state-hint {
+  font-size: 14px;
+  color: #70757a;
 }
 
-.results-row.header {
-	font-weight: bold;
-	background-color: #f5f5f5;
+.sr-error {
+  color: #c5221f;
 }
 
-.results-row>div {
-	display: table-cell;
-	padding: 10px;
-	border: 1px solid #ddd;
+/* 載入 spinner */
+.sr-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #2d92c1;
+  border-radius: 50%;
+  animation: srSpin 0.8s linear infinite;
+  flex-shrink: 0;
 }
 
-.content {
-	height: 100px;
-	border: 1px solid #000;
-	margin: 0 8px;
+@keyframes srSpin {
+  to { transform: rotate(360deg); }
 }
 
+/* ─── 外層包裝 ─── */
+.sr-wrapper {
+  width: 100%;
+}
+
+/* ─── 結果摘要列 ─── */
+.sr-summary {
+  font-size: 14px;
+  color: #70757a;
+  margin: 0 0 16px;
+}
+
+.sr-summary strong {
+  color: #3c4043;
+  font-weight: 600;
+}
+
+/* ─── 結果清單 ─── */
+.sr-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ─── 單一結果條目 ─── */
+.sr-item {
+  border-bottom: 1px solid #ebebeb;
+}
+
+.sr-item:last-child {
+  border-bottom: none;
+}
+
+/* 可點擊連結 */
+.sr-item-link {
+  display: block;
+  padding: 16px 12px;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
+}
+
+.sr-item-link:hover {
+  background-color: #f8fbff;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 來源標籤列 */
+.sr-item-source {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.sr-source-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  background-color: #e8f4f9;
+  color: #2d92c1;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 20px;
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.02em;
+}
+
+.sr-external-icon {
+  color: #aaa;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.sr-item-link:hover .sr-external-icon {
+  color: #2d92c1;
+}
+
+/* 內容片段 */
+.sr-item-snippet {
+  font-size: 15px;
+  line-height: 1.65;
+  color: #3c4043;
+  word-break: break-word;
+  /* 最多顯示 3 行 */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 關鍵字高亮（API 回傳的 <b> 標籤） */
+.sr-item-snippet b {
+  color: #c5221f;
+  font-weight: 600;
+}
+
+/* ─── 分頁列 ─── */
+.sr-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 28px 0 8px;
+  flex-wrap: wrap;
+}
+
+.sr-page-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  background: white;
+  color: #3c4043;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  line-height: 1;
+}
+
+.sr-page-btn:hover:not(:disabled) {
+  background-color: #f1f3f4;
+  border-color: #c6c8ca;
+}
+
+.sr-page-active {
+  background-color: #2d92c1;
+  border-color: #2d92c1;
+  color: white;
+}
+
+.sr-page-active:hover {
+  background-color: #2d92c1 !important;
+}
+
+.sr-page-nav {
+  padding: 0 8px;
+}
+
+.sr-page-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.sr-page-icon-flip {
+  transform: scaleX(-1);
+}
+
+.sr-hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ─── RWD ─── */
+@media (max-width: 768px) {
+  .sr-item-link {
+    padding: 14px 8px;
+  }
+
+  .sr-item-snippet {
+    font-size: 14px;
+    -webkit-line-clamp: 4;
+  }
+
+  .sr-source-tag {
+    font-size: 11px;
+    max-width: 150px;
+  }
+
+  .sr-pagination {
+    gap: 4px;
+    padding: 20px 0 8px;
+  }
+
+  .sr-page-btn {
+    min-width: 32px;
+    height: 32px;
+    font-size: 13px;
+    padding: 0 8px;
+  }
+
+  .sr-page-icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+@media (max-width: 380px) {
+  .sr-page-btn {
+    min-width: 28px;
+    height: 28px;
+    font-size: 12px;
+    padding: 0 6px;
+  }
+}
+
+/* =========================================================
+   保留部分舊樣式（供其他地方可能仍用到）
+   ========================================================= */
 a,
 a:hover {
-	color: inherit;
-	text-decoration: none;
-}
-
-
-/* Dropdown Button */
-.dropdown {
-	position: relative;
-	padding: 0;
-	width: 150px;
-	height: 3.7em;
-	border-radius: 30px;
-	background-color: #ADD9E6;
-	border-style: none;
-}
-
-.dropdown>.dropBtn {
-	padding: 0;
-	width: 150px;
-	height: 52px;
-	border-radius: 30px;
-	background-color: #ADD9E6;
-	border-style: none;
-	font-size: 20px;
-}
-
-
-.dropdown-content {
-	display: none;
-	position: absolute;
-	top: 36px;
-	width: 100%;
-	height: 500px;
-	min-width: 100%;
-	/*  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);*/
-	z-index: 1;
-	background-image: url("./static/img/phrase_dropdown.svg");
-	background-size: Contain;
-	background-position: bottom;
-	background-repeat: no-repeat;
-}
-
-.column {
-	float: left;
-	width: 136px;
-	/* 設定每個欄位的寬度為50% */
-	padding: 5px;
-	padding-top: 25px;
-	box-sizing: border-box;
-}
-
-/* Links inside the dropdown */
-.dropdown-content a {
-	color: black;
-	padding: 5px 10px;
-	width: 140px;
-	text-decoration: none;
-	display: block;
-}
-
-label {
-	display: block;
-	color: black;
-	font-size: 16px;
-	margin: 5px 0;
-}
-
-
-/* Show the dropdown menu on hover */
-.dropdown:hover .dropdown-content {
-	display: block;
-}
-
-/* Change color of dropdown links on hover */
-.dropdown-content a:hover {
-	background-color: #ddd;
-}
-
-/* Change the background color of the dropdown button when the dropdown content is shown */
-.dropdown:hover .dropbtn {
-	background-color: #ADD9E6;
-}
-
-.menuTitle {
-	font-size: 22px;
-	font-family: 'Huninn', 'NotoSansTC', sans-serif;
-	font-weight: 400;
-	color: #000;
-
-}
-
-.menuText {
-	font-size: 22px;
-	font-family: 'Huninn', 'NotoSansTC', sans-serif;
-	font-weight: 400;
-	color: #000;
-}
-
-.selectionText {
-	font-size: 20px;
-	font-family: 'Huninn', 'NotoSansTC', sans-serif;
-	font-weight: 500;
-	color: #000;
-	text-align: left;
-}
-
-.Title {
-	font-size: 2.5rem;
-	font-weight: bold;
-	margin-bottom: 0;
-}
-
-.SearchResultTitle {
-	font-size: 2.3rem;
-	font-weight: bold;
-	margin-bottom: 0;
-}
-
-.modal-content {
-	border: solid;
-	border-width: 4px;
-	border-color: #84C6DA;
-	border-radius: 20px;
-
-	min-width: 800px;
-	min-height: 200px;
-
-}
-
-.modal-header {
-	border: none;
-}
-
-.modal-close {
-	text-align: right;
-	margin-top: 10px;
-	margin-right: 10px;
-	padding-top: 0px;
-}
-
-.modal-detail {
-	/* 上右下左 */
-	padding: 0px 20px 20px 20px;
-}
-
-.popupTitle {
-	font-size: 2rem;
-	font-weight: bold;
-	margin-bottom: 0;
-}
-
-.selected-page {
-	background-color: #84C6DA;
-}
-
-.selected-page {
-	background-color: #84C6DA;
-}
-
-.content {
-	height: 100px;
-	border: 1px solid #000;
-	margin: 0 8px;
-}
-
-.imgBorder {
-	overflow: hidden;
-	width: 100%;
-	height: 60px;
-}
-
-.imgSize {
-	width: 100%;
-	height: 160px;
-	object-fit: cover;
-}
-
-.imgTitle {
-	font-size: 12px;
-	font-family: 'Huninn', 'NotoSansTC', sans-serif;
-	/* font-weight: bold; */
-	/* overflow:hidden; white-space: nowrap; text-overflow: ellipsis; */
-	-webkit-line-clamp: 2;
-	overflow: hidden;
-	display: -webkit-box;
-	-webkit-box-orient: vertical;
-	white-space: normal;
-}
-
-.sentenceCard {
-	width: 100%;
-	background-color: #dfeaf2;
-	border-bottom: 1px solid #eaf4f9;
-	color: #000
-}
-
-.titleCard {
-	height: 50px;
-	width: 100%;
-	padding-right: 1rem;
-	padding-left: 1rem;
-	padding-top: 0.7rem;
-	background-color: #2D92C1;
-	color: #fff;
-	font-size: 18px;
-	font-weight: bold;
-	border-radius: 8px 8px 0px 0px;
-}
-
-
-.sentenceTitle {
-	font-size: 16px;
-	font-weight: bold;
-	/* overflow:hidden; white-space: nowrap; text-overflow: ellipsis; */
-	-webkit-line-clamp: 1;
-	overflow: hidden;
-	display: -webkit-box;
-	-webkit-box-orient: vertical;
-	white-space: normal;
-}
-
-.sentenceContent {
-	font-size: 16px;
-	font-family: 'Huninn', 'NotoSansTC', sans-serif;
-	/* overflow:hidden; white-space: nowrap; text-overflow: ellipsis; */
-	-webkit-line-clamp: 1;
-	overflow: hidden;
-	display: -webkit-box;
-	-webkit-box-orient: vertical;
-	white-space: normal;
-}
-
-ul.pagination li a.wide-link {
-	width: 90px;
-	/* 設置你想要的寬度 */
-}
-
-ul.pagination li a {
-	text-align: center;
-	width: 48px;
-	border-radius: 5px;
-	color: #000;
-	border-color: rgba(0, 0, 0, 0);
-	background-color: rgba(0, 0, 0, 0);
-	;
-}
-
-
-.lastbutton {
-	width: 35px;
-	border-radius: 5px;
-	border-color: rgba(0, 0, 0, 0);
-	background-color: rgba(0, 0, 0, 0);
-	;
-}
-
-ul.pagination li a:hover {
-	background-color: rgba(0, 0, 0, 0);
-	color: #2D92C1;
-	border-color: rgba(0, 0, 0, 0);
-}
-
-ul.pagination li a.active {
-	border-radius: 5px;
-	border-color: rgba(0, 0, 0, 0);
-}
-
-.page-item.active .page-link {
-	border-radius: 5px 5px 5px 5px;
-	z-index: 1;
-	color: #fff;
-	background-color: #2D92C1;
-	border-color: rgba(0, 0, 0, 0);
-	cursor: pointer;
-
-}
-
-.page-link:hover {
-	background-color: rgba(0, 0, 0, 0);
-	color: #2D92C1;
-	border-color: rgba(0, 0, 0, 0);
-	cursor: pointer;
-	/* Add cursor pointer */
-}
-
-a,
-a:hover {
-	color: inherit;
-	text-decoration: none;
-}
-
-.languageRadio {
-	width: 50em;
-}
-
-.form-check-input[type=radio] {
-	margin-top: 1rem;
-}
-
-.pagination-container {
-	display: flex;
-	justify-content: center;
-	position: relative;
-	padding: 0 120px;
-	/* Make space for back/next buttons */
-}
-
-.pagination-container {
-	display: flex;
-	justify-content: center;
-}
-
-.pagination {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 5px;
-}
-
-.page-numbers {
-	display: flex;
-	gap: 5px;
-}
-
-.back-button,
-.next-button {
-	display: flex;
-	align-items: center;
-}
-
-.invisible {
-	visibility: hidden;
-}
-
-.page-link {
-	border: none;
-	padding: 0.5rem 1rem;
-}
-
-/* 圖片按鈕樣式 */
-.icon-link {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 0.5rem;
-	border: none;
-	background: transparent;
-}
-
-.pagination-icon {
-	width: 20px;
-	height: 20px;
-	transition: opacity 0.2s ease;
-}
-
-.pagination-icon:hover {
-	opacity: 0.7;
-}
-
-/* 右箭頭鏡像效果 */
-.right-arrow {
-	transform: scaleX(-1);
-}
-
-/* 按鈕間距調整 */
-.first-page-button,
-.back-button,
-.next-button,
-.last-page-button {
-	margin: 0 5px;
+  color: inherit;
+  text-decoration: none;
 }

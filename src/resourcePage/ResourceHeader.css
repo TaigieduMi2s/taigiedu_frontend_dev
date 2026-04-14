@@ -21,10 +21,11 @@
   height: 48px;
   padding: 12px 16px;
   align-items: center;
-  border: none;
+  border: 1px solid #ddd;
+  outline: none;
   border-radius: 10px;
   background: #fff;
-  box-shadow: 0px 0px 0px 4px rgba(20, 118, 255, 0.14);
+  box-shadow: none;
 
   color: var(--Primary-Black, #424242);
   font-family: Inter;
@@ -61,7 +62,8 @@
 .grade-dropdown:hover,
 .version-dropdown:hover,
 .resource-multi .select-header:hover {
-  box-shadow: 0px 0px 0px 4px #017ab1;
+  border-color: #017ab1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .version-dropdown:disabled {
@@ -76,34 +78,42 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  flex: 1 1 300px;
-  /* 允許縮放，最小寬度 300px */
+  flex: 1 1 auto;
+  min-width: 250px;
+  /* 允許縮放，最小寬度 250px */
   max-width: 800px;
+  height: 48px; /* 強制容器與其他元件等高 */
 }
 
 .res-search-input {
   width: 100%;
-  padding: 0.75rem 2.5rem 0.75rem 0.75rem;
+  height: 100%; /* 填滿容器高度 (48px) */
+  padding: 0 3rem 0 1rem;
   /* 調整內距以便顯示圖示 */
   border: 1px solid #cbd5e0;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  margin: 0 auto;
+  margin: 0;
   outline: none;
 }
 
 .res-search-input:focus,
 .res-search-input:hover {
   border-color: #4AA3BA;
-  box-shadow: 0 0 5px rgba(74, 163, 186, 0.3);
+  box-shadow: none;
 }
 
 .res-search-icon {
   position: absolute;
   cursor: pointer;
-  right: 0.5rem;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
   color: #cbd5e0;
+  z-index: 5;
 }
 
 .res-button-container {
@@ -116,8 +126,7 @@
 }
 
 .res-upload-button,
-.res-delete-button,
-.res-login-button {
+.res-delete-button {
   display: flex;
   width: 140px;
   height: 48px;
@@ -130,6 +139,8 @@
   cursor: pointer;
   transition: background-color 0.3s, border-color 0.3s;
 
+  border: none;
+  outline: none;
   color: #fff;
   text-align: center;
   font-family: Inter;
@@ -145,8 +156,7 @@
 }
 
 
-.res-upload-button:hover,
-.res-login-button:hover {
+.res-upload-button:hover {
   background-color: #005f8d;
 }
 
@@ -165,17 +175,7 @@
   opacity: 1;
 }
 
-/* 登出按鈕樣式 */
-.res-login-button.logout-button {
-  background-color: #e74c3c;
-  /* 紅色背景 */
-  color: white;
-}
 
-.res-login-button.logout-button:hover {
-  background-color: #c0392b;
-  /* 深紅色 hover 效果 */
-}
 
 /* 響應式優化 */
 @media (max-width: 1200px) {
@@ -192,9 +192,67 @@
   }
 
   .res-search-container {
-    order: -1;
-    /* 搜尋框移到前面 */
+    order: -2;
+    /* 搜尋框移到最前面 */
     width: 100%;
     max-width: 100%;
   }
+}
+
+@media (max-width: 768px) {
+  .resource-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 8px;
+    align-items: center;
+  }
+
+  .res-search-container {
+    grid-column: span 2;
+    width: 100%;
+    height: 44px;
+  }
+
+  .dropdown-container {
+    grid-column: span 2;
+    width: 100%;
+  }
+
+  .grade-dropdown {
+    width: 100%;
+    height: 44px;
+    font-size: 14px;
+  }
+
+  .multiselect-wrapper.resource-multi {
+    grid-column: span 1;
+    width: 100% !important;
+  }
+
+  .resource-multi .select-header {
+    width: 100% !important;
+    height: 44px;
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  .res-button-container {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .res-upload-button,
+  .res-delete-button {
+    width: 100% !important;
+    height: 40px;
+    font-size: 13px;
+    padding: 8px 4px;
+    margin: 0;
+  }
+
+
 }

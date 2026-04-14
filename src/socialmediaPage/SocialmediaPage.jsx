@@ -397,7 +397,7 @@ const SocialmediaPage = () => {
                                                     >
                                                         <span className="checkbox-indicator"></span>
                                                         <span>{type || "（空白類別）"}</span>
-                                                        <span className="social-submenu-arrow">›</span>
+                                                        <span className="social-submenu-arrow hidden-mobile">›</span>
                                                         <div
                                                             className="social-submenu"
                                                             onClick={(e) => e.stopPropagation()}
@@ -454,10 +454,10 @@ const SocialmediaPage = () => {
                     <div key={category} className="socialmedia-section" ref={categoryRefs.current[category]}>
                         <div className="container px-4">
                             <h2 className="social-category-title">{category || "（空白類別）"}</h2>
-                            <div className="row g-4">
+                            <div className="row g-2 g-sm-4">
                                 {items.map(item => (
                                     <div key={item.id}
-                                        className="col-12 col-sm-6 col-md-4 col-lg-3"
+                                        className="col-6 col-md-4 col-lg-3"
                                         onClick={() => handleCardClick(item.url)}>
                                         <div className="socialmedia-card">
                                             <div className="social-image-container">

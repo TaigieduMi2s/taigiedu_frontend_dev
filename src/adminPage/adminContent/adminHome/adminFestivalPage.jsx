@@ -9,13 +9,25 @@ import deleteIcon from '../../../assets/adminPage/trash.svg';
 import addIcon from '../../../assets/adminPage/plus.svg';
 import uturnIcon from '../../../assets/adminPage/uturn.svg';
 import speakerIcon from '../../../assets/speaker-wave.svg';
+import { authenticatedFetch } from '../../../services/authService';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/api';
 
 const getFileNameFromUrl = (url) => {
+  if (!url) return '';
   try {
     const u = new URL(url);
-    const last = u.pathname.split('/').filter(Boolean).pop();
-    return last || '';
-  } catch { return ''; }
+    return u.pathname.split('/').filter(Boolean).pop() || '';
+  } catch { 
+    return url.split('/').filter(Boolean).pop() || ''; 
+  }
+};
+
+const getFullImageUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('blob:')) return path;
+  const filename = path.split('/').filter(Boolean).pop();
+  return `https://dev.taigiedu.com/backend/static/festival/${filename}`;
 };
 
 const AdminFestivalPage = () => {
@@ -94,24 +106,43 @@ const AdminFestivalPage = () => {
 
   useEffect(() => { return () => { if (audioRef) { try { audioRef.pause(); } catch { /* ignore */ } } }; }, [audioRef]);
 
-  const fetchFestival = useCallback(() => {
+  const fetchFestival = useCallback(async () => {
     setIsLoading(true); setError(null);
-    setTimeout(() => {
-      try {
-        const mockData = [
-          // 目前項目
-          { id: 1, zhName: "清明節", twName: "tshing-bîng-tse", imageUrl: "", imageName: "圖1.jpeg", zhDesc: "約當國曆四月四日或五日，民眾…", twDesc: "約當國曆四月四日或五日…", audioUrl: "https://www2.cs.uic.edu/~i101/SoundFiles/Trumpet.mp3", timestamp: "國曆四月四日", status: "published" },
-          { id: 2, zhName: "中秋節", twName: "Tiong-tshiû", imageUrl: "", imageName: "圖2.jpeg", zhDesc: "我國傳統民俗節日之一…", twDesc: "我國傳統民俗節日之一…", audioUrl: "https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav", timestamp: "農曆八月十五日", status: "published" },
-          // 下架
-          { id: 3, zhName: "端午節", twName: "Tuan-ngóo-tse", imageUrl: "", imageName: "圖3.jpeg", zhDesc: "午時節慶…", twDesc: "午時節慶…", audioUrl: "", timestamp: "農曆五月初五", status: "archived" }
-        ];
-        const formatted = mockData.map(i => ({ id: i.id, zhName: i.zhName, twName: i.twName, imageUrl: i.imageUrl || '', imageName: i.imageName || '', zhDesc: i.zhDesc || '', twDesc: i.twDesc || '', audioUrl: i.audioUrl || '', timestamp: i.timestamp || 'N/A', status: i.status || 'published' }));
-        setAllFestival(formatted);
-      } catch (e) {
-        showToast(`載入節慶資料失敗: ${e.message}`, 'error');
-        setError(e.message);
-      } finally { setIsLoading(false); }
-    }, 600);
+    try {
+      const response = await authenticatedFetch(`${API_BASE_URL}/admin/culture/festival`);
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.message || '載入失敗');
+      
+      const records = result.festival_data || [];
+      const formatted = records.map(i => {
+        let label = i.timestamp;
+        if (i.date && i.islunar !== undefined) {
+           const [m, d] = i.date.split('-');
+           label = (i.islunar === '1' || String(i.islunar) === 'true' ? '農曆' : '國曆') + `${toCnNum(Number(m))}月${toCnNum(Number(d))}日`;
+        }
+        return {
+          id: i.id,
+          zhName: i.name || '',
+          twName: i.name_tl || '',
+          imageUrl: getFullImageUrl(i.figure),
+          imageName: i.figure ? i.figure.split('/').pop() : '',
+          zhDesc: i.intro_mandarin || '',
+          twDesc: i.intro_taigi || '',
+          audioUrl: getFullImageUrl(i.audio_data),
+          timestamp: label || 'N/A',
+          status: i.status === 'publish' ? 'published' : i.status === 'archive' ? 'archived' : i.status,
+          dateMonth: i.date ? i.date.split('-')[0] : '',
+          dateDay: i.date ? i.date.split('-')[1] : '',
+          dateType: (i.islunar === '1' || String(i.islunar) === 'true') ? 'lunar' : 'solar'
+        };
+      });
+      setAllFestival(formatted);
+    } catch (e) {
+      showToast(`載入節慶資料失敗: ${e.message}`, 'error');
+      setError(e.message);
+    } finally {
+      setIsLoading(false);
+    }
   }, [showToast]);
 
   useEffect(() => { fetchFestival(); }, [fetchFestival]);
@@ -128,12 +159,18 @@ const AdminFestivalPage = () => {
     setUsingRecording(false);
     setTtsPlaying(false); setTtsProgress(0);
     setRecState('idle'); setRecordUrl(''); setRecordPlaying(false); setRecordProgress(0);
-    // 嘗試從 timestamp 解析日期型別與數字，若不是標準格式就保留空白
-    if (item.timestamp && typeof item.timestamp === 'string') {
+    // 嘗試從 timestamp 或記錄解析日期型別與數字
+    if (item.dateMonth && item.dateDay) {
+      setDateMonth(Number(item.dateMonth).toString());
+      setDateDay(Number(item.dateDay).toString());
+      setDateType(item.dateType || 'lunar');
+    } else if (item.timestamp && typeof item.timestamp === 'string') {
       if (item.timestamp.startsWith('農曆')) setDateType('lunar');
       else if (item.timestamp.startsWith('國曆')) setDateType('solar');
+      setDateMonth(''); setDateDay('');
+    } else {
+      setDateMonth(''); setDateDay('');
     }
-    setDateMonth(''); setDateDay('');
     setNewImageFile(null);
     setTtsGenerated(false); setTtsPlaying(false); setTtsProgress(0); setUsingRecording(false);
     setShowAddModal(true);
@@ -252,7 +289,7 @@ const AdminFestivalPage = () => {
     return (tens > 1 ? map1[tens] + '十' : '十') + (ones ? map1[ones] : '');
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!newZhName || !newTwName || !newZhDesc || !newTwDesc) { showToast('請填寫必填欄位', 'warning'); return; }
     if (!dateMonth || !dateDay) { showToast('請填寫日期', 'warning'); return; }
@@ -262,27 +299,64 @@ const AdminFestivalPage = () => {
     if (m < 1 || m > 12) { showToast('月份需介於 1-12', 'warning'); return; }
     const maxD = dateType === 'solar' ? 31 : 30;
     if (d < 1 || d > maxD) { showToast(`日期(${dateType === 'solar' ? '國曆' : '農曆'})需介於 1-${maxD}`, 'warning'); return; }
-    const now = new Date();
-    const ts = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-    const label = (dateType === 'lunar' ? '農曆' : '國曆') + `${toCnNum(Number(dateMonth))}月${toCnNum(Number(dateDay))}日`;
-    if (isEditing && currentEditItem) {
-      setAllFestival(prev => prev.map(i => i.id === currentEditItem.id ? { ...i, zhName: newZhName, twName: newTwName, imageUrl: newImageFile ? URL.createObjectURL(newImageFile) : newImageUrl, imageName: newImageFile ? newImageFile.name : newImageName, zhDesc: newZhDesc, twDesc: newTwDesc, audioUrl: usingRecording ? (recordUrl || '') : newAudioUrl, ttsText: (!usingRecording && ttsGenerated) ? newTwName : '', timestamp: label } : i));
-      showToast('項目已更新', 'success');
-    } else {
-      const newItem = { id: 'festival-' + Date.now(), zhName: newZhName, twName: newTwName, imageUrl: newImageFile ? URL.createObjectURL(newImageFile) : '', imageName: newImageFile ? newImageFile.name : '', zhDesc: newZhDesc, twDesc: newTwDesc, audioUrl: usingRecording ? (recordUrl || '') : '', ttsText: (!usingRecording && ttsGenerated) ? newTwName : '', timestamp: label || ts, status: 'published' };
-      setAllFestival(prev => [newItem, ...prev]);
-      showToast('新節慶項目已新增', 'success');
+    
+    const dateStr = `${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const mappedAudio = usingRecording ? (recordUrl || '') : (newAudioUrl ? newAudioUrl.split('/').pop() : '');
+    const finalImage = newImageFile ? newImageFile.name : newImageName;
+    
+    const payload = {
+      name: newZhName,
+      name_tl: newTwName,
+      intro_mandarin: newZhDesc,
+      intro_taigi: newTwDesc,
+      figure: finalImage,
+      audio_data: mappedAudio,
+      islunar: dateType === 'lunar' ? '1' : '0',
+      date: dateStr,
+    };
+
+    try {
+      if (isEditing && currentEditItem) {
+        payload.id = String(currentEditItem.id);
+        payload.action = '3';
+        
+        const response = await authenticatedFetch(`${API_BASE_URL}/admin/culture/festival/modify`, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || '更新失敗');
+        showToast('項目已更新', 'success');
+      } else {
+        const response = await authenticatedFetch(`${API_BASE_URL}/admin/culture/festival/add`, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || '新增失敗');
+        showToast('新節慶項目已新增', 'success');
+      }
+      handleModalClose();
+      await fetchFestival();
+    } catch (e) {
+      showToast(`操作失敗: ${e.message}`, 'error');
     }
-    handleModalClose();
   };
 
-  const handleDeleteClick = (itemId) => {
+  const handleDeleteClick = async (itemId) => {
     const isRestore = statusFilter === 'archived';
     const confirmMsg = isRestore ? '確定要復原此筆已下架的項目嗎？' : '確定要下架此筆項目嗎？';
     if (!window.confirm(confirmMsg)) return;
     try {
-      setAllFestival(prev => prev.map(i => i.id === itemId ? { ...i, status: isRestore ? 'published' : 'archived' } : i));
+      const response = await authenticatedFetch(`${API_BASE_URL}/admin/culture/festival/modify`, {
+        method: 'POST',
+        body: JSON.stringify({ id: String(itemId), action: isRestore ? '2' : '1' })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.message || '操作失敗');
+
       showToast(isRestore ? '項目已復原' : '項目已下架', 'success');
+      await fetchFestival();
     } catch (e) {
       console.error(isRestore ? '復原失敗:' : '下架失敗:', e);
       showToast(`${isRestore ? '復原' : '下架'}失敗: ${e.message}`, 'error');
@@ -488,14 +562,20 @@ const AdminFestivalPage = () => {
         <div className="mb-3">
           <label className="form-label admin-form-label">*圖片</label>
           <div className="d-flex align-items-center gap-3">
-            <div className="file-cell">
-              <img src={jpgIcon} alt="JPG檔" className="file-icon-image" />
-              <span className="file-name">{newImageName || '未選擇檔案'}</span>
-            </div>
             <button type="button" className="btn btn-outline-secondary" onClick={handleReplaceFileClick}>上傳檔案</button>
-            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
+            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png" className="d-none" onChange={handleFileChange} />
+            <span className="text-muted" style={{ fontSize: '13px' }}>
+              ※限 JPG、PNG 可上傳，限制 2MB。
+            </span>
           </div>
-          <div className="form-text">*限 JPG、PNG可上傳，限制 2MB。</div>
+          {(newImageUrl || newImageFile) && (
+            <div className="mt-3 d-inline-flex flex-column align-items-center" style={{ border: '1px solid #e0e0e0', borderRadius: '8px', padding: '8px', backgroundColor: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.06)' }}>
+              <img src={newImageFile ? URL.createObjectURL(newImageFile) : newImageUrl} alt="圖片預覽" style={{ maxHeight: '130px', maxWidth: '100%', objectFit: 'contain', borderRadius: '4px' }} />
+              <div className="mt-2 text-secondary text-truncate" style={{ maxWidth: '200px', fontSize: '13px' }} title={newImageName || '圖片'}>
+                {newImageName || '圖片'}
+              </div>
+            </div>
+          )}
         </div>
         <div className="mb-3">
           <label htmlFor="newZhDesc" className="form-label admin-form-label">*華文釋義</label>

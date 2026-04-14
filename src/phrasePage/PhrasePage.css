@@ -1,20 +1,36 @@
 .page-container {
-    padding-left: 5%; /* 設置左側間隔 */
-    padding-right: 5%; /* 如果需要右側間隔 */
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 5%;
 }
 
 .search-bar-container {
-    width: 40%;
-    padding-left: 3%; /* 設置左側間隔 */
-    padding-top:2%;
-    margin-bottom: 2%;
+    width: 100%;
+    max-width: 1000px;
+    margin: 20px auto 0 auto;
+    display: flex;
+    justify-content: center;
 }
   
 .phrase-results-container {
-    display: grid;
-    gap: 20px;
     width: 100%;
-    padding-left: 5%; /* 設置左側間隔 */
-    padding-right: 5%; /* 如果需要右側間隔 */
-    margin-top: 0;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* ─── RWD ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .page-container {
+        padding-left: 3%;
+        padding-right: 3%;
+    }
+
+    .search-bar-container {
+        width: 100%;
+        padding-left: 0;
+    }
+
+    .phrase-results-container {
+        gap: 14px;
+    }
 }

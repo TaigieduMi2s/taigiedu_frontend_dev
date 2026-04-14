@@ -103,3 +103,39 @@ audio {
   cursor: not-allowed;
   opacity: 0.7;
 }
+
+/* ─── RWD ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 0;
+  }
+
+  .modal-content {
+    width: 100%;
+    height: 100%;
+    max-width: 100% !important;
+    max-height: 100vh !important;
+    border-radius: 0;
+    padding: 16px;
+    padding-top: 60px; /* 為叉叉留位置 */
+  }
+
+  .modal-close-button {
+    top: 20px;
+    right: 20px;
+    font-size: 28px;
+  }
+
+  .feedback-textarea {
+    min-height: calc(100vh - 200px);
+  }
+
+  .modal-actions {
+    width: 100%;
+  }
+
+  .modal-button {
+    width: 100%;
+    height: 48px;
+  }
+}
