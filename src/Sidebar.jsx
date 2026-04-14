@@ -24,6 +24,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
   const location = useLocation(); // 監聽當前路由變化
 
   const isUnstableFeaturesEnabled = envConfig.features.enableUnstableFeatures;
+  const isTopicIntegrationFeatureEnabled = envConfig.features.enableTopicIntegrationFeature;
 
   const allMenuItems = [
     { id: 1, label: "主頁搜尋", icon: homeIcon, path: "/" },
@@ -57,8 +58,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
   ];
 
   const menuItems = allMenuItems.filter(item => {
-    // 隱藏「本站特色資源」
-    if (item.id === 11) return false;
+    if (!isTopicIntegrationFeatureEnabled && item.id === 11) return false;
     if (!isUnstableFeaturesEnabled) {
       if ([2, 3, 4].includes(item.id)) return false;
     }

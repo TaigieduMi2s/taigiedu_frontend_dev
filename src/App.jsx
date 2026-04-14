@@ -70,6 +70,7 @@ const AppLayout = () => {
   const isCelebrityDetail = location.pathname === '/celebrity/detail';
   const isAdminPage = location.pathname === '/admin';
   const isAdminContent = location.pathname.startsWith('/admin/');
+  const isTopicIntegrationFeatureEnabled = envConfig.features.enableTopicIntegrationFeature;
 
   // 路由切換時自動收起 sidebar（手機版）
   useEffect(() => {
@@ -139,7 +140,14 @@ const AppLayout = () => {
           <Route path="/culture/festival" element={<CultureFestival />} />
           <Route path="/socialmedia" element={<SocialmediaPage />} />
           <Route path="/exam" element={<ExamPage />} />
-          <Route path="/featured-resource/topic-integration" element={<TopicIntegrationPage />} />
+          <Route
+            path="/featured-resource/topic-integration"
+            element={
+              isTopicIntegrationFeatureEnabled
+                ? <TopicIntegrationPage />
+                : <Navigate to="/" replace />
+            }
+          />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
