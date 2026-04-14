@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './ExamPage.css';
+import HorizontalScrollRow from '../components/HorizontalScrollRow/HorizontalScrollRow';
 import searchIcon from '../assets/home/search_logo.svg';
 // import questionMarkIcon from '../assets/question-mark.svg';
 import foodImage from '../assets/culture/foodN.png';
@@ -265,7 +266,7 @@ const ExamPage = () => {
                         </div>
 
                         {/* 橫向捲動卡片列 */}
-                        <div className="exam-scroll-row">
+                        <HorizontalScrollRow>
                             {items.map(item => (
                                 <div
                                     key={item.id}
@@ -290,7 +291,7 @@ const ExamPage = () => {
                                     </div>
                                 </div>
                             ))}
-                        </div>
+                        </HorizontalScrollRow>
                     </section>
                 ))}
             </div>

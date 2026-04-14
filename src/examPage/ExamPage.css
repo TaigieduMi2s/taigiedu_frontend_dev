@@ -159,28 +159,16 @@
     padding: 0 20px 16px;
 }
 
-/* ─── 橫向捲動列 ─── */
-.exam-scroll-row {
-    display: flex;
-    gap: 16px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-    padding: 4px 20px 20px;
-    scrollbar-width: none; /* 隱藏捲軸（Firefox）*/
+/* ─── 捲動列外層 padding ─── */
+.exam-section .hsr-root {
+    padding: 0 12px;
 }
 
-.exam-scroll-row::-webkit-scrollbar {
-    display: none; /* 隱藏捲軸（Chrome/Safari）*/
-}
-
-/* ─── 單張卡片 ─── */
+/* ─── 單張卡片（寬度由 hsr-slide 決定，卡片填滿） ─── */
 .exam-card {
-    flex: 0 0 160px;
     width: 160px;
-    scroll-snap-align: start;
     cursor: pointer;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     border-radius: 10px;
     overflow: hidden;
     background: white;
@@ -276,9 +264,8 @@
     padding: 0 16px 12px;
   }
 
-  .exam-scroll-row {
-    padding: 4px 16px 16px;
-    gap: 12px;
+  .exam-section .hsr-root {
+    padding: 0 4px;
   }
 
   .exam-category-title {
@@ -286,14 +273,12 @@
   }
 
   .exam-card {
-    flex: 0 0 136px;
     width: 136px;
   }
 }
 
 @media (max-width: 380px) {
   .exam-card {
-    flex: 0 0 120px;
     width: 120px;
   }
 

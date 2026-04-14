@@ -397,7 +397,7 @@ const SocialmediaPage = () => {
                                                     >
                                                         <span className="checkbox-indicator"></span>
                                                         <span>{type || "（空白類別）"}</span>
-                                                        <span className="social-submenu-arrow">›</span>
+                                                        <span className="social-submenu-arrow hidden-mobile">›</span>
                                                         <div
                                                             className="social-submenu"
                                                             onClick={(e) => e.stopPropagation()}

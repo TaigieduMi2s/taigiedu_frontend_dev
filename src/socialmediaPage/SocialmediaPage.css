@@ -87,6 +87,12 @@
     transform: translateY(-5px);
 }
 
+.socialmedia-card h5 {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
 .socialmedia-section {
     margin-bottom: 40px;
 }
@@ -331,24 +337,14 @@
     max-width: 100%;
   }
 
-  /* 手機版子選單改為下拉（不再彈到右側螢幕外） */
+  /* 手機版隱藏子選單 */
   .social-submenu {
-    position: static;
-    left: auto;
-    top: auto;
-    opacity: 1;
-    visibility: visible;
-    box-shadow: none;
-    border-top: 1px solid #e0e0e0;
-    border-radius: 0;
-    max-height: none;
-    transition: none;
+    display: none;
   }
 
   .social-dropdown-item-container:hover .social-submenu,
   .social-submenu:hover {
-    opacity: 1;
-    visibility: visible;
+    display: none;
   }
 
   .social-custom-dropdown {
@@ -357,6 +353,14 @@
 
   .social-dropdown-menu {
     width: 100%;
+  }
+
+  .social-dropdown-item.with-submenu {
+    justify-content: flex-start;
+  }
+
+  .hidden-mobile {
+    display: none;
   }
 }
 
