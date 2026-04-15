@@ -26,6 +26,7 @@ jobs:
           echo "VITE_API_URL=https://www.taigiedu.com/backend" >> .env
           echo "VITE_IMAGE_URL=https://dev.taigiedu.com" >> .env
           echo "VITE_ENABLE_UNSTABLE_FEATURES=false" >> .env
+          echo "VITE_ENABLE_TOPIC_INTEGRATION_FEATURE=false" >> .env
           echo "VITE_ENABLE_ROBOTS_NOINDEX=false" >> .env
           npm run build
 
