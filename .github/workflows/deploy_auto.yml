@@ -67,6 +67,7 @@ jobs:
           echo "VITE_API_URL=https://dev.taigiedu.com/backend" >> .env   # ← 改這行
           echo "VITE_IMAGE_URL=https://dev.taigiedu.com" >> .env
           echo "VITE_ENABLE_UNSTABLE_FEATURES=true" >> .env
+          echo "VITE_ENABLE_TOPIC_INTEGRATION_FEATURE=true" >> .env
           echo "VITE_ENABLE_ROBOTS_NOINDEX=true" >> .env
           npm run build
           rsync -av --delete ${{ github.workspace }}/dist/ /var/www/taigiedu_frontend_dev/
