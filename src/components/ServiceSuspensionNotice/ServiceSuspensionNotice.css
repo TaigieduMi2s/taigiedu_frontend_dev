@@ -1,0 +1,204 @@
+/* ── 暫停服務通知：遮罩 ──────────────────────────────────────── */
+.ssn-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: ssnFadeIn 0.25s ease;
+  padding: 16px;
+}
+
+.ssn-overlay--blocking {
+  cursor: default;
+}
+
+@keyframes ssnFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── 卡片 ─────────────────────────────────────────────────────
+   Figma frame: 1247 × 945  →  scale ≈ 760 / 1247 = 0.61
+   ─────────────────────────────────────────────────────────── */
+.ssn-card {
+  position: relative;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 760px;
+  overflow: hidden;
+  animation: ssnScaleIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes ssnScaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── 標題區（白色背景，Figma y=0~240 → 146px scaled） ─────── */
+.ssn-header {
+  position: relative;
+  background: #ffffff;
+  /* 縱向：title 在 y=40，header 白底到 y=240 → 約 146px */
+  min-height: 146px;
+  display: flex;
+  align-items: center;
+  /* 水平：title x=326 在 1247px 中心偏左 → 置中排列 */
+  justify-content: center;
+  padding: 28px 72px 28px 48px;
+}
+
+/* 標題：Figma 100px / NotoSansTC Bold → scaled ~61px */
+.ssn-title {
+  font-family: 'NotoSansTC', 'Noto Sans CJK TC', 'Noto Sans TC', sans-serif;
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 700;
+  color: #767676;
+  margin: 0;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+/* ── 關閉按鈕（Figma x=1159,y=38 → right:24px, top:24px） ── */
+.ssn-close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #041833;
+  transition: background 0.2s, transform 0.2s;
+  padding: 0;
+}
+
+.ssn-close-btn:hover {
+  background: rgba(0, 0, 0, 0.07);
+  transform: rotate(90deg);
+}
+
+/* ── 內容區（漸層背景，Figma y=240~945 → 430px scaled）────── */
+.ssn-body {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  /* 上方留白：Figma content y=380, gradient start y=240 → gap ≈ 85px */
+  padding: 85px 40px 88px 49px;
+  background: linear-gradient(
+    to bottom,
+    rgba(151, 151, 151, 0.20) 0%,
+    rgba(45, 146, 193, 0.07) 100%
+  );
+}
+
+/* ── 左側文字區 ──────────────────────────────────────────────
+   Figma: content x=80, w=633 in 1247px → scaled ~386px left section
+   ─────────────────────────────────────────────────────────── */
+.ssn-text-section {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── 期間區塊 ────────────────────────────────────────────────
+   Figma: label 32px / value 48px  → scaled ~19.5px / ~29px
+   ─────────────────────────────────────────────────────────── */
+.ssn-period-block {
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ssn-period-label {
+  font-family: 'Huninn', 'NotoSansTC', sans-serif;
+  font-size: clamp(0.9rem, 1.6vw, 1.2rem);
+  color: #767676;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.ssn-period-value {
+  font-family: 'Huninn', 'NotoSansTC', sans-serif;
+  font-size: clamp(1.25rem, 2.5vw, 1.85rem);
+  font-weight: 400;
+  color: #000000;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+/* ── 說明文字（Figma 32px → ~19.5px scaled）─────────────────── */
+.ssn-description {
+  font-family: 'Huninn', 'NotoSansTC', sans-serif;
+  font-size: clamp(0.9rem, 1.6vw, 1.2rem);
+  color: #000000;
+  line-height: 1.65;
+  margin: 20px 0 20px;
+  font-weight: 400;
+}
+
+/* ── 署名（Figma 20px → ~12px scaled）───────────────────────── */
+.ssn-signature {
+  font-family: 'Huninn', 'NotoSansTC', sans-serif;
+  font-size: clamp(0.72rem, 1.1vw, 0.87rem);
+  color: #767676;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* ── 右側圖示區 ──────────────────────────────────────────────
+   Figma: image x=753, w=444, h=461 in 1247px → scaled ~270×281px
+   ─────────────────────────────────────────────────────────── */
+.ssn-icon-section {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(160px, 36%, 275px);
+}
+
+/* ── 警告三角 SVG（Figma 444×461 → scaled ~270px）───────────── */
+.ssn-warning-icon {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 8px 20px rgba(255, 140, 0, 0.40));
+}
+
+/* ── RWD ─────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .ssn-header {
+    min-height: auto;
+    padding: 24px 56px 20px 24px;
+  }
+
+  .ssn-body {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    padding: 32px 24px 32px;
+    gap: 16px;
+  }
+
+  .ssn-icon-section {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .ssn-warning-icon {
+    width: 100px;
+  }
+
+  .ssn-close-btn {
+    top: 14px;
+    right: 14px;
+  }
+}
