@@ -53,6 +53,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
       hasSubmenu: true,
       submenuItems: [
         { id: "topic-integration", label: "議題融入", path: "/featured-resource/topic-integration" },
+        { id: 12, label: "親戚計算機", path: "/relative-calculator" },
       ],
     },
   ];
