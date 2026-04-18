@@ -44,7 +44,7 @@ const ModalCard = ({ onClose, isBlocking }) => (
   <div className={`ssn-card ${isBlocking ? 'ssn-card--blocking' : ''}`}>
     {/* 標題區（白色背景） */}
     <div className="ssn-header">
-      <h2 className="ssn-title">暫停服務預告</h2>
+      <h2 className="ssn-title">網站暫停服務公告</h2>
       {!isBlocking && (
         <button className="ssn-close-btn" onClick={onClose} aria-label="關閉">
           <CloseIcon />
@@ -57,15 +57,12 @@ const ModalCard = ({ onClose, isBlocking }) => (
       {/* 左側：日期與說明 */}
       <div className="ssn-text-section">
         <div className="ssn-period-block">
-          <span className="ssn-period-label">開始期間</span>
-          <span className="ssn-period-value">2026/04/20 AM9:00</span>
-        </div>
-        <div className="ssn-period-block">
-          <span className="ssn-period-label">結束期間</span>
+          <span className="ssn-period-label">預計暫停時間</span>
+          <span className="ssn-period-value">2026/04/20 AM9:00至</span>
           <span className="ssn-period-value">2026/04/30 AM9:00</span>
         </div>
         <p className="ssn-description">
-          以上期間，由於伺服器所在區域停電，屆時伺服器將暫時無法提供服務。
+          由於伺服器所在區域停電，以上期間，網站暫停服務。造成不便，敬請見諒。
         </p>
         <p className="ssn-signature">「Tshuì 水」團隊</p>
       </div>

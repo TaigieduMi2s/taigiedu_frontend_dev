@@ -31,6 +31,7 @@ import LoginPage from "./resourcePage/LoginPage";
 import RegisterPage from "./resourcePage/RegisterPage";
 import CelebrityDetails from "./celebrity/CelebrityDetails";
 import ServiceSuspensionNotice from "./components/ServiceSuspensionNotice/ServiceSuspensionNotice.jsx";
+import RelativeCalculatorPage from "./relativeCalculatorPage/RelativeCalculatorPage.jsx";
 import TermsPage from "./TermsPage.jsx";
 import TeamPage from "./TeamPage.jsx";
 import PolicyPage from "./PolicyPage.jsx";
@@ -150,6 +151,7 @@ const AppLayout = () => {
                 : <Navigate to="/" replace />
             }
           />
+          <Route path="/relative-calculator" element={<RelativeCalculatorPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
