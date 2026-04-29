@@ -155,6 +155,7 @@
   width: clamp(160px, 40%, 320px);
   position: relative;
   height: 100%;
+  background: transparent;
 }
 
 .ssn-bear-icon {

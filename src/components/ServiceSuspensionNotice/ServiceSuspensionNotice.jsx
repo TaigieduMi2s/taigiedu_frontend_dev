@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './ServiceSuspensionNotice.css';
 import blackboardBg from '../../assets/blackboard.png';
-import bearSvg from '../../assets/bear.svg';
+import bearGif from '../../assets/bear1.gif';
 
 // ── 停電停服時間設定 ──────────────────────────────────────────
 // 使用者要求修改為 5月10日(星期日)上午8時至下午17時。
@@ -82,7 +82,7 @@ const ModalCard = ({ onClose, isBlocking }) => (
 
       {/* 右側：黑熊圖示 */}
       <div className="ssn-icon-section">
-        <img src={bearSvg} className="ssn-bear-icon" alt="bear" />
+        <img src={bearGif} className="ssn-bear-icon" alt="bear" />
       </div>
     </div>
   </div>
