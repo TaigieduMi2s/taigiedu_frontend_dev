@@ -120,8 +120,51 @@
   }
 
   .celebrity-attribution {
-    text-align: right;
-    color: #666;
-    font-size: 14px;
-    margin-top: 20px;
+  text-align: right;
+  color: #666;
+  font-size: 14px;
+  margin-top: 20px;
+}
+
+/* ─── RWD ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .celebrity-modal-overlay {
+    padding: 0;
   }
+
+  .celebrity-modal-container {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    border-radius: 0;
+    margin: 0;
+    padding: 16px;
+    overflow-y: auto;
+  }
+
+  .celebrity-close-button {
+    top: 15px;
+    right: 15px;
+    font-size: 32px;
+    z-index: 10;
+  }
+
+  .celebrity-row-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .celebrity-modal-title {
+    font-size: 24px;
+  }
+
+  .celebrity-interpretation-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .celebrity-interpretation-label {
+    width: 100%;
+  }
+}

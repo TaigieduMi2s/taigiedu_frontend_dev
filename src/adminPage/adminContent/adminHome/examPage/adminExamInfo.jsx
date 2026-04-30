@@ -8,6 +8,16 @@ import deleteIcon from '../../../../assets/adminPage/trash.svg';
 import addIcon from '../../../../assets/adminPage/plus.svg';
 import uturnIcon from '../../../../assets/adminPage/uturn.svg';
 import jpgIconImage from '../../../../assets/adminPage/jpg icon.svg';
+import { authenticatedFetch } from '../../../../services/authService';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/api';
+
+const getFullImageUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('blob:')) return path;
+  const filename = path.split('/').filter(Boolean).pop();
+  return `https://dev.taigiedu.com/backend/static/exam/${filename}`;
+};
 
 const AdminExamInfo = () => {
   const { showToast } = useToast();
@@ -30,28 +40,25 @@ const AdminExamInfo = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchExamTypes = () => {
-    const mockData = [
-      {
-        id: 1,
-        name: '教育部閩南語語言能力認證',
-        imageName: 'cert1.jpg',
-        imageUrl: '',
-        link: 'https://example.com/cert1',
-        status: 'published',
-        createdAt: '2024/12/01 10:30:00'
-      },
-      {
-        id: 2,
-        name: '成大台語認證',
-        imageName: 'cert2.jpg',
-        imageUrl: '',
-        link: 'https://example.com/cert2',
-        status: 'published',
-        createdAt: '2024/12/05 14:20:00'
-      }
-    ];
-    setExamTypes(mockData);
+  const fetchExamTypes = async () => {
+    try {
+      const response = await authenticatedFetch(`${API_BASE_URL}/admin/exam`);
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.message || '載入失敗');
+      
+      const formatted = result.data.map(item => ({
+        id: item.id,
+        name: item.name,
+        link: item.link,
+        imageName: item.figure ? item.figure.split('/').pop() : '圖片',
+        imageUrl: getFullImageUrl(item.figure),
+        createdAt: item.timestamp,
+        status: item.status === 'publish' ? 'published' : item.status === 'archive' ? 'archived' : item.status
+      }));
+      setExamTypes(formatted);
+    } catch (err) {
+      showToast(`載入失敗: ${err.message}`, 'error');
+    }
   };
 
   // 過濾資料
@@ -80,20 +87,36 @@ const AdminExamInfo = () => {
     setShowAddModal(true);
   };
 
-  const handleDeleteClick = (id) => {
-    const updatedItems = examTypes.map(item =>
-      item.id === id ? { ...item, status: 'archived' } : item
-    );
-    setExamTypes(updatedItems);
-    showToast('項目已移至刪除紀錄', 'success');
+  const handleDeleteClick = async (id) => {
+    try {
+      const response = await authenticatedFetch(`${API_BASE_URL}/admin/exam/modify`, {
+        method: 'POST',
+        body: JSON.stringify({ id: String(id), action: '1' })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.message || '操作失敗');
+      
+      showToast('項目已移至刪除紀錄', 'success');
+      await fetchExamTypes();
+    } catch (err) {
+      showToast(`下架失敗: ${err.message}`, 'error');
+    }
   };
 
-  const handleRestoreClick = (id) => {
-    const updatedItems = examTypes.map(item =>
-      item.id === id ? { ...item, status: 'published' } : item
-    );
-    setExamTypes(updatedItems);
-    showToast('項目已恢復', 'success');
+  const handleRestoreClick = async (id) => {
+    try {
+      const response = await authenticatedFetch(`${API_BASE_URL}/admin/exam/modify`, {
+        method: 'POST',
+        body: JSON.stringify({ id: String(id), action: '2' })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.message || '操作失敗');
+      
+      showToast('項目已恢復', 'success');
+      await fetchExamTypes();
+    } catch (err) {
+      showToast(`恢復失敗: ${err.message}`, 'error');
+    }
   };
 
   const validateAndSetImage = (file) => {
@@ -127,7 +150,7 @@ const AdminExamInfo = () => {
     setImageUrl('');
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
 
     try {
@@ -137,37 +160,46 @@ const AdminExamInfo = () => {
       return;
     }
 
-    if (!imageName) {
+    if (!imageName && (!imageUrl || imageUrl.startsWith('data:') || imageUrl.startsWith('blob:')) && !currentEditId) {
+      // If adding new item and no images
       showToast('請上傳圖片', 'warning');
       return;
     }
 
-    const now = new Date();
-    const timestamp = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    try {
+      if (isEditing) {
+        const response = await authenticatedFetch(`${API_BASE_URL}/admin/exam/modify`, {
+          method: 'POST',
+          body: JSON.stringify({
+            id: String(currentEditId),
+            action: '3',
+            name: newName,
+            link: newLink,
+            figure: imageName
+          })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || '更新失敗');
+        showToast('認證類型已更新！', 'success');
+      } else {
+        const response = await authenticatedFetch(`${API_BASE_URL}/admin/exam/add`, {
+          method: 'POST',
+          body: JSON.stringify({
+            name: newName,
+            link: newLink,
+            figure: imageName
+          })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || '新增失敗');
+        showToast('認證類型已新增！', 'success');
+      }
 
-    if (isEditing) {
-      const updatedItems = examTypes.map(item =>
-        item.id === currentEditId
-          ? { ...item, name: newName, link: newLink, imageName, imageUrl }
-          : item
-      );
-      setExamTypes(updatedItems);
-      showToast('認證類型已更新！', 'success');
-    } else {
-      const newItem = {
-        id: Date.now(),
-        name: newName,
-        link: newLink,
-        imageName,
-        imageUrl,
-        status: 'published',
-        createdAt: timestamp
-      };
-      setExamTypes([...examTypes, newItem]);
-      showToast('認證類型已新增！', 'success');
+      handleModalClose();
+      await fetchExamTypes();
+    } catch (err) {
+      showToast(`操作失敗: ${err.message}`, 'error');
     }
-
-    handleModalClose();
   };
 
   // 拖曳處理
@@ -302,7 +334,7 @@ const AdminExamInfo = () => {
 
         <div className="mb-3">
           <label className="form-label admin-form-label">*圖片</label>
-          <div className="upload-wrapper">
+          <div className="upload-wrapper mb-2">
             <label className="upload-btn">
               <input
                 type="file"
@@ -314,10 +346,12 @@ const AdminExamInfo = () => {
             </label>
             <span className="upload-hint">※限 JPG、PNG 可上傳，限制 2MB。</span>
           </div>
-          {imageName && (
-            <div className="image-preview-cell" style={{ marginTop: 8 }}>
-              <img src={jpgIconImage} alt="圖片" className="file-icon-img" />
-              <span className="file-name-text">{imageName}</span>
+          {(imageName || imageUrl) && (
+            <div className="mt-3 d-inline-flex flex-column align-items-center" style={{ border: '1px solid #e0e0e0', borderRadius: '8px', padding: '8px', backgroundColor: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.06)' }}>
+              <img src={imageUrl || '#'} alt="圖片預覽" style={{ maxHeight: '130px', maxWidth: '100%', objectFit: 'contain', borderRadius: '4px' }} />
+              <div className="mt-2 text-secondary text-truncate" style={{ maxWidth: '200px', fontSize: '13px' }} title={imageName || '圖片'}>
+                {imageName || '圖片'}
+              </div>
             </div>
           )}
         </div>

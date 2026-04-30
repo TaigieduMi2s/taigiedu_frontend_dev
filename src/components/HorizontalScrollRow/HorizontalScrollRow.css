@@ -1,0 +1,86 @@
+/* =========================================================
+   HorizontalScrollRow — 通用橫向捲動列
+   ========================================================= */
+
+.hsr-root {
+  position: relative;
+  width: 100%;
+}
+
+/* ─── Embla 捲動視窗 ─── */
+.hsr-viewport {
+  overflow: hidden;
+  width: 100%;
+  cursor: grab;
+}
+
+.hsr-viewport:active {
+  cursor: grabbing;
+}
+
+.hsr-container {
+  display: flex;
+  gap: 0; /* gap 由 slide padding 控制 */
+  user-select: none;
+  touch-action: pan-y;
+}
+
+/* ─── 每張卡片的外層 wrapper ─── */
+.hsr-slide {
+  flex: 0 0 auto;
+  padding: 4px 8px 16px;
+  min-width: 0;
+}
+
+/* ─── 導航箭頭 ─── */
+.hsr-arrow {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #dde4ed;
+  background: rgba(255, 255, 255, 0.95);
+  color: #4b5563;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.2s ease, opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  padding: 0;
+  opacity: 0.96;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.12);
+}
+
+.hsr-arrow:hover {
+  color: #2d92c1;
+  background: #ffffff;
+  border-color: #c9d8e8;
+  opacity: 1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.16);
+}
+
+.hsr-arrow-prev {
+  left: 4px;
+}
+
+.hsr-arrow-next {
+  right: 4px;
+}
+
+/* ─── RWD：手機版隱藏箭頭（用滑動操作） ─── */
+@media (max-width: 768px) {
+  .hsr-arrow {
+    display: none;
+  }
+
+  .hsr-viewport {
+    /* 手機版讓使用者看到下一張卡片的一角，提示可滑動 */
+  }
+
+  .hsr-slide {
+    padding: 4px 6px 12px;
+  }
+}

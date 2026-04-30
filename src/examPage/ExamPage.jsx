@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './ExamPage.css';
+import HorizontalScrollRow from '../components/HorizontalScrollRow/HorizontalScrollRow';
 import searchIcon from '../assets/home/search_logo.svg';
 // import questionMarkIcon from '../assets/question-mark.svg';
 import foodImage from '../assets/culture/foodN.png';
@@ -244,52 +245,56 @@ const ExamPage = () => {
                             />
                         </form></div></div>
             </div>
-            {Object.entries(filteredData).map(([category, items]) => (
-                <div key={category} className="exam-section">
-                    <div className="container px-4">
-                        <h2
-                            className="exam-category-title"
-                            ref={ref => {
-                                if (ref && !sectionRefs.current[category]) {
+            {/* 各類別橫向捲動區 */}
+            <div className="exam-sections">
+                {Object.entries(filteredData).map(([category, items]) => (
+                    <section
+                        key={category}
+                        className="exam-section"
+                        ref={ref => {
+                            if (ref) {
+                                if (!sectionRefs.current[category]) {
                                     sectionRefs.current[category] = { current: ref };
-                                } else if (ref && sectionRefs.current[category]) {
+                                } else {
                                     sectionRefs.current[category].current = ref;
                                 }
-                            }}
-                        >
-                            {category}
-                        </h2>
-                        <div className="row g-4">
+                            }
+                        }}
+                    >
+                        <div className="exam-section-header">
+                            <h2 className="exam-category-title">{category}</h2>
+                        </div>
+
+                        {/* 橫向捲動卡片列 */}
+                        <HorizontalScrollRow>
                             {items.map(item => (
-                                <div key={item.id}
-                                    className="col-12 col-sm-6 col-md-4 col-lg-3"
-                                    onClick={() => handleCardClick(item.url)}>
-                                    <div className="exam-card">
-                                        <div className="exam-image-container">
-                                            <img
-                                                src={item.image}
-                                                alt={item.title}
-                                                className="exam-image"
-                                                onError={(e) => {
-                                                    e.target.src = foodImage;
-                                                }}
-                                            />
-                                        </div>
-                                        <h5 className="text-center mt-2">
-                                            {item.subcategory && (
-                                                <span className="text-muted small">
-                                                    [{item.subcategory}]
-                                                </span>
-                                            )}
-                                            {item.title}
-                                        </h5>
+                                <div
+                                    key={item.id}
+                                    className="exam-card"
+                                    onClick={() => handleCardClick(item.url)}
+                                >
+                                    <div className="exam-image-container">
+                                        <img
+                                            src={item.image}
+                                            alt={item.title}
+                                            className="exam-image"
+                                            onError={(e) => {
+                                                e.target.src = foodImage;
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="exam-card-body">
+                                        {item.subcategory && (
+                                            <span className="exam-card-badge">{item.subcategory}</span>
+                                        )}
+                                        <p className="exam-card-title">{item.title}</p>
                                     </div>
                                 </div>
                             ))}
-                        </div>
-                    </div>
-                </div>
-            ))}
+                        </HorizontalScrollRow>
+                    </section>
+                ))}
+            </div>
             {/* <div className="text-start mt-4 exam-report-issue">
                 <img src={questionMarkIcon} className="question-icon" />
                 如有任何問題，請點此回報問題

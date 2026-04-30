@@ -1,31 +1,93 @@
-/* header區塊樣式 */
+/* ============================================================
+   Header.css — Header 樣式（含 RWD 漢堡選單）
+   ============================================================ */
+
+/* ─── Header 主容器 ─────────────────────────────────────── */
 .header {
   width: 100%;
-  height: 58px;
-  background: linear-gradient(to right, #2C7FA6, #80C48F);
+  height: var(--header-height, 58px);
+  background: var(--gradient-brand, linear-gradient(to right, #2C7FA6, #80C48F));
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-sizing: border-box;
   padding: 0 20px 0 0;
-  position: relative;
-  z-index: 1000;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header, 1000);
+  flex-shrink: 0;
 }
 
-/* logo樣式 */
+/* ─── Header 左側（漢堡 + Logo）────────────────────────── */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ─── Logo ──────────────────────────────────────────────── */
 .logo {
   height: 40px;
   padding-left: 15px;
+  display: block;
 }
 
-/* Header 右側區域 */
+/* ─── 漢堡按鈕（mobile only）───────────────────────────── */
+.header-hamburger {
+  display: none; /* 預設隱藏，手機才顯示 */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  margin-left: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.header-hamburger:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* 三條橫線 */
+.header-hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background-color: white;
+  border-radius: 2px;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  transform-origin: center;
+}
+
+/* 打開狀態：變成 × */
+.header-hamburger.is-open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.header-hamburger.is-open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.header-hamburger.is-open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ─── Header 右側區域 ───────────────────────────────────── */
 .header-right {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-/* 載入狀態 */
+/* ─── 載入狀態 ──────────────────────────────────────────── */
 .header-loading {
   display: flex;
   align-items: center;
@@ -48,16 +110,17 @@
   }
 }
 
-/* 登入按鈕 - 參考 Footer 按鈕樣式 */
+/* ─── 登入按鈕 ──────────────────────────────────────────── */
 .header-login-button {
   background: transparent;
   border: 1px solid white;
   color: white;
-  padding: 10px 20px;
+  padding: 8px 20px;
   border-radius: 9999px;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
   font-size: 14px;
+  white-space: nowrap;
 }
 
 .header-login-button:hover {
@@ -65,7 +128,7 @@
   color: #017AB1;
 }
 
-/* 用戶資訊區塊 */
+/* ─── 用戶資訊區塊 ──────────────────────────────────────── */
 .header-user {
   position: relative;
 }
@@ -81,14 +144,14 @@
   color: #fff;
   font-size: 14px;
   cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
+  transition: background-color 0.3s;
 }
 
 .header-user-button:hover {
   background-color: rgba(255, 255, 255, 0.15);
 }
 
-/* 用戶頭像 */
+/* ─── 用戶頭像 ──────────────────────────────────────────── */
 .header-user-avatar {
   width: 32px;
   height: 32px;
@@ -101,6 +164,7 @@
   font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
+  flex-shrink: 0;
 }
 
 .header-user-name {
@@ -120,7 +184,7 @@
   transform: rotate(180deg);
 }
 
-/* 用戶下拉選單 */
+/* ─── 用戶下拉選單 ──────────────────────────────────────── */
 .header-user-menu {
   position: absolute;
   top: calc(100% + 8px);
@@ -131,7 +195,7 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 2px 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   animation: menuSlideDown 0.2s ease-out;
-  z-index: 1001;
+  z-index: var(--z-dropdown, 1001);
 }
 
 @keyframes menuSlideDown {
@@ -227,36 +291,66 @@
   color: #c62828;
 }
 
-/* 登入彈窗包裝器 - 使用原本的 LoginPage */
+/* ─── 登入彈窗包裝器 ────────────────────────────────────── */
 .header-login-modal-wrapper {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 10000;
+  z-index: var(--z-modal, 10000);
 }
 
-/* 響應式設計 */
+/* ─── RWD ───────────────────────────────────────────────── */
+
+/* 平板（≤1024px） */
+@media (max-width: 1024px) {
+  .header-user-name {
+    max-width: 80px;
+  }
+}
+
+/* 手機（≤768px） */
 @media (max-width: 768px) {
   .header {
     padding: 0 12px 0 0;
   }
 
-  .header-login-button {
-    padding: 8px 16px;
+  /* 顯示漢堡按鈕 */
+  .header-hamburger {
+    display: flex;
   }
 
-  .header-user-name {
+  .header-login-button {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  /* 隱藏用戶名稱，按鈕改為正圓形 */
+  .header-user-name,
+  .header-user-arrow {
     display: none;
   }
 
   .header-user-button {
-    padding: 6px 10px 6px 6px;
+    padding: 4px;
+    border-radius: 50%;
+    gap: 0;
   }
 
   .header-user-menu {
     right: -8px;
     min-width: 200px;
+  }
+}
+
+/* 極小螢幕（≤480px） */
+@media (max-width: 480px) {
+  .logo {
+    height: 32px;
+  }
+
+  .header-user-arrow {
+    display: none;
   }
 }

@@ -4,6 +4,7 @@ import "./MainContent.css";
 import heroImage from "./assets/Rectangle 7310.svg";
 import searchIcon from "./assets/home/search_logo.svg";
 import todayEventsIcon from "./assets/todayEvents.svg";
+import { EventModal } from "./components/UnifiedModal/EventModal";
 
 const MainContent = () => {
   const navigate = useNavigate(); // 使用 useNavigate 來進行頁面跳轉
@@ -179,21 +180,24 @@ const MainContent = () => {
     }
   };
 
-  // 從API獲取今日大事
+  // 從API獲取今日大事 (使用新的依日期獲取 API)
   const fetchTodayEvents = async () => {
     setEventsLoading(true);
     setEventsError(false);
     try {
-      const parameters = {}; // 傳送空的 JSON 物件
+      // 獲取當前日期的 MMDD 格式
+      const now = new Date();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const dateString = `${month}${day}`;
 
       const response = await fetch(
-        "https://dev.taigiedu.com/backend/events",
+        `https://dev.taigiedu.com/backend/events_calendar/${dateString}`,
         {
-          method: 'POST',
+          method: 'GET',
           headers: {
             'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(parameters)
+          }
         }
       );
 
@@ -202,15 +206,16 @@ const MainContent = () => {
       }
 
       const data = await response.json();
-      console.log("今日大事API回傳:", data);
+      console.log("今日大事 (Events Calendar) API回傳:", data);
 
       if (data.status === "success" && Array.isArray(data.data)) {
-        setTodayEvents(data.data);
+        // 過濾掉標題為「今日無大事」或包含「OO」佔位符的項
+        const filteredEvents = data.data.filter(item => 
+          item.title !== "今日無大事" && 
+          !item.title.includes("OO")
+        );
+        setTodayEvents(filteredEvents);
         setEventsError(false);
-      } else if (data.status === "error") {
-        console.error("今日大事API回傳錯誤:", data.message);
-        setTodayEvents([]);
-        setEventsError(true);
       } else {
         console.error("今日大事API回傳格式錯誤:", data);
         setTodayEvents([]);
@@ -257,34 +262,25 @@ const MainContent = () => {
 
   return (
     <main className="main-content">
-      {/* Hero Image Section with gradient background and text overlay */}
-      <section className="hero-section px-0 pt-6" data-testid="home-hero-section">
-        <div className="w-full max-w-[1600px] mx-auto h-[450px] relative bg-gradient-to-r from-[#4AA3BA] to-[#96D0B3] overflow-hidden rounded-lg">
+      {/* Hero Image Section */}
+      <section className="hero-section" data-testid="home-hero-section">
+        <div className="hero-wrapper">
           <img
             src={heroImage}
             alt="台語文教學共融平台"
-            className="w-full h-full object-cover"
           />
-          <div className="hero-text absolute top-1/3 left-1/4 text-white">
-            <div className="big text-4xl font-bold leading-tight">歡迎來到</div>
-            <div className="bigbig text-4xl font-bold leading-tight pb-4">
-              台語文教學共融平台
-            </div>
-            <div className="small mt-2 text-xl leading-snug">
-              鯨魚以聲音與其他鯨群溝通，聲波能穿越遙遠的距離。
-            </div>
-            <div className="small mt-2 text-xl leading-snug">
-              台語老師透過語言的教學，讓台語的聲音在人群中傳播。
-            </div>
-            <div className="small mt-2 text-xl leading-snug">
-              希翼能以台語為傳播媒介，傳遞咱台灣文化與情感。
-            </div>
+          <div className="hero-text">
+            <div className="big">歡迎來到</div>
+            <div className="bigbig">台語文教學共融平台</div>
+            <div className="small">鯨魚以聲音與其他鯨群溝通，聲波能穿越遙遠的距離。</div>
+            <div className="small">台語老師透過語言的教學，讓台語的聲音在人群中傳播。</div>
+            <div className="small">希翼能以台語為傳播媒介，傳遞咱台灣文化與情感。</div>
           </div>
         </div>
       </section>
 
-      {/* Search Bar and Tag Buttons Centered */}
-      <div className="w-full max-w-[800px] mx-auto px-6 mt-6 text-center">
+      {/* Search Bar and Tag Buttons */}
+      <div className="home-search-section">
         <form onSubmit={handleSearch} className="search-container">
           <input
             type="text"
@@ -297,14 +293,14 @@ const MainContent = () => {
           <img
             src={searchIcon}
             className="search-icon"
-            onClick={handleSearch} // 點擊圖片觸發搜尋跳轉
+            onClick={handleSearch}
             data-testid="home-search-button"
           />
         </form>
 
-        <div className="tag-buttons mt-4 flex justify-center gap-3">
+        <div className="tag-buttons">
           {isLoading ? (
-            <div className="text-gray-500">載入關鍵字中...</div>
+            <span style={{ color: '#6b7280', fontSize: '0.9rem' }}>載入關鍵字中...</span>
           ) : (
             keywords.map((tag) => (
               <button
@@ -320,45 +316,30 @@ const MainContent = () => {
       </div>
 
       {/* Content Grid */}
-      <div className="grid-container mt-10">
+      <div className="grid-container">
         {/* Left Top Column */}
         <div className="fade-in">
           <div className="content-section">
             <h2 className="section-title">俗語諺輪播</h2>
-            <div className="text-gray-600">
+            <div style={{ color: '#4b5563' }}>
               {idiomLoading ? (
-                <div className="text-gray-500">載入俗語諺中...</div>
+                <span style={{ color: '#6b7280' }}>載入俗語諺中...</span>
               ) : idiom ? (
                 <div>
-                  <p
-                    className="mb-2 text-gray-800"
-                    style={{
-                      fontWeight: 'bold',
-                      fontSize: '1.125rem',
-                      lineHeight: '1.75rem'
-                    }}
-                  >
+                  <p style={{ fontWeight: 700, fontSize: '1.1rem', lineHeight: '1.7', color: '#1f2937', marginBottom: '0.375rem' }}>
                     {idiom.Data}
                   </p>
-                  <p className="text-sm text-gray-500 mb-2">{idiom.Tai_lo}</p>
-                  <hr className="border-gray-300 my-2" />
-                  <p className="text-xs text-gray-500 leading-relaxed">{idiom.Explain}</p>
+                  <p style={{ fontSize: '0.9rem', color: '#6b7280', marginBottom: '0.5rem' }}>{idiom.Tai_lo}</p>
+                  <hr style={{ border: 'none', borderTop: '1px solid #d1d5db', margin: '0.5rem 0' }} />
+                  <p style={{ fontSize: '0.85rem', color: '#6b7280', lineHeight: '1.7' }}>{idiom.Explain}</p>
                 </div>
               ) : (
                 <div>
-                  <p
-                    className="text-gray-800"
-                    style={{
-                      fontWeight: 'bold',
-                      fontSize: '1.125rem',
-                      lineHeight: '1.75rem'
-                    }}
-                  >
-                    無魚蝦也好
-                  </p>
-                  <p className="text-sm text-gray-500">Bô hî, hê mā hó</p>
+                  <p style={{ fontWeight: 700, fontSize: '1.1rem', lineHeight: '1.6', color: '#1f2937' }}>無魚蝦也好</p>
+                  <p style={{ fontSize: '0.9rem', color: '#6b7280', marginTop: '0.25rem' }}>Bô hî, hê mā hó</p>
                   <button
-                    className="mt-3 text-blue-500 hover:text-blue-700 text-sm underline"
+                    className="button"
+                    style={{ marginTop: '0.75rem', fontSize: '0.85rem', padding: '0.3rem 0.875rem' }}
                     onClick={fetchRandomIdiom}
                   >
                     重新載入
@@ -372,60 +353,46 @@ const MainContent = () => {
         {/* Right Top Column */}
         <div className="fade-in">
           <div className="content-section">
-            <h2 className="section-title">今日大事</h2>
+            <h2 className="section-title">
+              <a 
+                href="#" 
+                className="section-title-link"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (todayEvents.length > 0) {
+                    setSelectedEvent(todayEvents[0]);
+                    setShowEventModal(true);
+                  }
+                }}
+              >
+                今日大事
+              </a>
+            </h2>
             {eventsLoading ? (
-              <div className="text-gray-500">載入今日大事中...</div>
+              <span style={{ color: '#6b7280' }}>載入中...</span>
             ) : (
               <ul className="info-list">
                 {todayEvents.length > 0 ? (
                   todayEvents.map((item, index) => {
-                    // 相容處理：如果是純字串，將其轉為基本物件
-                    const eventObj = typeof item === 'string' ? { title: item, content: "" } : item;
-
-                    // 根據您目前的字串處理邏輯解析標題（若是字串格式則解析，若是物件則優先使用 title 欄位）
-                    let displayTitle = eventObj.title;
-                    let displayDate = eventObj.date || "";
-
-                    if (typeof item === 'string' && item.includes(' ')) {
-                      const parts = item.split(' ');
-                      const firstPart = parts[0] || '';
-                      const fullDateStr = firstPart.includes('：') ? firstPart.split('：')[1] : firstPart;
-                      displayTitle = parts.slice(1).join(' ') || item;
-                      displayDate = fullDateStr.replace(/(\d{4})年(\d{1,2})月(\d{1,2})日/, '$1 年 $2 月 $3 日');
-                    }
-
-                    // 判斷是否具備細節內容 (以此決定黑色或藍色)
-                    const hasDetail = eventObj.content && eventObj.content.trim() !== "";
-
+                    const hasContent = item.content && item.content.trim() !== "";
+                    const displayTitle = `歷史上的今天：${item.title} ${item.date ? `( ${item.date} )` : ""}`;
+                    
                     return (
                       <li key={index}>
-                        {hasDetail ? (
-                          // 有資料：藍色連結
+                        {hasContent ? (
                           <a
                             href="#"
                             className="event-link"
-                            style={{ color: '#2d92c1', cursor: 'pointer', textDecoration: 'none' }}
                             onClick={(e) => {
                               e.preventDefault();
-                              const eventData = {
-                                date: displayDate || '1998 年 10 月 28 日',
-                                title: displayTitle,
-                                content: eventObj.content,
-                                footnote: eventObj.footnote || '歷史大事記',
-                                source: eventObj.source || '台灣獨曆',
-                                sourceUrl: eventObj.sourceUrl || 'https://www.facebook.com/indepcalendar/'
-                              };
-                              setSelectedEvent(eventData);
+                              setSelectedEvent(item);
                               setShowEventModal(true);
                             }}
                           >
                             {displayTitle}
                           </a>
                         ) : (
-                          // 無資料：黑色純文字
-                          <span style={{ color: '#424242', cursor: 'default' }}>
-                            {displayTitle}
-                          </span>
+                          <span style={{ color: '#424242' }}>{displayTitle}</span>
                         )}
                       </li>
                     );
@@ -443,9 +410,9 @@ const MainContent = () => {
           <div className="content-section">
             <h2 className="section-title">考試資訊</h2>
             {examLoading ? (
-              <div className="text-gray-500">載入考試資訊中...</div>
+              <span style={{ color: '#6b7280' }}>載入中...</span>
             ) : (
-              <ul className="info-list list-disc ml-5">
+              <ul className="info-list">
                 {examInfo.length > 0 ? (
                   examInfo.map((exam) => (
                     <li key={exam.id}>
@@ -478,7 +445,7 @@ const MainContent = () => {
           <div className="content-section">
             <h2 className="section-title">活動快訊</h2>
             {newsLoading ? (
-              <div className="text-gray-500">載入活動快訊中...</div>
+              <span style={{ color: '#6b7280' }}>載入中...</span>
             ) : (
               <ul className="info-list">
                 {newsInfo.length > 0 ? (
@@ -509,40 +476,13 @@ const MainContent = () => {
         </div>
       </div>
 
-      {/* 今日大事詳細資訊彈窗 */}
-      {showEventModal && selectedEvent && (
-        <div className="event-modal-overlay" onClick={() => setShowEventModal(false)}>
-          <div className="event-modal" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="event-modal-close"
-              onClick={() => setShowEventModal(false)}
-            >
-              ×
-            </button>
-
-            <div className="event-modal-header">
-              <img src={todayEventsIcon} alt="今日大事" className="event-modal-icon" />
-              <div className="event-modal-title-section">
-                <div className="event-modal-date">{selectedEvent.date}</div>
-                <h2 className="event-modal-title">{selectedEvent.title}</h2>
-              </div>
-            </div>
-
-            <div className="event-modal-content">
-              <div className="event-content-text">
-                {selectedEvent.content.split('\n\n').map((paragraph, idx) => (
-                  <p key={idx}>{paragraph}</p>
-                ))}
-              </div>
-            </div>
-
-            <div className="event-modal-source">
-              <p>資料來源：{selectedEvent.source}</p>
-              <p>官方粉專：<a href={selectedEvent.sourceUrl} target="_blank" rel="noopener noreferrer">{selectedEvent.sourceUrl}</a></p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* 今日大事詳細資訊彈窗 (使用新的 EventModal 組件) */}
+      <EventModal
+        isOpen={showEventModal}
+        onClose={() => setShowEventModal(false)}
+        event={selectedEvent}
+        icon={todayEventsIcon}
+      />
     </main>
   );
 };

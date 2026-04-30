@@ -408,6 +408,7 @@ export default function AdminResourcePage() {
             currentPage={page}
             totalPages={totalPages}
             onPageChange={handlePageChange}
+            maxVisible={4}
           />
         </div>
       )}

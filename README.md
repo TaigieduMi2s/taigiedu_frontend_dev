@@ -59,12 +59,12 @@ npm install
 本專案使用環境變數來控制基礎路徑、API 位置，以及特定功能（如朗讀、翻譯、逐字稿）的開啟與否。請參考 `.env.example`，根據您的開發需求建立對應的設定檔：
 
 - **開發環境 (`.env.development`)**：
-  供本地開發時使用。預設開啟測試中功能，並防止頁面被索引。
+  供本地開發時使用。建議開啟 `VITE_ENABLE_TOPIC_INTEGRATION_FEATURE=true`，讓「議題融入」功能可見。
   ```bash
   cp .env.example .env.development
   ```
 - **正式環境 (`.env.production`)**：
-  供正式上線使用。需手動將測試功能及防爬蟲等標籤關閉 (`false`)。
+  供正式上線使用。請維持 `VITE_ENABLE_TOPIC_INTEGRATION_FEATURE=false`，讓「議題融入」在導覽列與路由皆保持隱藏。
   ```bash
   cp .env.example .env.production
   ```
@@ -111,7 +111,7 @@ npm run preview
 ```
 taiwaneseOMG/
 ├── src/
-│   ├── components/         # 可重用元件（Header、Sidebar、Modal 等）
+│   ├── components/         # 可重用元件（Header、Sidebar、ServiceSuspensionNotice、Modal 等）
 │   ├── contexts/           # React Context（認證、主題等）
 │   ├── services/           # API 服務層（認證、資源管理等）
 │   ├── shared/             # 共用工具與常數
@@ -121,6 +121,8 @@ taiwaneseOMG/
 │   ├── celebrity/          # 名人介紹頁面
 │   ├── culture/            # 文化相關頁面
 │   ├── examPage/           # 認證考試頁面
+│   ├── featuredResourcePage/ # 主題融入資源頁面
+│   ├── relativeCalculatorPage/ # 親屬關係計算機頁面
 │   ├── resourcePage/       # 學習資源頁面
 │   ├── translatePage/      # 翻譯工具頁面
 │   ├── transcriptPage/     # 轉譯工具頁面
@@ -172,6 +174,12 @@ npm run lint
 const apiUrl = import.meta.env.VITE_API_URL;
 const imagePath = `${import.meta.env.VITE_IMAGE_URL}/path/to/image.jpg`;
 ```
+
+常用功能開關：
+
+- `VITE_ENABLE_UNSTABLE_FEATURES`：控制朗讀、翻譯、逐字稿等功能是否顯示。
+- `VITE_ENABLE_TOPIC_INTEGRATION_FEATURE`：控制「議題融入」是否顯示在側邊欄，並是否允許存取 `/featured-resource/topic-integration`。
+- `VITE_ENABLE_ROBOTS_NOINDEX`：控制是否注入 `noindex, nofollow` 的 robots meta tag。
 
 ## E2E 測試
 

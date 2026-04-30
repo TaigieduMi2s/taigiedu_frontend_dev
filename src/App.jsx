@@ -4,6 +4,7 @@ import { ToastProvider } from './components/Toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute, { AdminRoute } from './components/ProtectedRoute';
 import envConfig from './config';
+import "./styles/global.css";
 import "./App.css";
 
 import Sidebar from "./Sidebar";
@@ -29,6 +30,8 @@ import DownloadPage from "./resourcePage/DownloadPage";
 import LoginPage from "./resourcePage/LoginPage";
 import RegisterPage from "./resourcePage/RegisterPage";
 import CelebrityDetails from "./celebrity/CelebrityDetails";
+import ServiceSuspensionNotice from "./components/ServiceSuspensionNotice/ServiceSuspensionNotice.jsx";
+import RelativeCalculatorPage from "./relativeCalculatorPage/RelativeCalculatorPage.jsx";
 import TermsPage from "./TermsPage.jsx";
 import TeamPage from "./TeamPage.jsx";
 import PolicyPage from "./PolicyPage.jsx";
@@ -50,6 +53,7 @@ import ResourceHeaderPage from "./adminPage/adminContent/adminHome/adminresource
 const AppLayout = () => {
   const location = useLocation();
   const { isAuthenticated } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (envConfig.features.enableRobotsNoindex) {
@@ -68,6 +72,12 @@ const AppLayout = () => {
   const isCelebrityDetail = location.pathname === '/celebrity/detail';
   const isAdminPage = location.pathname === '/admin';
   const isAdminContent = location.pathname.startsWith('/admin/');
+  const isTopicIntegrationFeatureEnabled = envConfig.features.enableTopicIntegrationFeature;
+
+  // 路由切換時自動收起 sidebar（手機版）
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (isAdminPage || isAdminContent) {
@@ -78,11 +88,25 @@ const AppLayout = () => {
     return () => document.body.classList.remove('admin-body');
   }, [isAdminPage, isAdminContent]);
 
+  const showSidebar = !isPreviewPage && !isDownloadPage && !isCelebrityDetail && !isAdminPage && !isAdminContent;
+
   return (
     <div className="app">
-      <Header />
+      <ServiceSuspensionNotice />
+      <Header onMenuToggle={() => setSidebarOpen(prev => !prev)} sidebarOpen={sidebarOpen} />
+
+      {/* 手機版 sidebar overlay 遮罩 */}
+      {showSidebar && (
+        <div
+          className={`sidebar-overlay ${sidebarOpen ? 'active' : ''}`}
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       <div className={`maincontent ${isPreviewPage || isDownloadPage || isCelebrityDetail || isAdminPage ? 'preview-page' : ''}`}>
-        {!isPreviewPage && !isDownloadPage && !isCelebrityDetail && (isAdminContent ? <AdminSidebar /> : isAdminPage ? null : <Sidebar />)}
+        {showSidebar && <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />}
+        {!isPreviewPage && !isDownloadPage && !isCelebrityDetail && isAdminContent && <AdminSidebar />}
         <div className={isAdminContent ? 'admin-content-scroll' : ''}>
         <Routes>
           <Route path="/" element={<MainContent />} />
@@ -119,7 +143,15 @@ const AppLayout = () => {
           <Route path="/culture/festival" element={<CultureFestival />} />
           <Route path="/socialmedia" element={<SocialmediaPage />} />
           <Route path="/exam" element={<ExamPage />} />
-          <Route path="/featured-resource/topic-integration" element={<TopicIntegrationPage />} />
+          <Route
+            path="/featured-resource/topic-integration"
+            element={
+              isTopicIntegrationFeatureEnabled
+                ? <TopicIntegrationPage />
+                : <Navigate to="/" replace />
+            }
+          />
+          <Route path="/relative-calculator" element={<RelativeCalculatorPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 

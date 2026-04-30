@@ -1,34 +1,41 @@
-/* Footer 整體樣式 */
+/* ============================================================
+   Footer.css — Footer 樣式（含 RWD）
+   ============================================================ */
+
+/* ─── Footer 整體樣式 ───────────────────────────────────── */
 .footer {
-    width: 100%; /* 滿版寬度 */
-    background: linear-gradient(to right, #80C48F, #2C7FA6); /* 左綠右藍漸層 */
-    padding: 20px 0; /* 上下間距 */
-    bottom: 0; /* 固定在螢幕底部 */
-    left: 0;
+    width: 100%;
+    background: var(--gradient-brand-reverse, linear-gradient(to right, #80C48F, #2C7FA6));
+    padding: 20px 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     color: white;
+    flex-shrink: 0;
 }
 
-/* 按鈕容器 */
+/* ─── 按鈕容器 ──────────────────────────────────────────── */
 .footer-buttons {
     display: flex;
     justify-content: center;
-    gap: 20px; /* 按鈕間距 */
+    align-items: center;
+    gap: 20px;
     margin-bottom: 10px;
+    flex-wrap: wrap;
 }
 
-/* 按鈕樣式 */
+/* ─── 按鈕樣式 ──────────────────────────────────────────── */
 .footer-button {
     background: transparent;
     border: 1px solid white;
     color: white;
-    padding: 10px 20px;
+    padding: 8px 18px;
     border-radius: 9999px;
     cursor: pointer;
+    font-size: 14px;
     transition: background-color 0.3s, color 0.3s;
+    white-space: nowrap;
 }
 
 .footer-button:hover {
@@ -36,8 +43,36 @@
     color: #017AB1;
 }
 
-/* 版權文字樣式 */
+/* ─── 版權文字樣式 ──────────────────────────────────────── */
 .footer-text {
-    font-size: 14px;
+    font-size: 13px;
     text-align: center;
+    opacity: 0.9;
+    padding: 0 1rem;
+}
+
+/* ─── RWD：手機（≤768px）───────────────────────────────── */
+@media (max-width: 768px) {
+    .footer {
+        padding: 24px 0;
+    }
+
+    .footer-buttons {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .footer-button {
+        width: auto;
+        max-width: none;
+        text-align: center;
+        padding: 8px 16px;
+    }
+
+    .footer-text {
+        line-height: 1.5;
+        padding: 0 16px;
+    }
 }

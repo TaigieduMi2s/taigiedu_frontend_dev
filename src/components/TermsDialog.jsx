@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { UnifiedModal } from './UnifiedModal/UnifiedModal';
 import './TermsDialog.css';
 import '../styles/markdown.css';
 
@@ -20,17 +21,14 @@ const TermsDialog = ({ isOpen, onClose, onAccept, type = 'terms' }) => {
                 ? import.meta.env.BASE_URL.slice(0, -1)
                 : import.meta.env.BASE_URL;
 
-            // 讀取 markdown 文件
             fetch(`${baseUrl}${markdownFile}`)
                 .then((response) => response.text())
                 .then((text) => {
-                    // 移除第一行的 H1 大標題，因為對話框已經有標題了
                     const processedText = text.replace(/^#\s+.*(\r?\n)*/, '').trim();
                     setContent(processedText);
                 })
                 .catch((error) => console.error('Error loading document:', error));
 
-            // 重置狀態
             setHasScrolledToBottom(false);
             setShowScrollHint(false);
         }
@@ -41,7 +39,6 @@ const TermsDialog = ({ isOpen, onClose, onAccept, type = 'terms' }) => {
         const scrollPercentage =
             (element.scrollTop + element.clientHeight) / element.scrollHeight;
 
-        // 當滾動到底部（95%以上）時，標記為已讀
         if (scrollPercentage >= 0.95) {
             setHasScrolledToBottom(true);
             setShowScrollHint(false);
@@ -52,27 +49,22 @@ const TermsDialog = ({ isOpen, onClose, onAccept, type = 'terms' }) => {
         if (hasScrolledToBottom) {
             onAccept();
         } else {
-            // 顯示提示訊息，引導使用者滾動到底部
             setShowScrollHint(true);
         }
     };
 
-    if (!isOpen) return null;
-
     return (
-        <div className="terms-dialog-overlay">
-            <div className="terms-dialog-container">
-                <div className="terms-dialog-header">
-                    <h2>{title}</h2>
-                    <button className="terms-dialog-close" onClick={onClose}>
-                        ×
-                    </button>
+        <UnifiedModal isOpen={isOpen} onClose={onClose} className="terms-dialog">
+            <div className="terms-dialog-inner">
+                <div className="terms-dialog-header" style={{ marginBottom: '20px' }}>
+                    <h2 style={{ margin: 0, color: 'var(--color-primary-dark)' }}>{title}</h2>
                 </div>
 
                 <div
                     className="terms-dialog-content"
                     ref={contentRef}
                     onScroll={handleScroll}
+                    style={{ maxHeight: '60vh', overflowY: 'auto', padding: '15px', background: '#f9f9f9', borderRadius: '8px' }}
                 >
                     <div className="markdown-content">
                         <ReactMarkdown>{content}</ReactMarkdown>
@@ -80,22 +72,22 @@ const TermsDialog = ({ isOpen, onClose, onAccept, type = 'terms' }) => {
                 </div>
 
                 {showScrollHint && (
-                    <div className="terms-scroll-hint">
+                    <div style={{ color: '#F37458', fontSize: '14px', marginTop: '10px', textAlign: 'center', fontWeight: 'bold' }}>
                         請先閱讀完整內容，將滾動條拉到底部
                     </div>
                 )}
 
-                <div className="terms-dialog-footer">
+                <div className="terms-dialog-footer" style={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}>
                     <button
-                        className={`terms-dialog-accept ${hasScrolledToBottom ? 'enabled' : 'disabled'}`}
+                        className={`btn ${hasScrolledToBottom ? 'btn-primary' : 'btn-outline disabled'}`}
                         onClick={handleAccept}
-                        disabled={!hasScrolledToBottom}
+                        style={{ width: '200px', opacity: hasScrolledToBottom ? 1 : 0.5 }}
                     >
                         我已閱讀並同意
                     </button>
                 </div>
             </div>
-        </div>
+        </UnifiedModal>
     );
 };
 

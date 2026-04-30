@@ -3,7 +3,7 @@
     align-items: center;
     gap: 10px;
     margin: 20px auto;
-    max-width: 800px;
+    max-width: 1000px;
     padding: 10px;
     border-radius: 8px;
   }
@@ -72,9 +72,6 @@
     height: 32px;
   }
   
-  .search-icon:hover {
-    transform: scale(1.1);
-  }
   
   .search-container {
     position: relative;
@@ -87,8 +84,28 @@
   }
 
   .multi-select {
-    display: block; /* 確保選單顯示 */
-    position: relative; /* 確保定位正確 */
+    display: block;
+    position: relative;
   }
 
-  
+/* ─── RWD ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .search-Bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .filter-section {
+    width: 100%;
+    padding-right: 0;
+  }
+
+  .phrase-search-input {
+    width: 100%;
+  }
+
+  .input-container {
+    width: 100%;
+  }
+}

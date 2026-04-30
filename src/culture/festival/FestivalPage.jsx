@@ -143,10 +143,10 @@ const FestivalPage = () => {
                     <p>目前沒有節慶資料</p>
                 </div>
             ) : (
-                <div className="row g-4 pt-4">
+                <div className="row g-2 g-sm-4 pt-4">
                     {festivals.map(festival => (
                         <div key={festival.key}
-                            className="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-custom-5"
+                            className="col-6 col-md-4 col-lg-3 col-xl-custom-5"
                             onClick={() => handleCardClick(festival)}>
                             <div className="festival-card">
                                 <div className="image-container">

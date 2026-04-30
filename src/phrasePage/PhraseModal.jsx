@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import './PhraseModal.css';
+import { UnifiedModal, InfoRow } from '../components/UnifiedModal/UnifiedModal';
 import megaphoneIcon from '../assets/megaphone.svg';
 
 const PhraseModal = ({ isOpen, onClose, phrase, pronunciation, interpretation, pronun_diff, audio, type }) => {
@@ -253,38 +253,28 @@ const PhraseModal = ({ isOpen, onClose, phrase, pronunciation, interpretation, p
   };
 
   return (
-    <div className="phrase-modal-overlay">
-      <div className="phrase-modal-container">
-        <div className="phrase-modal-content">
-          <div className="phrase-modal-close">
-            <div className="phrase-close-button" onClick={onClose}>&times;</div>
-          </div>
-          <div className="phrase-modal-detail">
-            <div className="phrase-modal-header">
-              <div className="phrase-title-container">
-                <h2 className="phrase-modal-title">{phrase}</h2>
-                {type && <span className="phrase-type-pill">{type}</span>}
-              </div>
-            </div>
-            <div className="phrase-modal-body">
-              <div className="phrase-pronunciation-container">
-                <div className="phrase-pronunciation-text">{pronunciation}</div>
-                <div className="phrase-play-button" onClick={playAudio}>
-                  <img src={megaphoneIcon} alt="播放發音" />
-                </div>
-              </div>
-              <div className="phrase-interpretation-container">
-                <span className="phrase-interpretation-label">釋義</span>
-                <div className="phrase-interpretation-text">
-                  {interpretation}
-                </div>
-              </div>
-              {renderPronunDiffTable()}
-            </div>
-          </div>
+    <UnifiedModal isOpen={isOpen} onClose={onClose} className="phrase-modal">
+      <div className="phrase-modal-header" style={{ marginBottom: '20px' }}>
+        <div className="phrase-title-container" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <h2 style={{ margin: 0, color: 'var(--color-primary-dark)' }}>{phrase}</h2>
+          {type && <span className="phrase-type-pill" style={{ border: '2px solid #A6A6A6', color: '#A6A6A6', padding: '2px 8px', borderRadius: '20px', fontSize: '14px' }}>{type}</span>}
         </div>
       </div>
-    </div>
+      <div className="phrase-modal-body">
+        <div className="phrase-pronunciation-container" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
+          <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{pronunciation}</div>
+          <button onClick={playAudio} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+            <img src={megaphoneIcon} alt="播放" style={{ width: '24px' }} />
+          </button>
+        </div>
+        
+        <InfoRow label="釋義">
+          {interpretation}
+        </InfoRow>
+
+        {renderPronunDiffTable()}
+      </div>
+    </UnifiedModal>
   );
 };
 

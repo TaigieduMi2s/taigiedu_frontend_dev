@@ -10,6 +10,16 @@ import deleteIcon from '../../../assets/adminPage/trash.svg';
 import addIcon from '../../../assets/adminPage/plus.svg';
 import uturnIcon from '../../../assets/adminPage/uturn.svg';
 import jpgIconImage from '../../../assets/adminPage/jpg icon.svg';
+import { authenticatedFetch } from '../../../services/authService';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/api';
+
+const getFullImageUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('blob:')) return path;
+  const filename = path.split('/').filter(Boolean).pop();
+  return `https://dev.taigiedu.com/backend/static/media/${filename}`;
+};
 
 const AdminSocialmediaPage = () => {
   const { showToast } = useToast();
@@ -76,47 +86,53 @@ const AdminSocialmediaPage = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('https://dev.taigiedu.com/backend/media', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      if (!response.ok) throw new Error('載入失敗');
+      const response = await authenticatedFetch(`${API_BASE_URL}/admin/socialmedia`);
       const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.message || '載入失敗');
 
       const dynamicMenu = {};
       const items = [];
+      const records = result.data || [];
+      const categoryMap = {};
 
-      Object.keys(result).forEach(rawCategory => {
-        const mainCategory = rawCategory === '' ? '其他' : rawCategory;
-        const records = result[rawCategory] || [];
-        const subSet = new Set();
-
-        records.forEach(item => {
-          if (item.subcategory && item.subcategory.trim() !== '') {
-            subSet.add(item.subcategory.trim());
+      records.forEach(item => {
+        let mainCategory = '其他';
+        let subCategory = '';
+        if (item.category) {
+          const parts = item.category.includes('>') ? item.category.split('>') : [item.category];
+          mainCategory = parts[0].trim() || '其他';
+          if (parts.length > 1) {
+            subCategory = parts[1].trim();
           }
-        });
+        }
+        
+        if (!categoryMap[mainCategory]) {
+          categoryMap[mainCategory] = new Set();
+        }
+        if (subCategory) {
+          categoryMap[mainCategory].add(subCategory);
+        }
 
-        const subItems = Array.from(subSet).sort();
-        dynamicMenu[mainCategory] = {
+        items.push({
+          id: item.id || `media-${Date.now()}-${Math.random()}`,
+          mainCategory,
+          subCategory,
+          categories: item.category ? [item.category] : [],
+          name: item.name || '未命名',
+          link: item.link || '#',
+          imageUrl: getFullImageUrl(item.figure),
+          imageName: item.figure ? item.figure.split('/').pop() : '',
+          status: item.status === 'publish' ? 'published' : item.status === 'archive' ? 'archived' : item.status,
+          timestamp: item.timestamp || new Date().toLocaleDateString('zh-TW')
+        });
+      });
+
+      Object.keys(categoryMap).forEach(mainCat => {
+        const subItems = Array.from(categoryMap[mainCat]).sort();
+        dynamicMenu[mainCat] = {
           hasSubMenu: subItems.length > 0,
           subItems
         };
-
-        records.forEach(item => {
-          items.push({
-            id: item.id || `media-${Date.now()}-${Math.random()}`,
-            mainCategory,
-            subCategory: item.subcategory && item.subcategory.trim() !== '' ? item.subcategory.trim() : '',
-            categories: item.subcategory && item.subcategory.trim() !== '' ? [item.subcategory.trim()] : [],
-            name: item.title || '未命名',
-            link: item.url || '#',
-            imageUrl: item.image || '',
-            imageName: '',
-            status: 'published',
-            timestamp: new Date().toLocaleDateString('zh-TW')
-          });
-        });
       });
 
       setMenuItems(dynamicMenu);
@@ -178,7 +194,7 @@ const AdminSocialmediaPage = () => {
     });
   }, [filteredItems]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setAttemptedSubmit(true);
 
@@ -199,31 +215,42 @@ const AdminSocialmediaPage = () => {
       return;
     }
 
-    const now = new Date();
-    const ts = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    try {
+      if (isEditing && currentEditId) {
+        const response = await authenticatedFetch(`${API_BASE_URL}/admin/socialmedia/modify`, {
+          method: 'POST',
+          body: JSON.stringify({
+            id: String(currentEditId),
+            action: '3',
+            name,
+            link,
+            category: pickedCategories.join(', '),
+            figure: imageName
+          })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || '更新失敗');
+        showToast('項目已更新', 'success');
+      } else {
+        const response = await authenticatedFetch(`${API_BASE_URL}/admin/socialmedia/add`, {
+          method: 'POST',
+          body: JSON.stringify({
+            name,
+            link,
+            category: pickedCategories.join(', '),
+            figure: imageName
+          })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || '新增失敗');
+        showToast('項目已新增', 'success');
+      }
 
-    if (isEditing && currentEditId) {
-      setAllItems(prev => prev.map(i =>
-        i.id === currentEditId
-          ? { ...i, name, link, categories: pickedCategories, imageName: imageName || i.imageName, imageUrl: imageUrl || i.imageUrl }
-          : i
-      ));
-      showToast('項目已更新', 'success');
-    } else {
-      setAllItems(prev => [{
-        id: 'media-' + Date.now(),
-        name,
-        link,
-        categories: pickedCategories,
-        imageName,
-        imageUrl,
-        status: 'published',
-        timestamp: ts
-      }, ...prev]);
-      showToast('項目已新增', 'success');
+      setShowModal(false);
+      await fetchData();
+    } catch (err) {
+      showToast(`操作失敗: ${err.message}`, 'error');
     }
-
-    setShowModal(false);
   };
 
   const validateAndSetImage = (file) => {
@@ -243,13 +270,24 @@ const AdminSocialmediaPage = () => {
     setImageUrl(URL.createObjectURL(file));
   };
 
-  const handleDeleteClick = (id) => {
+  const handleDeleteClick = async (id) => {
     const item = allItems.find(i => i.id === id);
     if (!item) return;
 
-    const newStatus = item.status === 'published' ? 'archived' : 'published';
-    setAllItems(prev => prev.map(i => i.id === id ? { ...i, status: newStatus } : i));
-    showToast(newStatus === 'archived' ? '項目已封存' : '項目已恢復', 'success');
+    const isRestoreAction = item.status === 'archived';
+    try {
+      const response = await authenticatedFetch(`${API_BASE_URL}/admin/socialmedia/modify`, {
+        method: 'POST',
+        body: JSON.stringify({ id: String(id), action: isRestoreAction ? '2' : '1' })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.message || '操作失敗');
+      
+      showToast(isRestoreAction ? '項目已恢復' : '項目已封存', 'success');
+      await fetchData();
+    } catch (err) {
+      showToast(`操作失敗: ${err.message}`, 'error');
+    }
   };
 
   const showChildFilter = parentFilter === '全部'
@@ -449,37 +487,40 @@ const AdminSocialmediaPage = () => {
         </div>
 
         <div className="mb-3">
-          <label className="form-label admin-form-label">
-            *類別（至少勾選一個類別）
-          </label>
+          <label className="form-label admin-form-label">*類別（至少勾選一個類別）</label>
           {flatCategoryOptions.length === 0 ? (
             <div className="text-muted" style={{ fontSize: '0.9rem' }}>
               尚無可選分類
             </div>
           ) : (
-            <div className="category-grid">
-              {flatCategoryOptions.map(opt => (
-                <label key={opt.key} className="form-check-label category-option">
-                  <input
-                    type="checkbox"
-                    className="form-check-input"
-                    checked={pickedCategories.includes(opt.key)}
-                    onChange={() => togglePicked(opt.key)}
-                  />
-                  {' '}
-                  {opt.label}
-                </label>
-              ))}
+            <div className="category-checkboxes-container p-3 border rounded bg-light">
+              <div className="d-flex flex-wrap gap-4">
+                {flatCategoryOptions.map(opt => (
+                  <div key={opt.key} className="form-check m-0 d-flex align-items-center">
+                    <input
+                      className="form-check-input mt-0 me-2"
+                      type="checkbox"
+                      id={`cat-${opt.key}`}
+                      checked={pickedCategories.includes(opt.key)}
+                      onChange={() => togglePicked(opt.key)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                    <label className="form-check-label mb-0" htmlFor={`cat-${opt.key}`} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                      {opt.label}
+                    </label>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
           {attemptedSubmit && pickedCategories.length === 0 && (
-            <div className="invalid-hint">請至少勾選一個類別</div>
+            <div className="invalid-hint text-danger mt-1" style={{ fontSize: '13px' }}>請至少勾選一個類別</div>
           )}
         </div>
 
         <div className="mb-3">
           <label className="form-label admin-form-label">*圖片</label>
-          <div className="upload-wrapper">
+          <div className="upload-wrapper mb-2">
             <label className="upload-btn">
               <input
                 type="file"
@@ -494,11 +535,11 @@ const AdminSocialmediaPage = () => {
             </span>
           </div>
           {(imageName || imageUrl) && (
-            <div className="image-preview-cell" style={{ marginTop: 8 }}>
-              <img src={jpgIconImage} alt="圖片" className="file-icon-img" />
-              <span className="file-name-text">
+            <div className="mt-3 d-inline-flex flex-column align-items-center" style={{ border: '1px solid #e0e0e0', borderRadius: '8px', padding: '8px', backgroundColor: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.06)' }}>
+              <img src={imageUrl || '#'} alt="圖片預覽" style={{ maxHeight: '130px', maxWidth: '100%', objectFit: 'contain', borderRadius: '4px' }} />
+              <div className="mt-2 text-secondary text-truncate" style={{ maxWidth: '200px', fontSize: '13px' }} title={imageName || '圖片'}>
                 {imageName || imageUrl?.split('/').pop()?.split('.')[0] || '圖片'}
-              </span>
+              </div>
             </div>
           )}
         </div>

@@ -88,9 +88,14 @@
     }
 }
 
+/* 手機版維持兩欄，但縮小 padding 避免卡片過大 */
 @media (max-width: 576px) {
     .col-xl-custom-5 {
-        flex: 0 0 100%;
-        max-width: 100%;
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+
+    .festival-card {
+        padding: 4px;
     }
 }

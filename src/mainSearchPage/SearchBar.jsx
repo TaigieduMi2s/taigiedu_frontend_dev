@@ -55,7 +55,7 @@ const SearchBar = ({ initialQuery = '', categories = [], selectedCategories = []
   return (
     <div className="search-bar">
       <div className="input-container">
-        <div className="px-2 bar-selectspace">
+        <div className="bar-selectspace">
           <MultiSelect
             options={categories}
             selectedOptions={selectedCategories}

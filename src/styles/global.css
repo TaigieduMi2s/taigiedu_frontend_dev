@@ -1,0 +1,477 @@
+/* ============================================================
+   全局樣式系統 (Global CSS Design Tokens & Utilities)
+   台語文教學共融平台 — 前臺 RWD 統一樣式
+   ============================================================ */
+
+/* ─── 1. Design Tokens (CSS Variables) ─────────────────────── */
+:root {
+  /* 主色系 */
+  --color-primary: #2D92C1;
+  --color-primary-dark: #017AB1;
+  --color-primary-light: #4AA3BA;
+  --color-secondary: #80C48F;
+
+  /* 漸層（Header / Footer 共用）*/
+  --gradient-brand: linear-gradient(to right, #2C7FA6, #80C48F);
+  --gradient-brand-reverse: linear-gradient(to right, #80C48F, #2C7FA6);
+
+  /* 背景色 */
+  --bg-page: #f5f7fa;
+  --bg-card: #ffffff;
+  --bg-sidebar: #DFEAF2;
+  --bg-sidebar-sub: #e8eef4;
+  --bg-sidebar-hover: #c8d0e7;
+
+  /* 文字色 */
+  --text-primary: #1a1a1a;
+  --text-secondary: #333333;
+  --text-muted: #6b7280;
+  --text-light: #9ca3af;
+  --text-link: #2D92C1;
+  --text-link-hover: #017AB1;
+
+  /* 邊框 */
+  --border-light: #e2e8f0;
+  --border-medium: #cbd5e0;
+  --border-color: #e5e7eb;
+
+  /* Border radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* 陰影 */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.10);
+  --shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.12);
+
+  /* 間距 */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+
+  /* Layout */
+  --sidebar-width: 230px;
+  --header-height: 58px;
+  --content-max-width: 1600px;
+  --page-padding-x: 2rem;
+  --page-padding-x-mobile: 1rem;
+
+  /* Transition */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
+
+  /* Z-index */
+  --z-header: 1000;
+  --z-sidebar: 900;
+  --z-overlay: 800;
+  --z-modal: 10000;
+  --z-dropdown: 1001;
+}
+
+/* ─── 2. 頁面基礎容器 ─────────────────────────────────────── */
+
+/* 頁面統一內容容器（各頁面主要 wrapper） */
+.page-container {
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 1.5rem var(--page-padding-x);
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 1rem var(--page-padding-x-mobile);
+  }
+}
+
+/* ─── 3. 頁面標題（section-title） ───────────────────────── */
+
+/* 統一各頁面段落標題 */
+.page-section-title {
+  color: var(--color-primary-dark);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 1.5rem 0 1rem 0;
+  padding: 0;
+}
+
+/* ─── 4. 卡片基礎樣式 ─────────────────────────────────────── */
+
+.card {
+  background-color: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-md);
+  transition: box-shadow var(--transition-base), transform var(--transition-base);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+/* ─── 5. 卡片格柵佈局（card-grid） ───────────────────────── */
+/* 4 欄 → 3 欄(1024px) → 2 欄(768px) → 1 欄(480px) */
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  width: 100%;
+}
+
+@media (max-width: 1200px) {
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+/* 2 欄卡片格柵（用於大圖片展示） */
+.card-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .card-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+/* 5 欄卡片格柵（用於名人堂等） */
+.card-grid-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  width: 100%;
+}
+
+@media (max-width: 1200px) {
+  .card-grid-5 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .card-grid-5 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .card-grid-5 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 400px) {
+  .card-grid-5 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── 6. 頁面頂部篩選列（page-filter-header） ───────────────── */
+
+/* 包含搜尋框 + 下拉篩選的 header 列 */
+.page-filter-header {
+  background: #fff;
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+
+.page-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .page-filter-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+}
+
+/* ─── 7. 統一搜尋框（search-field） ─────────────────────────── */
+
+.search-field-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  max-width: 480px;
+}
+
+@media (max-width: 768px) {
+  .search-field-wrap {
+    max-width: 100%;
+  }
+}
+
+.search-field {
+  width: 100%;
+  padding: 0.65rem 2.5rem 0.65rem 0.875rem;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  font-size: 0.9375rem;
+  outline: none;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.search-field:focus,
+.search-field:hover {
+  border-color: var(--color-primary-light);
+  box-shadow: 0 0 0 3px rgba(44, 127, 166, 0.15);
+}
+
+.search-field-icon {
+  position: absolute;
+  right: 0.625rem;
+  cursor: pointer;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+}
+
+/* ─── 8. 表格 RWD（table-scroll-wrapper） ─────────────────── */
+
+/* 包裹 <table> 的容器，讓表格在小螢幕可左右滑動 */
+.table-scroll-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.table-scroll-wrapper table {
+  min-width: 600px; /* 確保欄位不被壓縮 */
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* 標準表格樣式 */
+.data-table {
+  min-width: 600px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-light);
+  white-space: nowrap;
+}
+
+.data-table th {
+  background-color: #f8fafc;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.data-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+/* ─── 9. 按鈕基礎樣式（解決全局 button 污染） ──────────────── */
+/* 注意：這裡不覆寫裸 button，只提供 .btn class */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1.125rem;
+  border-radius: var(--radius-full);
+  border: none;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--transition-base), color var(--transition-base), box-shadow var(--transition-base);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--color-primary);
+  color: var(--color-primary);
+}
+
+.btn-outline:hover {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1.5px solid white;
+  color: white;
+}
+
+.btn-ghost:hover {
+  background-color: white;
+  color: var(--color-primary-dark);
+}
+
+.btn-sm {
+  padding: 0.375rem 0.875rem;
+  font-size: 0.875rem;
+}
+
+/* ─── 10. Modal 全局 RWD 基礎 ────────────────────────────── */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  padding: 1.25rem;
+}
+
+.modal-box {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 650px;
+  max-height: 90vh;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalSlideUp 0.22s ease-out;
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal-box {
+    max-width: 100%;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    max-height: 92vh;
+  }
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── 11. 通用 Loading 狀態 ──────────────────────────────── */
+
+.loading-state {
+  width: 100%;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── 12. 空狀態（Empty State） ──────────────────────────── */
+
+.empty-state {
+  width: 100%;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+}
+
+.empty-state svg {
+  width: 48px;
+  height: 48px;
+  color: #d1d5db;
+}
+
+/* ─── 13. 工具類 ─────────────────────────────────────────── */
+
+/* 隱藏（RWD 用） */
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .show-mobile-only {
+    display: none !important;
+  }
+}

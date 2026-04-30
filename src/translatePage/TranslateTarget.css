@@ -11,9 +11,15 @@
   box-sizing: border-box; /* 包括內邊距和邊框在寬高計算內 */
 }
 
+.dropdown-container {
+  position: relative;
+  display: flex;
+  width: 148px; /* 確保容器有固定寬度，或在 RWD 中調整 */
+}
+
 .language-dropdown {
   display: flex;
-  width: 148px;
+  width: 100%; /* 填滿容器寬度 */
   height: 48px;
   padding: 12px 16px;
   align-items: center;
@@ -242,7 +248,8 @@
 
 .dropdown-container {
   position: relative;
-  display: inline-block;
+  display: flex;
+  width: 148px;
 }
 
 .dropdown-arrow {
@@ -253,4 +260,40 @@
   width: 20px;
   height: 20px;
   pointer-events: none; /* 讓箭頭不會阻擋點擊事件 */
+}
+
+/* ===== RWD - Mobile (max-width: 768px) ===== */
+@media (max-width: 768px) {
+  .translate-content {
+    gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  
+  .dropdown-container {
+    width: 100%;
+  }
+
+  .language-dropdown {
+    width: 100%;
+    max-width: none;
+    font-size: 16px;
+  }
+  
+  .target-display-box {
+    height: 180px;
+    min-height: 180px;
+    max-height: 180px;
+    font-size: 16px;
+  }
+
+  .copy-button-translate,
+  .tran-feedback-button {
+    width: 100%;
+    max-width: 300px;
+    align-self: center;
+    min-width: 0;
+    font-size: 15px;
+  }
 }

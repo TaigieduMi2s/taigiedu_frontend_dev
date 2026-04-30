@@ -15,7 +15,7 @@ import featuredResourceIcon from "./assets/sidebar_icon/本站特色資源.svg";
 import chevronUpIcon from "./assets/chevron-up.svg";
 import envConfig from "./config";
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen = false, onClose }) => {
   const basePath = envConfig.basePath;
   const [activeItem, setActiveItem] = useState(null); // 用於追蹤哪個選單被選取
   const [activeSubItem, setActiveSubItem] = useState(null);
@@ -24,6 +24,7 @@ const Sidebar = () => {
   const location = useLocation(); // 監聽當前路由變化
 
   const isUnstableFeaturesEnabled = envConfig.features.enableUnstableFeatures;
+  const isTopicIntegrationFeatureEnabled = envConfig.features.enableTopicIntegrationFeature;
 
   const allMenuItems = [
     { id: 1, label: "主頁搜尋", icon: homeIcon, path: "/" },
@@ -52,13 +53,13 @@ const Sidebar = () => {
       hasSubmenu: true,
       submenuItems: [
         { id: "topic-integration", label: "議題融入", path: "/featured-resource/topic-integration" },
+        { id: 12, label: "親戚計算機", path: "/relative-calculator" },
       ],
     },
   ];
 
   const menuItems = allMenuItems.filter(item => {
-    // 隱藏「本站特色資源」
-    if (item.id === 11) return false;
+    if (!isTopicIntegrationFeatureEnabled && item.id === 11) return false;
     if (!isUnstableFeaturesEnabled) {
       if ([2, 3, 4].includes(item.id)) return false;
     }
@@ -113,7 +114,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="sidebar" data-testid="sidebar">
+    <div className={`sidebar${isOpen ? ' sidebar-open' : ''}`} data-testid="sidebar">
       {menuItems.map((item) => (
         <div key={item.id}>
           <button

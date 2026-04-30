@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: calc(100vh - 200px);
+  min-height: 400px;
   position: relative;
   width: 100%;
 }
@@ -21,15 +21,15 @@
 /* 添加一個居中的 grid 容器 */
 .resource-content {
   position: relative;
-  margin: 40px auto;
-  padding-top: 20px;
+  margin: 20px auto;
+  padding-top: 10px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 300px));
   /* 自動調整列數 */
   column-gap: 30px;
   /* 縮小間距以適應更多螢幕 */
   row-gap: 50px;
-  min-height: 400px;
+  min-height: 200px;
   align-items: start;
   width: 100%;
   justify-content: center;
@@ -64,7 +64,7 @@
 }
 
 .resource-content-wrapper {
-  min-height: 750px;
+  min-height: 300px;
   position: relative;
   width: 100%;
   display: flex;
@@ -74,7 +74,7 @@
 }
 
 .pagination-container {
-  margin-top: 50px;
+  margin-top: 40px;
   padding: 20px 0;
   position: relative;
   width: 100%;
@@ -100,7 +100,7 @@
   }
 
   .resource-content-wrapper {
-    min-height: 850px;
+    min-height: 400px;
   }
 }
 
@@ -110,7 +110,7 @@
   }
 
   .resource-content-wrapper {
-    min-height: 1250px;
+    min-height: 400px;
   }
 }
 
@@ -119,8 +119,16 @@
     grid-template-columns: repeat(1, 1fr);
   }
 
+  .resource-content .resource-card,
+  .resource-content .delete-card-wrapper,
+  .resource-content > * {
+    max-width: 100% !important;
+    height: auto;
+    min-height: 350px;
+  }
+
   .resource-content-wrapper {
-    min-height: 2450px;
+    min-height: 400px;
   }
 }
 

@@ -1,47 +1,94 @@
+/* ============================================================
+   App.css — 全站主佈局
+   ============================================================ */
+
 * {
     box-sizing: border-box;
 }
 
 body {
     font-family: 'Huninn', 'NotoSansTC', Arial, sans-serif;
-    /* 將字體應用於 body */
     margin: 0;
     padding: 0;
     height: 100%;
     width: 100%;
-    overflow-x: hidden; /* 防止水平滾動條導致的白邊 */
+    overflow-x: hidden;
 }
 
+/* ─── 最外層容器 ─────────────────────────────────────────── */
+.app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ─── 主內容區（Header 以下、Footer 以上）──────────────────── */
+.maincontent {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr;
+    flex: 1;
+    min-height: calc(100vh - var(--header-height));
+    background-color: var(--bg-page);
+}
+
+/* 讓 grid item 可在 1fr 欄位內收縮，避免內容把版面撐出 viewport */
+.maincontent > * {
+    min-width: 0;
+}
+
+/* 預覽 / 下載 / Admin 首頁：不顯示 sidebar */
+.maincontent.preview-page {
+    display: block;
+    grid-template-columns: none;
+    width: 100%;
+}
+
+/* Admin 內容頁捲動 */
 .admin-content-scroll {
     overflow-x: auto;
     min-width: 0;
 }
 
-.app {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    /* 改為 min-height 確保內容過多時能正常捲動 */
-}
-
-.maincontent {
-    display: grid;
-    grid-template-columns: 230px 1fr;
-    /* 左側Sidebar寬度固定，右側MainContent填滿剩餘空間 */
-    min-height: 100vh;
-    background-color: #f5f5f5;
-}
-
-
-.maincontent.preview-page {
-    display: block !important;
-    /* 覆蓋原本的 grid 布局 */
-    grid-template-columns: none;
-    width: 100%;
-}
-
-
+/* ─── 主頁面內容 padding ────────────────────────────────── */
 .main-content {
     padding: 20px;
-    /* 調整間距 */
+}
+
+/* ─── Sidebar Overlay（行動裝置打開 sidebar 時的半透明遮罩）── */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: var(--z-overlay);
+    cursor: pointer;
+    animation: overlayFadeIn 0.2s ease;
+}
+
+.sidebar-overlay.active {
+    display: block;
+}
+
+@keyframes overlayFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ─── RWD: 平板（≤ 1024px）─────────────────────────────── */
+@media (max-width: 1024px) {
+    .maincontent {
+        grid-template-columns: 200px 1fr;
+    }
+}
+
+/* ─── RWD: 手機（≤ 768px）──────────────────────────────── */
+@media (max-width: 768px) {
+    .maincontent {
+        /* sidebar 變為 overlay，不佔用格線空間 */
+        grid-template-columns: 1fr;
+    }
+
+    .main-content {
+        padding: 14px;
+    }
 }
