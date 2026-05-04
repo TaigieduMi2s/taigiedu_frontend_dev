@@ -8,14 +8,17 @@ import bearGif from '../../assets/bear1.gif';
 const OUTAGE_START = new Date('2026-05-10T08:00:00'); 
 const OUTAGE_END   = new Date('2026-05-10T17:00:00'); 
 
-// 此開關用於控制是否啟用公告功能。
-const IS_NOTICE_ACTIVE = true; 
+// 5/10 17:00 後 getNoticeMode() 回傳 'none'，公告自動消失，屆時可移除此元件
+const IS_NOTICE_ACTIVE = true;
 
 const LS_KEY = 'ssn_dismissed_v1';
 
 function getNoticeMode() {
-  // ── 演練模式：強制開啟 blocking 狀態 ──────────────────────────
-  return 'blocking'; 
+  const now = new Date();
+  if (!IS_NOTICE_ACTIVE) return 'none';
+  if (now >= OUTAGE_START && now <= OUTAGE_END) return 'blocking';
+  if (now < OUTAGE_START) return 'preview';
+  return 'none';
 }
 
 // 警告三角圖示 (SVG inline)
