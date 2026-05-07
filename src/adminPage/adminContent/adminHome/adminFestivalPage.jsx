@@ -11,7 +11,18 @@ import uturnIcon from '../../../assets/adminPage/uturn.svg';
 import speakerIcon from '../../../assets/speaker-wave.svg';
 import { authenticatedFetch } from '../../../services/authService';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/backend';
+
+const blobUrlToBase64 = async (blobUrl) => {
+  const response = await fetch(blobUrl);
+  const blob = await response.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
 
 const getFileNameFromUrl = (url) => {
   if (!url) return '';
@@ -60,7 +71,9 @@ const AdminFestivalPage = () => {
   const [ttsPlaying, setTtsPlaying] = useState(false);
   const [ttsProgress, setTtsProgress] = useState(0);
   const [usingRecording, setUsingRecording] = useState(false);
-  const ttsUtterRef = useRef(null);
+  const ttsArrayBufferRef = useRef(null);
+  const ttsAudioCtxRef = useRef(null);
+  const ttsSourceNodeRef = useRef(null);
   const [recState, setRecState] = useState('idle'); // idle | recording | review
   const mediaRecorderRef = useRef(null);
   const [recordUrl, setRecordUrl] = useState('');
@@ -76,33 +89,18 @@ const AdminFestivalPage = () => {
   const handlePlayAudio = useCallback((item) => {
     if (playingId === item.id) {
       if (audioRef) { try { audioRef.pause(); audioRef.currentTime = 0; } catch { /* ignore */ } }
-      if (ttsUtterRef.current) { try { window.speechSynthesis.cancel(); } catch { /* ignore */ } }
       setPlayingId(null);
       return;
     }
     if (audioRef) { try { audioRef.pause(); } catch { /* ignore */ } }
-    if (ttsUtterRef.current) { try { window.speechSynthesis.cancel(); } catch { /* ignore */ } }
     if (item.audioUrl) {
       const a = new Audio(item.audioUrl);
       a.addEventListener('ended', () => { setPlayingId(null); });
-      a.play().catch(() => {/* ignore */ });
+      a.play().catch(() => {});
       setAudioRef(a);
       setPlayingId(item.id);
-    } else if (item.ttsText) {
-      if (!('speechSynthesis' in window)) { showToast('此瀏覽器不支援語音播放', 'warning'); return; }
-      const utter = new SpeechSynthesisUtterance(item.ttsText);
-      try {
-        const voices = window.speechSynthesis.getVoices();
-        const zhVoice = voices.find(v => /zh|cmn|nan/i.test(v.lang));
-        if (zhVoice) utter.voice = zhVoice; utter.lang = (zhVoice && zhVoice.lang) || 'zh-TW';
-      } catch { /* ignore */ }
-      utter.onend = () => { setPlayingId(null); ttsUtterRef.current = null; };
-      window.speechSynthesis.speak(utter);
-      ttsUtterRef.current = utter;
-      setAudioRef(null);
-      setPlayingId(item.id);
     }
-  }, [audioRef, playingId, showToast]);
+  }, [audioRef, playingId]);
 
   useEffect(() => { return () => { if (audioRef) { try { audioRef.pause(); } catch { /* ignore */ } } }; }, [audioRef]);
 
@@ -147,7 +145,7 @@ const AdminFestivalPage = () => {
 
   useEffect(() => { fetchFestival(); }, [fetchFestival]);
 
-  const handleAddClick = () => { if (festivalList.length >= 12 && statusFilter === 'published') { showToast('目前節慶項目已滿 12 個，請先刪除一個再新增。', 'warning'); return; } setShowAddModal(true); };
+  const handleAddClick = () => { setShowAddModal(true); };
   const handleEditClick = (item) => {
     setIsEditing(true); setCurrentEditItem(item);
     setNewZhName(item.zhName || ''); setNewTwName(item.twName || '');
@@ -155,7 +153,8 @@ const AdminFestivalPage = () => {
     setNewZhDesc(item.zhDesc || '');
     setNewTwDesc(item.twDesc || '');
     setNewAudioUrl(item.audioUrl || '');
-    setTtsGenerated(!!item.ttsText);
+    setTtsGenerated(false);
+    ttsArrayBufferRef.current = null;
     setUsingRecording(false);
     setTtsPlaying(false); setTtsProgress(0);
     setRecState('idle'); setRecordUrl(''); setRecordPlaying(false); setRecordProgress(0);
@@ -182,6 +181,9 @@ const AdminFestivalPage = () => {
     setDateType('lunar'); setDateMonth(''); setDateDay('');
     setNewImageFile(null);
     setTtsGenerated(false); setTtsPlaying(false); setTtsProgress(0); setUsingRecording(false);
+    if (ttsSourceNodeRef.current) { try { ttsSourceNodeRef.current.stop(); } catch { /* ignore */ } ttsSourceNodeRef.current = null; }
+    if (ttsAudioCtxRef.current) { try { ttsAudioCtxRef.current.close(); } catch { /* ignore */ } ttsAudioCtxRef.current = null; }
+    ttsArrayBufferRef.current = null;
     setRecState('idle'); setRecordUrl(''); setRecordPlaying(false); setRecordProgress(0);
     setIsEditing(false); setCurrentEditItem(null);
   };
@@ -196,38 +198,59 @@ const AdminFestivalPage = () => {
     setNewImageName(f.name);
   };
 
-  const handleGenerateTTS = () => {
+  const handleGenerateTTS = async () => {
     if (!newTwName) { showToast('請先輸入「名稱(台羅)」', 'warning'); return; }
-    if (!('speechSynthesis' in window)) { showToast('此瀏覽器不支援語音播放', 'warning'); return; }
-    try { window.speechSynthesis.cancel(); } catch { /* ignore */ }
-    setTtsGenerated(true); setTtsPlaying(false); setUsingRecording(false); setTtsProgress(0);
-  };
-  const handlePlayTTS = () => {
-    if (!ttsGenerated) return;
-    if (!('speechSynthesis' in window)) { showToast('此瀏覽器不支援語音播放', 'warning'); return; }
-    if (ttsPlaying) { try { window.speechSynthesis.cancel(); } catch { /* ignore */ } setTtsPlaying(false); setTtsProgress(0); return; }
-    const utter = new SpeechSynthesisUtterance(newTwName);
+    setTtsPlaying(false); setTtsProgress(0);
     try {
-      const voices = window.speechSynthesis.getVoices();
-      const zhVoice = voices.find(v => /zh|cmn|nan/i.test(v.lang));
-      if (zhVoice) utter.voice = zhVoice; utter.lang = (zhVoice && zhVoice.lang) || 'zh-TW';
-    } catch { /* ignore */ }
-    const est = Math.max(1, Math.round((newTwName || '').length * 0.08 * 1000));
-    const start = Date.now();
-    const timer = setInterval(() => {
-      const p = Math.min(1, (Date.now() - start) / est);
-      setTtsProgress(p);
-      if (p >= 1) { clearInterval(timer); }
-    }, 60);
-    utter.onend = () => { setTtsPlaying(false); setTtsProgress(0); clearInterval(timer); };
-    utter.onerror = () => { setTtsPlaying(false); setTtsProgress(0); clearInterval(timer); };
-    ttsUtterRef.current = utter;
-    window.speechSynthesis.speak(utter);
-    setTtsPlaying(true);
+      const response = await authenticatedFetch(`${API_BASE_URL}/synthesize_speech`, {
+        method: 'POST',
+        body: JSON.stringify({ tts_lang: 'tb', tts_data: newTwName }),
+      });
+      if (!response.ok) throw new Error('語音合成失敗');
+      const base64 = (await response.text()).trim();
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      ttsArrayBufferRef.current = bytes.buffer;
+      setTtsGenerated(true);
+      setUsingRecording(false);
+    } catch (e) {
+      showToast(`語音合成失敗: ${e.message}`, 'error');
+    }
+  };
+  const handlePlayTTS = async () => {
+    if (!ttsGenerated || !ttsArrayBufferRef.current) return;
+    if (ttsPlaying) {
+      if (ttsSourceNodeRef.current) { try { ttsSourceNodeRef.current.stop(); } catch { /* ignore */ } ttsSourceNodeRef.current = null; }
+      setTtsPlaying(false); setTtsProgress(0); return;
+    }
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      ttsAudioCtxRef.current = audioCtx;
+      const decoded = await audioCtx.decodeAudioData(ttsArrayBufferRef.current.slice(0));
+      const source = audioCtx.createBufferSource();
+      source.buffer = decoded;
+      source.connect(audioCtx.destination);
+      const duration = decoded.duration;
+      const startTime = audioCtx.currentTime;
+      const timer = setInterval(() => {
+        const p = Math.min(1, (audioCtx.currentTime - startTime) / duration);
+        setTtsProgress(p);
+        if (p >= 1) clearInterval(timer);
+      }, 60);
+      source.onended = () => { clearInterval(timer); setTtsPlaying(false); setTtsProgress(0); ttsSourceNodeRef.current = null; };
+      source.start(0);
+      ttsSourceNodeRef.current = source;
+      setTtsPlaying(true);
+    } catch (e) {
+      showToast(`播放失敗: ${e.message}`, 'error');
+    }
   };
 
   const handleDiscardTTS = () => {
-    try { window.speechSynthesis.cancel(); } catch { /* ignore */ }
+    if (ttsSourceNodeRef.current) { try { ttsSourceNodeRef.current.stop(); } catch { /* ignore */ } ttsSourceNodeRef.current = null; }
+    if (ttsAudioCtxRef.current) { try { ttsAudioCtxRef.current.close(); } catch { /* ignore */ } ttsAudioCtxRef.current = null; }
+    ttsArrayBufferRef.current = null;
     setTtsGenerated(false); setTtsPlaying(false); setTtsProgress(0);
     setUsingRecording(true);
   };
@@ -301,9 +324,19 @@ const AdminFestivalPage = () => {
     if (d < 1 || d > maxD) { showToast(`日期(${dateType === 'solar' ? '國曆' : '農曆'})需介於 1-${maxD}`, 'warning'); return; }
     
     const dateStr = `${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    const mappedAudio = usingRecording ? (recordUrl || '') : (newAudioUrl ? newAudioUrl.split('/').pop() : '');
+    let mappedAudio = '';
+    if (usingRecording && recordUrl) {
+      mappedAudio = await blobUrlToBase64(recordUrl);
+    } else if (ttsGenerated && ttsArrayBufferRef.current) {
+      const bytes = new Uint8Array(ttsArrayBufferRef.current);
+      let binary = '';
+      for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+      mappedAudio = `data:audio/wav;base64,${btoa(binary)}`;
+    } else {
+      mappedAudio = newAudioUrl ? newAudioUrl.split('/').pop() : '';
+    }
     const finalImage = newImageFile ? newImageFile.name : newImageName;
-    
+
     const payload = {
       name: newZhName,
       name_tl: newTwName,
