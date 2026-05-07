@@ -10,6 +10,8 @@ import addIcon from '../../../assets/adminPage/plus.svg';
 import uturnIcon from '../../../assets/adminPage/uturn.svg';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/backend';
+const TEST_ORDER_KEY = 'testPublishedOrder';
+const ALLOWED_CATEGORIES = ['成大', '教育部'];
 
 const AdminTestPage = () => {
     const { showToast } = useToast();
@@ -26,6 +28,7 @@ const AdminTestPage = () => {
 
     const [isEditing, setIsEditing] = useState(false);
     const [currentEditItem, setCurrentEditItem] = useState(null);
+    const [isDirty, setIsDirty] = useState(false);
 
     const fetchTestInfo = useCallback(async () => {
         setIsLoading(true);
@@ -44,7 +47,37 @@ const AdminTestPage = () => {
                 timestamp: item.timestamp || 'N/A',
                 status: item.status === 'publish' ? 'published' : item.status === 'archive' ? 'archived' : item.status,
             }));
-            setAllTestInfo(formatted);
+
+            const sortByTimestampDesc = (a, b) => {
+                if (a.timestamp === 'N/A') return 1;
+                if (b.timestamp === 'N/A') return -1;
+                return new Date(b.timestamp) - new Date(a.timestamp);
+            };
+
+            const publishedItems = formatted.filter(f => f.status === 'published');
+            const otherItems = formatted.filter(f => f.status !== 'published').sort(sortByTimestampDesc);
+
+            let orderedPublished;
+            try {
+                const savedIds = JSON.parse(localStorage.getItem(TEST_ORDER_KEY) || 'null');
+                if (savedIds) {
+                    orderedPublished = savedIds.reduce((acc, id) => {
+                        const item = publishedItems.find(f => String(f.id) === String(id));
+                        if (item) acc.push(item);
+                        return acc;
+                    }, []);
+                    const unseenItems = publishedItems
+                        .filter(f => !savedIds.includes(String(f.id)))
+                        .sort(sortByTimestampDesc);
+                    orderedPublished = [...unseenItems, ...orderedPublished];
+                } else {
+                    orderedPublished = [...publishedItems].sort(sortByTimestampDesc);
+                }
+            } catch {
+                orderedPublished = [...publishedItems].sort(sortByTimestampDesc);
+            }
+
+            setAllTestInfo([...orderedPublished, ...otherItems]);
         } catch (error) {
             showToast(`載入考試資訊失敗: ${error.message}`, 'error');
             setAllTestInfo([]);
@@ -54,11 +87,11 @@ const AdminTestPage = () => {
         }
     }, [showToast]);
 
-    // 編輯按鈕點擊
+    // 編輯按鈕點擊：category 不在允許清單內則清空，強制重新選擇
     const handleEditClick = useCallback((item) => {
         setIsEditing(true);
         setCurrentEditItem(item);
-        setNewCategory(item.category);
+        setNewCategory(ALLOWED_CATEGORIES.includes(item.category) ? item.category : '');
         setNewContent(item.content);
         setNewLink(item.link);
         setShowAddModal(true);
@@ -153,13 +186,12 @@ const AdminTestPage = () => {
         ];
     }, [statusFilter, handleEditClick, handleDeleteClick]);
 
-    // 拖曳結束處理
-    const handleDragEnd = useCallback(async (activeId, overId) => {
+    // 拖曳結束處理：只更新本地狀態，等待使用者點「確認順序」才送 API
+    const handleDragEnd = useCallback((activeId, overId) => {
         if (!overId) return;
 
         const oldIndex = testInfo.findIndex(item => item.id === activeId);
         const newIndex = testInfo.findIndex(item => item.id === overId);
-
         if (oldIndex === -1 || newIndex === -1) return;
 
         const reordered = [...testInfo];
@@ -178,20 +210,26 @@ const AdminTestPage = () => {
             tempAllInfo.splice(newAllIndex, 0, removedAll);
             return tempAllInfo;
         });
+        setIsDirty(true);
+    }, [testInfo]);
 
+    const handleConfirmOrder = useCallback(async () => {
+        localStorage.setItem(TEST_ORDER_KEY, JSON.stringify(testInfo.map(item => String(item.id))));
         try {
             const response = await authenticatedFetch(`${API_BASE_URL}/admin/main-search/test/change`, {
                 method: 'POST',
-                body: JSON.stringify({ ids: reordered.map(item => String(item.id)) }),
+                body: JSON.stringify({ ids: testInfo.map(item => String(item.id)) }),
             });
             const result = await response.json();
             if (!response.ok || !result.success) throw new Error(result.message || '排序更新失敗');
+            showToast('順序已成功更新！', 'success');
+            setIsDirty(false);
         } catch (error) {
             showToast(`排序更新失敗: ${error.message}`, 'error');
             fetchTestInfo();
+            setIsDirty(false);
         }
     }, [testInfo, showToast, fetchTestInfo]);
-
 
     useEffect(() => {
         fetchTestInfo();
@@ -208,7 +246,6 @@ const AdminTestPage = () => {
         }
     }, [allTestInfo, statusFilter, isLoading]);
 
-    // 新增功能
     const handleAddClick = () => {
         if (testInfo.length >= 12 && statusFilter === 'published') {
             showToast('目前公告數量已滿12個項目，請先刪除一個再新增。', 'warning');
@@ -294,7 +331,6 @@ const AdminTestPage = () => {
                 </div>
             </div>
 
-            {/* 使用 AdminDataTable 組件 */}
             <AdminDataTable
                 data={testInfo}
                 columns={columns}
@@ -306,8 +342,14 @@ const AdminTestPage = () => {
                 onRetry={fetchTestInfo}
                 emptyState={{ message: '目前沒有公告資料' }}
             />
+            {isDirty && statusFilter === 'published' && (
+                <div className="drag-confirm-row">
+                    <button className="btn btn-primary admin-add-button" onClick={handleConfirmOrder}>
+                        確認順序
+                    </button>
+                </div>
+            )}
 
-            {/* 使用 AdminModal 組件 */}
             <AdminModal
                 isOpen={showAddModal}
                 onClose={handleModalClose}
@@ -326,8 +368,9 @@ const AdminTestPage = () => {
                         required
                     >
                         <option value="" disabled>請選擇類別</option>
-                        <option value="教育部">教育部</option>
-                        <option value="成大">成大</option>
+                        {ALLOWED_CATEGORIES.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                        ))}
                     </select>
                 </div>
                 <div className="mb-3">

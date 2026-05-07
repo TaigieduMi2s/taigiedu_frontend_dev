@@ -15,6 +15,7 @@ const columnHelper = createColumnHelper();
 
 const NEWS_CATEGORIES_KEY = 'newsCategories';
 const DEFAULT_CATEGORIES = ['教育部', '成大'];
+const NEWS_ORDER_KEY = 'newsPublishedOrder';
 
 function loadCategories() {
   try {
@@ -46,6 +47,7 @@ const AdminNewsPage = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [currentEditItem, setCurrentEditItem] = useState(null);
+  const [isDirty, setIsDirty] = useState(false);
 
   // 動態類別管理
   const [categories, setCategories] = useState(loadCategories);
@@ -81,7 +83,38 @@ const AdminNewsPage = () => {
         timestamp: item.timestamp || 'N/A',
         status: item.status === 'publish' ? 'published' : item.status === 'archive' ? 'archived' : item.status,
       }));
-      setAllNews(formatted);
+
+      const sortByTimestampDesc = (a, b) => {
+        if (a.timestamp === 'N/A') return 1;
+        if (b.timestamp === 'N/A') return -1;
+        return new Date(b.timestamp) - new Date(a.timestamp);
+      };
+
+      const publishedItems = formatted.filter(f => f.status === 'published');
+      const otherItems = formatted.filter(f => f.status !== 'published').sort(sortByTimestampDesc);
+
+      let orderedPublished;
+      try {
+        const savedIds = JSON.parse(localStorage.getItem(NEWS_ORDER_KEY) || 'null');
+        if (savedIds) {
+          orderedPublished = savedIds.reduce((acc, id) => {
+            const item = publishedItems.find(f => String(f.id) === String(id));
+            if (item) acc.push(item);
+            return acc;
+          }, []);
+          // 新增的項目（不在已存順序裡）加到最前面
+          const unseenItems = publishedItems
+            .filter(f => !savedIds.includes(String(f.id)))
+            .sort(sortByTimestampDesc);
+          orderedPublished = [...unseenItems, ...orderedPublished];
+        } else {
+          orderedPublished = [...publishedItems].sort(sortByTimestampDesc);
+        }
+      } catch {
+        orderedPublished = [...publishedItems].sort(sortByTimestampDesc);
+      }
+
+      setAllNews([...orderedPublished, ...otherItems]);
     } catch (error) {
       showToast(`載入最新消息失敗: ${error.message}`, 'error');
       setAllNews([]);
@@ -225,19 +258,26 @@ const AdminNewsPage = () => {
       return tempAllInfo;
     });
 
-    // 通知後端新順序
+    setIsDirty(true);
+  }, [newsList]);
+
+  const handleConfirmOrder = useCallback(async () => {
+    localStorage.setItem(NEWS_ORDER_KEY, JSON.stringify(newsList.map(item => String(item.id))));
     try {
       const response = await authenticatedFetch(`${API_BASE_URL}/admin/main-search/news/change`, {
         method: 'POST',
-        body: JSON.stringify({ ids: reordered.map(item => String(item.id)) }),
+        body: JSON.stringify({ ids: newsList.map(item => String(item.id)) }),
       });
       const result = await response.json();
       if (!response.ok || !result.success) {
         throw new Error(result.message || '排序更新失敗');
       }
+      showToast('順序已成功更新！', 'success');
+      setIsDirty(false);
     } catch (error) {
       showToast(`排序更新失敗: ${error.message}`, 'error');
-      fetchNews(); // 回滾到後端真實順序
+      fetchNews();
+      setIsDirty(false);
     }
   }, [newsList, showToast, fetchNews]);
 
@@ -432,6 +472,13 @@ const AdminNewsPage = () => {
         onRetry={fetchNews}
         emptyState={{ message: '目前沒有快訊資料' }}
       />
+      {isDirty && statusFilter === 'published' && (
+        <div className="drag-confirm-row">
+          <button className="btn btn-primary admin-add-button" onClick={handleConfirmOrder}>
+            確認順序
+          </button>
+        </div>
+      )}
 
       {/* 使用 AdminModal 組件 */}
       <AdminModal
