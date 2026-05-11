@@ -4,6 +4,7 @@ import searchIcon from '../assets/home/search_logo.svg';
 import chevronUp from '../assets/chevron-up.svg';
 // import questionMarkIcon from '../assets/question-mark.svg';
 import noPics from "../assets/culture/festivalN.png";
+import envConfig from "../config";
 
 const SocialmediaPage = () => {
     const [selectedType, setSelectedType] = useState("分類");  // 將 "類型" 改為 "分類"
@@ -64,7 +65,7 @@ const SocialmediaPage = () => {
                 // 為圖片添加前綴
                 const formattedItems = actualData[category].map(item => ({
                     ...item,
-                    image: item.image ? `https://dev.taigiedu.com${item.image}` : null
+                    image: item.image ? `${envConfig.imageUrl}${item.image}` : null
                 }));
                 
                 // 保持類別名稱不變（包括空字串）
