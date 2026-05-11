@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "taiwanese-omg",
+  "name": "__WORKER_NAME__",
   "compatibility_date": "2026-05-11",
   "observability": {
     "enabled": true
@@ -12,14 +12,6 @@
     "nodejs_compat"
   ],
   "routes": [
-    { "pattern": "www.taigiedu.com/*", "zone_name": "taigiedu.com" }
-  ],
-  "env": {
-    "dev": {
-      "name": "taiwanese-omg-dev",
-      "routes": [
-        { "pattern": "dev.taigiedu.com/*", "zone_name": "taigiedu.com" }
-      ]
-    }
-  }
+    { "pattern": "__ROUTE_PATTERN__", "zone_name": "taigiedu.com" }
+  ]
 }
