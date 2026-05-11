@@ -40,7 +40,7 @@ const getFullImageUrl = (path) => {
   if (!path) return '';
   if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('blob:')) return path;
   const filename = path.split('/').filter(Boolean).pop();
-  return `https://dev.taigiedu.com/backend/static/festival/${filename}`;
+  return `${envConfig.apiUrl}/static/festival/${filename}`;
 };
 
 const AdminFestivalPage = () => {

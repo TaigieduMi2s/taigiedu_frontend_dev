@@ -5,6 +5,7 @@ import heroImage from "./assets/Rectangle 7310.svg";
 import searchIcon from "./assets/home/search_logo.svg";
 import todayEventsIcon from "./assets/todayEvents.svg";
 import { EventModal } from "./components/UnifiedModal/EventModal";
+import envConfig from "./config";
 
 const MainContent = () => {
   const navigate = useNavigate(); // 使用 useNavigate 來進行頁面跳轉
@@ -41,7 +42,7 @@ const MainContent = () => {
       const parameters = {}; // 無需附帶參數，空物件即可
 
       const response = await fetch(
-        "https://dev.taigiedu.com/backend/idiom_random",
+        `${envConfig.apiUrl}/idiom_random`,
         {
           method: 'POST',
           headers: {
@@ -80,7 +81,7 @@ const MainContent = () => {
       };
 
       const response = await fetch(
-        "https://dev.taigiedu.com/backend/top_keywords",
+        `${envConfig.apiUrl}/top_keywords`,
         {
           method: 'POST',
           headers: {
@@ -113,7 +114,7 @@ const MainContent = () => {
     setExamLoading(true);
     try {
       const response = await fetch(
-        "https://dev.taigiedu.com/backend/info/test",
+        `${envConfig.apiUrl}/info/test`,
         {
           method: 'POST',
           headers: {
@@ -149,7 +150,7 @@ const MainContent = () => {
     setNewsLoading(true);
     try {
       const response = await fetch(
-        "https://dev.taigiedu.com/backend/info/news",
+        `${envConfig.apiUrl}/info/news`,
         {
           method: 'POST',
           headers: {
@@ -192,7 +193,7 @@ const MainContent = () => {
       const dateString = `${month}${day}`;
 
       const response = await fetch(
-        `https://dev.taigiedu.com/backend/events_calendar/${dateString}`,
+        `${envConfig.apiUrl}/events_calendar/${dateString}`,
         {
           method: 'GET',
           headers: {
@@ -240,7 +241,7 @@ const MainContent = () => {
 
     // 呼叫 top_keywords API 來建立統計資料
     try {
-      const keywordsResponse = await fetch('https://dev.taigiedu.com/backend/top_keywords', {
+      const keywordsResponse = await fetch(`${envConfig.apiUrl}/top_keywords`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
