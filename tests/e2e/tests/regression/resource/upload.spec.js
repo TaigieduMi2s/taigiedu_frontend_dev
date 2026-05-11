@@ -175,7 +175,7 @@ test.describe('資源上傳測試', () => {
             return;
         }
 
-        await page.locator('input[type="file"]').setInputFiles(testFilePath);
+        await page.locator('input.file-upload').setInputFiles(testFilePath);
         console.log('[測試] ✓ 已上傳測試檔案');
 
         // 等待檔案處理
