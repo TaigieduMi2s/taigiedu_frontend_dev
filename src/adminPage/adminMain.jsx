@@ -27,7 +27,7 @@ const AdminMain = () => {
     {
       title: "認證考試",
       icon: testIcon,
-      functions: ["認證類型", "推薦用書", "教育頻道"]
+      functions: ["認證考試"]
     },
     {
       title: "媒體與社群資源",
@@ -61,9 +61,7 @@ const AdminMain = () => {
     "卡通動漫": "/admin/socialmedia",
     "音樂": "/admin/socialmedia",
     "戲劇": "/admin/socialmedia",
-    "認證類型": "/admin/exam/info",
-    "推薦用書": "/admin/exam/books",
-    "教育頻道": "/admin/exam/channels",
+    "認證考試": "/admin/exam/info",
     "會員管理": "/admin/member"
     // ...
   };

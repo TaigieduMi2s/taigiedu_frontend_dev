@@ -31,17 +31,7 @@ const MENU_ITEMS = [
       { id: 'festival', label: "節慶", path: "/admin/culture/festival" }
     ]
   },
-  {
-    id: 3,
-    label: "認證考試",
-    icon: testIcon,
-    hasSubmenu: true,
-    submenuItems: [
-      { id: 'adminExamInfo', label: "認證類型", path: "/admin/exam/info" },
-      { id: 'adminBooks', label: "推薦用書", path: "/admin/exam/books" },
-      { id: 'adminChannels', label: "教育頻道", path: "/admin/exam/channels" },
-    ]
-  },
+  { id: 3, label: "認證考試", icon: testIcon, path: "/admin/exam/info" },
   { id: 4, label: "媒體與社群資源", icon: playIcon, path: "/admin/socialmedia" },
   {
     id: 5,
