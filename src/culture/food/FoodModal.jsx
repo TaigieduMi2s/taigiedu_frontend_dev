@@ -1,7 +1,8 @@
 import React from 'react';
 import { UnifiedModal, InfoRow } from '../../components/UnifiedModal/UnifiedModal';
 import megaPhoneIcon from '../../assets/megaphone.svg';
-import nofood from "../../assets/culture/foodN.png"; 
+import nofood from "../../assets/culture/foodN.png";
+import './FoodModal.css';
 
 const FoodModal = ({ isOpen, onClose, food }) => {
     if (!isOpen || !food) return null;
@@ -31,22 +32,22 @@ const FoodModal = ({ isOpen, onClose, food }) => {
 
     return (
         <UnifiedModal isOpen={isOpen} onClose={onClose} className="food-modal">
-            <div className="food-header-container" style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-                <div className="food-image-container" style={{ flex: '0 0 200px' }}>
+            <div className="food-header-container">
+                <div className="food-image-container">
                     <img
+                        className="food-modal-image"
                         src={food.image}
                         alt={food.name}
-                        style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '8px' }}
                         onError={(e) => { e.target.src = nofood; }}
                     />
                 </div>
-                <div className="food-header-content" style={{ flex: 1 }}>
-                    <h2 style={{ margin: '0 0 10px 0', color: 'var(--color-primary-dark)' }}>{food.name}</h2>
-                    <div className="food-pronunciation-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{food.pron}</div>
-                        <button 
-                            onClick={playAudio} 
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                <div className="food-header-content">
+                    <h2 className="food-modal-title-text">{food.name}</h2>
+                    <div className="food-pronunciation-container">
+                        <div className="food-pron-text">{food.pron}</div>
+                        <button
+                            className="food-play-btn"
+                            onClick={playAudio}
                         >
                             <img src={megaPhoneIcon} alt="播放" style={{ width: '24px' }} />
                         </button>
@@ -54,7 +55,7 @@ const FoodModal = ({ isOpen, onClose, food }) => {
                 </div>
             </div>
 
-            <div className="food-modal-body" style={{ marginTop: '20px' }}>
+            <div className="food-modal-body">
                 <InfoRow label="華文釋義">
                     {food.intro}
                 </InfoRow>

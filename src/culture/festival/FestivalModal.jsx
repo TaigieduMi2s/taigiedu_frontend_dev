@@ -1,6 +1,7 @@
 import React from 'react';
 import { UnifiedModal, InfoRow } from '../../components/UnifiedModal/UnifiedModal';
 import megaPhoneIcon from '../../assets/megaphone.svg';
+import './FestivalModal.css';
 
 const FestivalModal = ({ isOpen, onClose, festival }) => {
     if (!isOpen || !festival) return null;
@@ -30,13 +31,13 @@ const FestivalModal = ({ isOpen, onClose, festival }) => {
 
     return (
         <UnifiedModal isOpen={isOpen} onClose={onClose} className="festival-modal">
-            <div className="festival-header" style={{ marginBottom: '20px' }}>
-                <h2 style={{ margin: '0 0 10px 0', color: 'var(--color-primary-dark)' }}>{festival.name}</h2>
-                <div className="festival-pronunciation-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{festival.pron}</div>
-                    <button 
-                        onClick={playAudio} 
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding:0 }}
+            <div className="festival-header">
+                <h2 className="festival-modal-name">{festival.name}</h2>
+                <div className="festival-pronunciation-container">
+                    <div className="festival-pron-text">{festival.pron}</div>
+                    <button
+                        className="festival-play-btn"
+                        onClick={playAudio}
                     >
                         <img src={megaPhoneIcon} alt="播放" style={{ width: '24px' }} />
                     </button>
