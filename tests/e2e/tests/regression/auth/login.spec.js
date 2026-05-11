@@ -44,7 +44,7 @@ test.describe('使用者認證測試', () => {
         // 開啟登入 Modal
         const loginButton = page.locator('header button:has-text("登入")');
         await loginButton.click();
-        await expect(page.locator('.login-modal-container')).toBeVisible();
+        await expect(page.locator('.login-unified-modal')).toBeVisible();
 
         // 等待初始驗證碼載入
         await page.waitForTimeout(1000);
@@ -78,7 +78,7 @@ test.describe('使用者認證測試', () => {
         await loginButton.click();
 
         // 等待登入 Modal 打開
-        await expect(page.locator('.login-modal-container')).toBeVisible();
+        await expect(page.locator('.login-unified-modal')).toBeVisible();
 
         // 等待驗證碼圖片載入
         const captchaImg = page.locator('img.captcha-image, img[alt="驗證碼"]');
@@ -146,7 +146,7 @@ test.describe('使用者認證測試', () => {
             try {
                 await Promise.race([
                     page.locator('.toast-message').waitFor({ state: 'visible', timeout: 15000 }),
-                    expect(page.locator('.login-modal-container')).not.toBeVisible({ timeout: 15000 }),
+                    expect(page.locator('.login-unified-modal')).not.toBeVisible({ timeout: 15000 }),
                 ]);
             } catch {
                 console.log('[測試] 等待登入回應超時');
@@ -172,7 +172,7 @@ test.describe('使用者認證測試', () => {
                     await page.waitForTimeout(1500);
 
                     // 先檢查 Modal 是否還可見，如果 Modal 已關閉則可能是登入成功
-                    const isModalStillVisible = await page.locator('.login-modal-container').isVisible();
+                    const isModalStillVisible = await page.locator('.login-unified-modal').isVisible();
                     if (!isModalStillVisible) {
                         console.log('[測試] ✓ Modal 已關閉，登入可能成功');
                         loginSuccess = true;
@@ -198,7 +198,7 @@ test.describe('使用者認證測試', () => {
 
             // 如果 Toast 沒有明確表示成功或失敗，檢查 Modal 狀態和 header
             if (!loginSuccess && !errorMessage) {
-                const isModalVisible = await page.locator('.login-modal-container').isVisible();
+                const isModalVisible = await page.locator('.login-unified-modal').isVisible();
 
                 if (!isModalVisible) {
                     // Modal 已關閉，檢查 header 是否顯示使用者資訊

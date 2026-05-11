@@ -55,14 +55,17 @@ test.describe('Sidebar 導航功能', () => {
 
     test('點擊「台語出名人」導航成功', async ({ page, context }) => {
         const menuItem = page.locator('.menu-item', { hasText: '台語出名人' });
-
-        // 預期會打開新分頁
-        const [newPage] = await Promise.all([
-            context.waitForEvent('page'),
-            menuItem.click()
-        ]);
-
-        await expect(newPage).toHaveURL(/famous.taigiedu.com/);
+        
+        // Mock window.open to intercept the url without causing navigation failures
+        await page.evaluate(() => {
+            window.openedUrls = [];
+            window.open = (url) => { window.openedUrls.push(url); return null; };
+        });
+        
+        await menuItem.click();
+        
+        const urls = await page.evaluate(() => window.openedUrls);
+        expect(urls).toContain('https://famous.taigiedu.com/');
     });
 
     test('「節慶飲食」子選單展開並導航', async ({ page }) => {
@@ -127,7 +130,7 @@ test.describe('直接 URL 導航', () => {
         await expect(page).toHaveURL('/login');
 
         // 登入 modal 應該顯示
-        const loginModal = page.locator('.login-modal-container');
+        const loginModal = page.locator('.login-modal-container, .login-unified-modal');
         await expect(loginModal).toBeVisible();
     });
 });
