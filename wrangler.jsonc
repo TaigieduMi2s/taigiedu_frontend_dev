@@ -12,6 +12,9 @@
     "nodejs_compat"
   ],
   "routes": [
-    { "pattern": "__ROUTE_PATTERN__", "zone_name": "taigiedu.com" }
+    {
+      "pattern": "__ROUTE_PATTERN__",
+      "zone_name": "taigiedu.com"
+    }
   ]
 }

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import envConfig from '../../../../config';
 import './ResourceHeaderPage.css';
 import TableHeaderCell from '../TableHeaderCell/TableHeaderCell.jsx';
 import HighSchoolColumn from '../HighSchoolColumn/HighSchoolColumn.jsx';
@@ -92,10 +93,7 @@ export default function ResourceHeaderPage() {
   const [pending, setPending] = useState(false);
   const { showToast } = useToast();
 
-  // API base URL
-  import envConfig from '../../../../config';
-
-const apiBaseUrl = envConfig.apiUrl;
+  const apiBaseUrl = envConfig.apiUrl;
 
   const setStage = (stage, nextList) => {
     setConfig((prev) => ({ ...prev, versions: { ...prev.versions, [stage]: nextList } }));
