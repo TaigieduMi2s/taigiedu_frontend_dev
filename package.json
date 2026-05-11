@@ -9,10 +9,11 @@
     "build:github": "set VITE_BASE_PATH=/taiwaneseOMG/&& vite build",
     "build:prod": "set VITE_BASE_PATH=/&& vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
+    "preview": "npm run build && wrangler dev",
     "test:e2e": "npx playwright test --config=tests/e2e/playwright.config.js",
     "test:e2e:ui": "npx playwright test --config=tests/e2e/playwright.config.js --ui",
-    "test:e2e:smoke": "npx playwright test --config=tests/e2e/playwright.config.js --project=smoke"
+    "test:e2e:smoke": "npx playwright test --config=tests/e2e/playwright.config.js --project=smoke",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -27,6 +28,7 @@
     "react-router-dom": "^6.27.0"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.36.3",
     "@eslint/js": "^9.13.0",
     "@playwright/test": "^1.57.0",
     "@types/react": "^18.3.11",
@@ -40,6 +42,7 @@
     "globals": "^15.11.0",
     "sharp": "^0.34.5",
     "tesseract.js": "^7.0.0",
-    "vite": "^7.2.6"
+    "vite": "^7.2.6",
+    "wrangler": "^4.90.0"
   }
 }

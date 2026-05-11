@@ -1,0 +1,39 @@
+name: Deploy to Cloudflare Workers
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Build and Deploy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_BASE_PATH: /
+          VITE_API_URL: ${{ github.ref == 'refs/heads/main' && secrets.PROD_VITE_API_URL || secrets.DEV_VITE_API_URL || 'https://dev.taigiedu.com/backend' }}
+          VITE_IMAGE_URL: ${{ github.ref == 'refs/heads/main' && secrets.PROD_VITE_IMAGE_URL || secrets.DEV_VITE_IMAGE_URL || 'https://dev.taigiedu.com' }}
+
+      - name: Deploy to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # Use 'dev' environment for develop branch, otherwise production (default)
+          command: deploy ${{ github.ref == 'refs/heads/develop' && '--env dev' || '' }}
