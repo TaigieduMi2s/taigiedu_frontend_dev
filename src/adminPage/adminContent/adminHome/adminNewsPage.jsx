@@ -4,6 +4,8 @@ import { useToast } from '../../../components/Toast';
 import AdminDataTable from '../../../components/AdminDataTable';
 import AdminModal from '../../../components/AdminModal';
 import { authenticatedFetch } from '../../../services/authService';
+import { useAuth } from '../../../contexts/AuthContext';
+import { can } from '../../../config/permissions';
 import './adminNewsPage.css';
 import editIcon from '../../../assets/adminPage/pencil.svg';
 import deleteIcon from '../../../assets/adminPage/trash.svg';
@@ -34,6 +36,9 @@ function saveCategories(cats) {
 
 const AdminNewsPage = () => {
   const { showToast } = useToast();
+  const { user } = useAuth();
+  // 依角色決定連結是否為非必填（SUPER_ADMIN 可省略連結）
+  const isLinkOptional = can(user?.role, 'news', 'optionalLink');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [allNews, setAllNews] = useState([]);
@@ -384,15 +389,19 @@ const AdminNewsPage = () => {
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
-    if (!newCategory || !newContent || !newLink) {
-      showToast('請填寫所有欄位', 'warning');
+    // 必填驗證：SUPER_ADMIN 的連結為非必填，其餘角色連結必填
+    if (!newCategory || !newContent || (!isLinkOptional && !newLink)) {
+      showToast('請填寫所有必填欄位', 'warning');
       return;
     }
-    try {
-      new URL(newLink);
-    } catch {
-      showToast('請輸入有效的 URL', 'warning');
-      return;
+    // 若有填入連結，統一驗證格式
+    if (newLink) {
+      try {
+        new URL(newLink);
+      } catch {
+        showToast('請輸入有效的 URL', 'warning');
+        return;
+      }
     }
 
     try {
@@ -558,7 +567,7 @@ const AdminNewsPage = () => {
         </div>
         <div className="mb-3">
           <label htmlFor="newLink" className="form-label admin-form-label">
-            *連結
+            {isLinkOptional ? '連結（選填）' : '*連結'}
           </label>
           <input
             type="url"
@@ -566,7 +575,7 @@ const AdminNewsPage = () => {
             id="newLink"
             value={newLink}
             onChange={(e) => setNewLink(e.target.value)}
-            required
+            required={!isLinkOptional}
           />
         </div>
       </AdminModal>
