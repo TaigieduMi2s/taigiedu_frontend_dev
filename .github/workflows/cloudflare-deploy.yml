@@ -10,6 +10,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Build and Deploy
+    # 根據分支自動選擇對應的 GitHub Environment（含變數設定）
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,17 +26,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Create .env file from GitHub Environment Variables
+        run: |
+          echo "VITE_API_URL=${{ vars.VITE_API_URL }}" >> .env
+          echo "VITE_IMAGE_URL=${{ vars.VITE_IMAGE_URL }}" >> .env
+          echo "VITE_BASE_PATH=${{ vars.VITE_BASE_PATH }}" >> .env
+          echo "VITE_ENABLE_UNSTABLE_FEATURES=${{ vars.VITE_ENABLE_UNSTABLE_FEATURES }}" >> .env
+          echo "VITE_ENABLE_TOPIC_INTEGRATION_FEATURE=${{ vars.VITE_ENABLE_TOPIC_INTEGRATION_FEATURE }}" >> .env
+          echo "VITE_ENABLE_ROBOTS_NOINDEX=${{ vars.VITE_ENABLE_ROBOTS_NOINDEX }}" >> .env
+          echo "VITE_ENABLE_SERVICE_SUSPENSION_NOTICE=${{ vars.VITE_ENABLE_SERVICE_SUSPENSION_NOTICE }}" >> .env
+
       - name: Build
         run: npm run build
-        env:
-          VITE_BASE_PATH: /
-          VITE_API_URL: ${{ github.ref == 'refs/heads/main' && secrets.PROD_VITE_API_URL || secrets.DEV_VITE_API_URL || 'https://dev.taigiedu.com/backend' }}
-          VITE_IMAGE_URL: ${{ github.ref == 'refs/heads/main' && secrets.PROD_VITE_IMAGE_URL || secrets.DEV_VITE_IMAGE_URL || 'https://dev.taigiedu.com' }}
 
       - name: Deploy to Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          # Use 'dev' environment for develop branch, otherwise production (default)
+          # develop 分支部署至 dev 環境，main 分支部署至正式環境
           command: deploy ${{ github.ref == 'refs/heads/develop' && '--env dev' || '' }}
