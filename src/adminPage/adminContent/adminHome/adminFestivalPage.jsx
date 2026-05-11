@@ -11,7 +11,9 @@ import uturnIcon from '../../../assets/adminPage/uturn.svg';
 import speakerIcon from '../../../assets/speaker-wave.svg';
 import { authenticatedFetch } from '../../../services/authService';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/backend';
+import envConfig from '../../../config';
+
+const API_BASE_URL = envConfig.apiUrl;
 
 const blobUrlToBase64 = async (blobUrl) => {
   const response = await fetch(blobUrl);

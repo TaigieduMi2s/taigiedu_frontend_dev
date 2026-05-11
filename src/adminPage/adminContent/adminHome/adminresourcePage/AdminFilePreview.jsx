@@ -5,6 +5,7 @@ import TakedownDialog from './TakedownDialog';
 import { authenticatedFetch } from '../../../../services/authService';
 import { useToast } from '../../../../components/Toast';
 import { useAuth } from '../../../../contexts/AuthContext';
+import envConfig from '../../../../config';
 
 // 預設預覽圖
 import defaultPreviewImage from '../../../../assets/resourcepage/file_preview_demo.png';
@@ -37,7 +38,7 @@ export default function AdminFilePreview() {
     const location = useLocation();
     const { showToast } = useToast();
     const { user } = useAuth();
-    const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/backend';
+    const API_BASE_URL = envConfig.apiUrl;
 
     const [resourceData, setResourceData] = useState({
         id: "",

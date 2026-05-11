@@ -5,6 +5,7 @@ import ResourceCard from "./ResourceCard";
 import { useToast } from "../components/Toast";
 import { authenticatedFetch } from "../services/authService";
 import { useAuth } from "../contexts/AuthContext";
+import envConfig from "../config";
 
 // 添加 renderCard 到組件參數中
 const ResourceContent = ({ searchParams, onCardClick, renderCard, onResourcesLoaded }) => {
@@ -114,7 +115,7 @@ const ResourceContent = ({ searchParams, onCardClick, renderCard, onResourcesLoa
 
       console.log("搜索參數:", parameters);
 
-      const response = await authenticatedFetch(`${import.meta.env.VITE_API_URL}/api/resource/search`, {
+      const response = await authenticatedFetch(`${envConfig.apiUrl}/api/resource/search`, {
         method: "POST",
         body: JSON.stringify(parameters)
       });
@@ -137,7 +138,7 @@ const ResourceContent = ({ searchParams, onCardClick, renderCard, onResourcesLoa
                 // 如果已經是完整路徑或本地預設圖，不處理
                 if (path.startsWith("http") || path.includes("/src/assets/")) return path;
 
-                const baseUrl = import.meta.env.VITE_API_URL || "";
+                const baseUrl = envConfig.apiUrl;
                 let cleanPath = path;
 
                 // 移除開頭的斜線

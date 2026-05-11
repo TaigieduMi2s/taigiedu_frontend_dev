@@ -13,8 +13,10 @@ import { useToast } from '../../../../components/Toast';
 import { useAuth } from '../../../../contexts/AuthContext';
 import TakedownDialog from './TakedownDialog';
 
+import envConfig from '../../../../config';
+
 // API base URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/backend';
+const API_BASE_URL = envConfig.apiUrl;
 
 export default function AdminResourcePage() {
   const { showToast } = useToast();
@@ -172,7 +174,7 @@ export default function AdminResourcePage() {
           return defaultPreviewImage;
         }
         if (url.startsWith('http://') || url.startsWith('https://')) return url;
-        return `https://dev.taigiedu.com/backend/${url}`;
+        return `${envConfig.apiUrl}/${url}`;
       };
       const previewUrl = `${window.location.origin}/admin/file-preview?` +
         `title=${encodeURIComponent(resource.title || '無標題資源')}` +

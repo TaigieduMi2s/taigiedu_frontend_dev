@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
 import { useAuth } from "../contexts/AuthContext";
 import { authenticatedFetch } from "../services/authService";
+import envConfig from "../config";
 import "./FilePreview.css";
 import likesIconFilled from "../assets/resourcepage/Union (Stroke)(black).svg";
 import likesIconOutline from "../assets/resourcepage/heart-outline-black.svg";
@@ -52,7 +53,7 @@ const FilePreview = () => {
     "涉及詐騙、詐欺或假冒"
   ];
 
-  const apiBaseUrl = import.meta.env.VITE_API_URL || "https://dev.taigiedu.com/backend";
+  const apiBaseUrl = envConfig.apiUrl;
   const joinUrl = (base, path) => {
     const normalizedBase = String(base || "").replace(/\/+$/, "");
     let normalizedPath = String(path || "").replace(/^\/+/, "");

@@ -3,8 +3,10 @@
  * 處理 JWT Token 管理、API 請求和自動刷新
  */
 
-// 在開發環境下，如果沒有 VITE_API_URL，使用相對路徑 /backend 以觸發 vite proxy
-const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '/backend' : 'https://dev.taigiedu.com/backend');
+import envConfig from '../config';
+
+// 使用統一配置中的 API URL
+const API_BASE_URL = envConfig.apiUrl;
 
 // 存放 Access Token 在記憶體中
 let accessToken = null;

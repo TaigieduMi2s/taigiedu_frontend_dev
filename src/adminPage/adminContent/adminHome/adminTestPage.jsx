@@ -10,7 +10,9 @@ import deleteIcon from '../../../assets/adminPage/trash.svg';
 import addIcon from '../../../assets/adminPage/plus.svg';
 import uturnIcon from '../../../assets/adminPage/uturn.svg';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/backend';
+import envConfig from '../../../config';
+
+const API_BASE_URL = envConfig.apiUrl;
 const TEST_ORDER_KEY = 'testPublishedOrder';
 const ALLOWED_CATEGORIES = ['成大', '教育部'];
 

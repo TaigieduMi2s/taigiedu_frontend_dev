@@ -12,13 +12,15 @@ import uturnIcon from '../../../assets/adminPage/uturn.svg';
 import jpgIconImage from '../../../assets/adminPage/jpg icon.svg';
 import { authenticatedFetch } from '../../../services/authService';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/api';
+import envConfig from '../../../config';
+
+const API_BASE_URL = envConfig.apiUrl;
 
 const getFullImageUrl = (path) => {
   if (!path) return '';
   if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('blob:')) return path;
   const filename = path.split('/').filter(Boolean).pop();
-  return `https://dev.taigiedu.com/backend/static/media/${filename}`;
+  return `${envConfig.imageUrl}/backend/static/media/${filename}`;
 };
 
 const AdminSocialmediaPage = () => {

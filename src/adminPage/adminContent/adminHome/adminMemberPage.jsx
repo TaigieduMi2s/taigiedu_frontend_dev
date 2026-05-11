@@ -8,7 +8,7 @@ import AdminDataTable from '../../../components/AdminDataTable';
 import '../../../components/AdminDataTable/AdminDataTable.css';
 import AdminModal from '../../../components/AdminModal';
 import './adminMemberPage.css';
-import './adminMemberPage.css';
+import envConfig from '../../../config';
 import adjustmentsIcon from '../../../assets/adjustments-horizontal.svg';
 import uturnIcon from '../../../assets/adminPage/uturn.svg';
 
@@ -253,7 +253,7 @@ const AdminMemberPage = () => {
   }, [authUser, checkSuperAdmin]);
 
   // API base URL
-  const apiBaseUrl = import.meta.env.VITE_API_URL || "https://dev.taigiedu.com/backend";
+  const apiBaseUrl = envConfig.apiUrl;
 
   // 載入會員資料
   const fetchMembers = useCallback(async () => {

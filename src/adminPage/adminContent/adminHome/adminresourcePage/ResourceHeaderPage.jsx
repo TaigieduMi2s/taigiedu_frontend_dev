@@ -93,7 +93,9 @@ export default function ResourceHeaderPage() {
   const { showToast } = useToast();
 
   // API base URL
-  const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/backend';
+  import envConfig from '../../../../config';
+
+const apiBaseUrl = envConfig.apiUrl;
 
   const setStage = (stage, nextList) => {
     setConfig((prev) => ({ ...prev, versions: { ...prev.versions, [stage]: nextList } }));
