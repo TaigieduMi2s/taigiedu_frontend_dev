@@ -500,7 +500,7 @@ const AdminFestivalPage = () => {
   return (
     <div className="admin-test-page p-4">
       <div className="admin-header-main">
-        <h5 className="mb-3 text-secondary">台語文化 &gt; 節慶 &gt; <span>{statusFilter === 'published' ? '目前項目' : '刪除紀錄'}</span></h5>
+        <h5 className="mb-3 text-secondary">節慶飲食 &gt; 節慶 &gt; <span>{statusFilter === 'published' ? '目前項目' : '刪除紀錄'}</span></h5>
         <div className="admin-controls-row">
           <button className="btn btn-primary me-3 admin-add-button" onClick={handleAddClick}>
             <img src={addIcon} alt="新增項目" />新增項目

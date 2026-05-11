@@ -12,10 +12,10 @@ const AdminMain = () => {
     {
       title: "主頁搜尋",
       icon: houseIcon,
-      functions: ["考試資訊", "最新消息"]
+      functions: ["考試資訊", "活動快訊"]
     },
     {
-      title: "台語文化",
+      title: "節慶飲食",
       icon: bookIcon,
       functions: ["飲食", "節慶"]
     },
@@ -44,7 +44,7 @@ const AdminMain = () => {
   const navigate = useNavigate();
   const routeMap = {
     "考試資訊": "/admin/main-search/test",
-    "最新消息": "/admin/main-search/news",
+    "活動快訊": "/admin/main-search/news",
     "飲食": "/admin/culture/food",
     "節慶": "/admin/culture/festival",
     // 台語教學資源共享平台

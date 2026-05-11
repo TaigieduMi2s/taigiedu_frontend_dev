@@ -23,7 +23,7 @@ const MENU_ITEMS = [
   },
   {
     id: 2,
-    label: "台語文化",
+    label: "節慶飲食",
     icon: bookIcon,
     hasSubmenu: true,
     submenuItems: [
