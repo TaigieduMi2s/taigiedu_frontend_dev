@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { UnifiedModal, InfoRow } from '../components/UnifiedModal/UnifiedModal';
 import megaphoneIcon from '../assets/megaphone.svg';
+import './PhraseModal.css';
 
 const PhraseModal = ({ isOpen, onClose, phrase, pronunciation, interpretation, pronun_diff, audio, type }) => {
   console.log("Modal 接收的數據:", { phrase, pronunciation, interpretation, pronun_diff, audio });
@@ -268,7 +269,7 @@ const PhraseModal = ({ isOpen, onClose, phrase, pronunciation, interpretation, p
           </button>
         </div>
         
-        <InfoRow label="釋義">
+        <InfoRow label="漢羅解讀">
           {interpretation}
         </InfoRow>
 
