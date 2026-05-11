@@ -129,7 +129,7 @@ const AdminFoodPage = () => {
         audioUrl: getFullImageUrl(item.audio_data),
         ttsText: '',
         timestamp: item.timestamp || 'N/A',
-        status: item.status === 'publish' ? 'published' : item.status === 'archive' ? 'archived' : item.status,
+        status: (item.status === 'publish' || item.status === 'published') ? 'published' : (item.status === 'archive' || item.status === 'archived' || item.status === 'deleted') ? 'archived' : item.status,
       }));
       setAllFood(formatted);
     } catch (e) {

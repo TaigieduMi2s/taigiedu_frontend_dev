@@ -128,7 +128,7 @@ const AdminFestivalPage = () => {
           twDesc: i.intro_taigi || '',
           audioUrl: getFullImageUrl(i.audio_data),
           timestamp: label || 'N/A',
-          status: i.status === 'publish' ? 'published' : i.status === 'archive' ? 'archived' : i.status,
+          status: (i.status === 'publish' || i.status === 'published') ? 'published' : (i.status === 'archive' || i.status === 'archived' || i.status === 'deleted') ? 'archived' : i.status,
           dateMonth: i.date ? i.date.split('-')[0] : '',
           dateDay: i.date ? i.date.split('-')[1] : '',
           dateType: (i.islunar === '1' || String(i.islunar) === 'true') ? 'lunar' : 'solar'

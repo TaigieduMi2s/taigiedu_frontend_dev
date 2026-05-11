@@ -122,7 +122,7 @@ const AdminSocialmediaPage = () => {
           link: item.link || '#',
           imageUrl: getFullImageUrl(item.figure),
           imageName: item.figure ? item.figure.split('/').pop() : '',
-          status: item.status === 'publish' ? 'published' : item.status === 'archive' ? 'archived' : item.status,
+          status: (item.status === 'publish' || item.status === 'published') ? 'published' : (item.status === 'archive' || item.status === 'archived' || item.status === 'deleted') ? 'archived' : item.status,
           timestamp: item.timestamp || new Date().toLocaleDateString('zh-TW')
         });
       });

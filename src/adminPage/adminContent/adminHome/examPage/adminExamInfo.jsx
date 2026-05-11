@@ -53,7 +53,7 @@ const AdminExamInfo = () => {
         imageName: item.figure ? item.figure.split('/').pop() : '圖片',
         imageUrl: getFullImageUrl(item.figure),
         createdAt: item.timestamp,
-        status: item.status === 'publish' ? 'published' : item.status === 'archive' ? 'archived' : item.status
+        status: (item.status === 'publish' || item.status === 'published') ? 'published' : (item.status === 'archive' || item.status === 'archived' || item.status === 'deleted') ? 'archived' : item.status
       }));
       setExamTypes(formatted);
     } catch (err) {
