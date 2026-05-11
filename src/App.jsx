@@ -40,8 +40,6 @@ import AdminSidebar from "./adminPage/adminSidebar";
 import AdminTestPage from "./adminPage/adminContent/adminHome/adminTestPage";
 import AdminNewsPage from "./adminPage/adminContent/adminHome/adminNewsPage";
 import AdminExamInfo from "./adminPage/adminContent/adminHome/examPage/adminExamInfo";
-import AdminExamBooks from "./adminPage/adminContent/adminHome/examPage/adminExamBooks";
-import AdminExamChannels from "./adminPage/adminContent/adminHome/examPage/adminExamChannels";
 import AdminMemberPage from "./adminPage/adminContent/adminHome/adminMemberPage";
 import AdminFilePreview from "./adminPage/adminContent/adminHome/adminresourcePage/AdminFilePreview";
 import AdminFoodPage from "./adminPage/adminContent/adminHome/adminFoodPage";
@@ -233,22 +231,6 @@ const AppLayout = () => {
             element={
               <AdminRoute>
                 <AdminExamInfo />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/exam/books"
-            element={
-              <AdminRoute>
-                <AdminExamBooks />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/exam/channels"
-            element={
-              <AdminRoute>
-                <AdminExamChannels />
               </AdminRoute>
             }
           />

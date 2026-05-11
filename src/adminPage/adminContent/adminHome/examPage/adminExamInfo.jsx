@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useToast } from '../../../../components/Toast';
 import AdminModal from '../../../../components/AdminModal';
 import AdminDataTable from '../../../../components/AdminDataTable';
@@ -19,10 +19,18 @@ const getFullImageUrl = (path) => {
   return `https://dev.taigiedu.com/backend/static/exam/${filename}`;
 };
 
+const normalizeStatus = (status) => {
+  if (status === 'publish' || status === 'published') return 'published';
+  if (status === 'archive' || status === 'archived' || status === 'deleted') return 'archived';
+  return status;
+};
+
 const AdminExamInfo = () => {
   const { showToast } = useToast();
   const [examTypes, setExamTypes] = useState([]);
+  const [availableCategories, setAvailableCategories] = useState([]);
   const [statusFilter, setStatusFilter] = useState('published');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentEditId, setCurrentEditId] = useState(null);
@@ -30,6 +38,7 @@ const AdminExamInfo = () => {
   // Form fields
   const [newName, setNewName] = useState('');
   const [newLink, setNewLink] = useState('');
+  const [newCategory, setNewCategory] = useState('');
   // eslint-disable-next-line no-unused-vars
   const [imageFile, setImageFile] = useState(null);
   const [imageName, setImageName] = useState('');
@@ -45,30 +54,36 @@ const AdminExamInfo = () => {
       const response = await authenticatedFetch(`${API_BASE_URL}/admin/exam`);
       const result = await response.json();
       if (!response.ok || !result.success) throw new Error(result.message || '載入失敗');
-      
-      const formatted = result.data.map(item => ({
-        id: item.id,
-        name: item.name,
-        link: item.link,
-        imageName: item.figure ? item.figure.split('/').pop() : '圖片',
-        imageUrl: getFullImageUrl(item.figure),
-        createdAt: item.timestamp,
-        status: (item.status === 'publish' || item.status === 'published') ? 'published' : (item.status === 'archive' || item.status === 'archived' || item.status === 'deleted') ? 'archived' : item.status
-      }));
-      setExamTypes(formatted);
+
+      const dataObj = result.data || {};
+      const cats = Object.keys(dataObj);
+      setAvailableCategories(cats);
+
+      const allItems = cats.flatMap(cat =>
+        (dataObj[cat] || []).map(item => ({
+          id: item.id,
+          category: cat,
+          name: item.title || item.name || '',
+          link: item.url || item.link || '',
+          imageName: (item.image || item.figure) ? (item.image || item.figure).split('/').pop() : '圖片',
+          imageUrl: getFullImageUrl(item.image || item.figure || ''),
+          createdAt: item.timestamp,
+          status: normalizeStatus(item.status)
+        }))
+      );
+      setExamTypes(allItems);
     } catch (err) {
       showToast(`載入失敗: ${err.message}`, 'error');
     }
   };
 
-  // 過濾資料
   const displayItems = useMemo(() => {
-    return examTypes.filter(item => item.status === statusFilter);
-  }, [examTypes, statusFilter]);
-
-  const handleStatusFilterChange = (e) => {
-    setStatusFilter(e.target.value);
-  };
+    return examTypes.filter(item => {
+      const matchStatus = item.status === statusFilter;
+      const matchCategory = categoryFilter === 'all' || item.category === categoryFilter;
+      return matchStatus && matchCategory;
+    });
+  }, [examTypes, statusFilter, categoryFilter]);
 
   const handleAddClick = () => {
     setIsEditing(false);
@@ -82,6 +97,7 @@ const AdminExamInfo = () => {
     setCurrentEditId(item.id);
     setNewName(item.name);
     setNewLink(item.link);
+    setNewCategory(item.category);
     setImageName(item.imageName);
     setImageUrl(item.imageUrl);
     setShowAddModal(true);
@@ -95,7 +111,6 @@ const AdminExamInfo = () => {
       });
       const result = await response.json();
       if (!response.ok || !result.success) throw new Error(result.message || '操作失敗');
-      
       showToast('項目已移至刪除紀錄', 'success');
       await fetchExamTypes();
     } catch (err) {
@@ -111,7 +126,6 @@ const AdminExamInfo = () => {
       });
       const result = await response.json();
       if (!response.ok || !result.success) throw new Error(result.message || '操作失敗');
-      
       showToast('項目已恢復', 'success');
       await fetchExamTypes();
     } catch (err) {
@@ -121,17 +135,14 @@ const AdminExamInfo = () => {
 
   const validateAndSetImage = (file) => {
     if (!file) return;
-
     if (!['image/jpeg', 'image/png'].includes(file.type)) {
       showToast('只接受 JPG 或 PNG 格式', 'warning');
       return;
     }
-
     if (file.size > 2 * 1024 * 1024) {
       showToast('檔案大小不能超過 2MB', 'warning');
       return;
     }
-
     setImageFile(file);
     setImageName(file.name);
     setImageUrl(URL.createObjectURL(file));
@@ -145,6 +156,7 @@ const AdminExamInfo = () => {
   const resetForm = () => {
     setNewName('');
     setNewLink('');
+    setNewCategory(availableCategories[0] || '');
     setImageFile(null);
     setImageName('');
     setImageUrl('');
@@ -153,6 +165,11 @@ const AdminExamInfo = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
+    if (!newCategory) {
+      showToast('請選擇類別', 'warning');
+      return;
+    }
+
     try {
       new URL(newLink);
     } catch {
@@ -160,8 +177,7 @@ const AdminExamInfo = () => {
       return;
     }
 
-    if (!imageName && (!imageUrl || imageUrl.startsWith('data:') || imageUrl.startsWith('blob:')) && !currentEditId) {
-      // If adding new item and no images
+    if (!isEditing && !imageName) {
       showToast('請上傳圖片', 'warning');
       return;
     }
@@ -173,6 +189,7 @@ const AdminExamInfo = () => {
           body: JSON.stringify({
             id: String(currentEditId),
             action: '3',
+            category: newCategory,
             name: newName,
             link: newLink,
             figure: imageName
@@ -180,11 +197,12 @@ const AdminExamInfo = () => {
         });
         const result = await response.json();
         if (!response.ok || !result.success) throw new Error(result.message || '更新失敗');
-        showToast('認證類型已更新！', 'success');
+        showToast('項目已更新！', 'success');
       } else {
         const response = await authenticatedFetch(`${API_BASE_URL}/admin/exam/add`, {
           method: 'POST',
           body: JSON.stringify({
+            category: newCategory,
             name: newName,
             link: newLink,
             figure: imageName
@@ -192,7 +210,7 @@ const AdminExamInfo = () => {
         });
         const result = await response.json();
         if (!response.ok || !result.success) throw new Error(result.message || '新增失敗');
-        showToast('認證類型已新增！', 'success');
+        showToast('項目已新增！', 'success');
       }
 
       handleModalClose();
@@ -202,23 +220,6 @@ const AdminExamInfo = () => {
     }
   };
 
-  // 拖曳處理
-  const handleDragEnd = useCallback((activeId, overId) => {
-    if (!overId) return;
-
-    setExamTypes(prev => {
-      const oldIndex = prev.findIndex(i => i.id === activeId);
-      const newIndex = prev.findIndex(i => i.id === overId);
-      if (oldIndex === -1 || newIndex === -1) return prev;
-
-      const newItems = [...prev];
-      const [removed] = newItems.splice(oldIndex, 1);
-      newItems.splice(newIndex, 0, removed);
-      return newItems;
-    });
-  }, []);
-
-  // 定義表格欄位
   const columns = useMemo(() => [
     {
       id: 'edit',
@@ -230,6 +231,11 @@ const AdminExamInfo = () => {
           <img src={editIcon} alt="編輯" className="admin-action-icon" />
         </button>
       )
+    },
+    {
+      accessorKey: 'category',
+      header: '類別',
+      enableSorting: true,
     },
     {
       accessorKey: 'name',
@@ -275,29 +281,45 @@ const AdminExamInfo = () => {
         )
       )
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   ], [statusFilter]);
 
   return (
     <div className="admin-exam-info-page p-4">
       <div className="admin-header-main">
         <h5 className="mb-3 text-secondary">
-          認證考試 &gt; 認證類型 &gt; <span>{statusFilter === 'published' ? '目前項目' : '刪除紀錄'}</span>
+          認證考試 &gt; {categoryFilter === 'all' ? '全部' : categoryFilter} &gt; <span>{statusFilter === 'published' ? '目前項目' : '刪除紀錄'}</span>
         </h5>
         <div className="admin-controls-row">
           <button className="btn btn-primary me-3 admin-add-button" onClick={handleAddClick}>
             <img src={addIcon} alt="新增項目" />
             新增項目
           </button>
-          <div className="status-filter">
-            <span className="me-2 text-secondary">目前狀態：</span>
-            <select
-              className="form-select admin-status-dropdown"
-              value={statusFilter}
-              onChange={handleStatusFilterChange}
-            >
-              <option value="published">目前項目</option>
-              <option value="archived">刪除紀錄</option>
-            </select>
+          <div className="d-flex align-items-center gap-3">
+            <div className="status-filter">
+              <span className="me-2 text-secondary">類別：</span>
+              <select
+                className="form-select admin-category-dropdown"
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+              >
+                <option value="all">全部</option>
+                {availableCategories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+            <div className="status-filter">
+              <span className="me-2 text-secondary">目前狀態：</span>
+              <select
+                className="form-select admin-status-dropdown"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="published">目前項目</option>
+                <option value="archived">刪除紀錄</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -305,19 +327,32 @@ const AdminExamInfo = () => {
       <AdminDataTable
         data={displayItems}
         columns={columns}
-        enableDragging={true}
+        enableDragging={false}
         enableSorting={true}
-        onDragEnd={handleDragEnd}
-        emptyState={{ message: '目前沒有認證類型資料' }}
+        emptyState={{ message: '目前沒有認證考試資料' }}
       />
 
-      {/* 使用 AdminModal 組件 */}
       <AdminModal
         isOpen={showAddModal}
         onClose={handleModalClose}
         title={isEditing ? '編輯項目' : '新增項目'}
         onSubmit={handleFormSubmit}
       >
+        <div className="mb-3">
+          <label className="form-label admin-form-label">*類別</label>
+          <select
+            className="form-select admin-form-control"
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            required
+          >
+            <option value="" disabled>請選擇類別</option>
+            {availableCategories.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+
         <div className="mb-3">
           <label htmlFor="newName" className="form-label admin-form-label">
             *名稱

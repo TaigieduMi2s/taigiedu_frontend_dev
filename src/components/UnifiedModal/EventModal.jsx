@@ -1,6 +1,7 @@
 import React from 'react';
 import { UnifiedModal } from './UnifiedModal';
 import './EventModal.css';
+import independenceLogo from '../../assets/台灣獨曆logo.svg';
 
 /**
  * 今日大事詳細資訊彈窗
@@ -41,14 +42,15 @@ export const EventModal = ({ isOpen, onClose, event, icon }) => {
 
         {/* Footer Section */}
         <div className="event-detail-footer">
+          <img src={independenceLogo} alt="台灣獨曆" className="event-footer-logo" />
           <div className="event-detail-quote-bar">
             <div className="footer-info">
               資料來源：{event.source || '台灣獨曆授權使用'}
             </div>
             <div className="footer-info">
-              官方粉專：<a 
-                href={event.sourceUrl || "https://www.facebook.com/indepcalendar/"} 
-                target="_blank" 
+              官方粉專：<a
+                href={event.sourceUrl || "https://www.facebook.com/indepcalendar/"}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="source-link"
               >

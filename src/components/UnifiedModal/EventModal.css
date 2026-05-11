@@ -132,6 +132,15 @@
   margin-top: 0.5rem;
   padding-top: 1.25rem;
   border-top: 1px solid #edf2f7;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.event-footer-logo {
+  width: 56px;
+  height: auto;
+  flex-shrink: 0;
 }
 
 .footer-info {
