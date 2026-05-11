@@ -172,9 +172,3 @@
     color: #e74c3c;
     margin-bottom: 6px;
 }
-
-.drag-confirm-row {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 12px;
-}

@@ -398,22 +398,6 @@ const AdminFoodPage = () => {
 
   const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
 
-  // 拖曳處理（本地排序，API 無 change endpoint）
-  const handleDragEnd = useCallback((activeId, overId) => {
-    if (!overId) return;
-
-    setAllFood(prev => {
-      const oldIndex = prev.findIndex(i => i.id === activeId);
-      const newIndex = prev.findIndex(i => i.id === overId);
-      if (oldIndex === -1 || newIndex === -1) return prev;
-
-      const newItems = [...prev];
-      const [removed] = newItems.splice(oldIndex, 1);
-      newItems.splice(newIndex, 0, removed);
-      return newItems;
-    });
-  }, []);
-
   const columns = useMemo(() => [
     {
       id: 'edit',
@@ -517,9 +501,8 @@ const AdminFoodPage = () => {
       <AdminDataTable
         data={foodList}
         columns={columns}
-        enableDragging={true}
+        enableDragging={false}
         enableSorting={true}
-        onDragEnd={handleDragEnd}
         isLoading={isLoading}
         error={error}
         onRetry={fetchFood}
