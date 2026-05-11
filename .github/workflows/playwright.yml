@@ -27,6 +27,11 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install chromium --with-deps
 
+      - name: Configure wrangler.jsonc for tests
+        run: |
+          sed -i "s|__WORKER_NAME__|taiwanese-omg-test|g" wrangler.jsonc
+          sed -i "s|__ROUTE_PATTERN__|test.taigiedu.com/*|g" wrangler.jsonc
+
       - name: Run Playwright smoke tests
         run: npm run test:e2e:smoke
         env:
