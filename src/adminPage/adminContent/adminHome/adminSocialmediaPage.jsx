@@ -168,32 +168,6 @@ const AdminSocialmediaPage = () => {
     return list;
   }, [allItems, parentFilter, childFilter, statusFilter]);
 
-  // 拖曳處理
-  const handleDragEnd = useCallback((activeId, overId) => {
-    if (!overId || activeId === overId) return;
-
-    const oldIndex = filteredItems.findIndex(item => item.id === activeId);
-    const newIndex = filteredItems.findIndex(item => item.id === overId);
-
-    if (oldIndex === -1 || newIndex === -1) return;
-
-    setAllItems(prevItems => {
-      const newItems = [...prevItems];
-      const reorderedFiltered = [...filteredItems];
-      const [movedItem] = reorderedFiltered.splice(oldIndex, 1);
-      reorderedFiltered.splice(newIndex, 0, movedItem);
-
-      reorderedFiltered.forEach((item) => {
-        const globalIndex = newItems.findIndex(i => i.id === item.id);
-        if (globalIndex !== -1) {
-          newItems[globalIndex] = { ...item };
-        }
-      });
-
-      return newItems;
-    });
-  }, [filteredItems]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setAttemptedSubmit(true);
@@ -270,7 +244,7 @@ const AdminSocialmediaPage = () => {
     setImageUrl(URL.createObjectURL(file));
   };
 
-  const handleDeleteClick = async (id) => {
+  const handleDeleteClick = useCallback(async (id) => {
     const item = allItems.find(i => i.id === id);
     if (!item) return;
 
@@ -282,13 +256,13 @@ const AdminSocialmediaPage = () => {
       });
       const result = await response.json();
       if (!response.ok || !result.success) throw new Error(result.message || '操作失敗');
-      
+
       showToast(isRestoreAction ? '項目已恢復' : '項目已封存', 'success');
       await fetchData();
     } catch (err) {
       showToast(`操作失敗: ${err.message}`, 'error');
     }
-  };
+  }, [allItems, showToast, fetchData]);
 
   const showChildFilter = parentFilter === '全部'
     ? childOptions.length > 0
@@ -388,7 +362,7 @@ const AdminSocialmediaPage = () => {
       header: '建立時間',
       enableSorting: true,
     }
-  ], []);
+  ], [handleDeleteClick]);
 
   return (
     <div className="admin-content-wrapper">
@@ -403,11 +377,12 @@ const AdminSocialmediaPage = () => {
           )}
           {parentFilter === '全部' && ' 媒體與社群資源'}
         </h5>
-        <button className="btn btn-primary admin-add-button" onClick={openCreate}>
-          <img src={addIcon} alt="新增" />
-          新增項目
-        </button>
       </div>
+
+      <button className="btn btn-primary admin-add-button mb-3" onClick={openCreate}>
+        <img src={addIcon} alt="新增" />
+        新增項目
+      </button>
 
       <div className="admin-controls-row">
         <div className="filter-breadcrumb">
@@ -451,7 +426,7 @@ const AdminSocialmediaPage = () => {
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="published">目前公告</option>
-            <option value="archived">歷史公告</option>
+            <option value="archived">刪除紀錄</option>
           </select>
         </div>
       </div>
@@ -459,9 +434,8 @@ const AdminSocialmediaPage = () => {
       <AdminDataTable
         data={filteredItems}
         columns={columns}
-        enableDragging={true}
+        enableDragging={false}
         enableSorting={true}
-        onDragEnd={handleDragEnd}
         isLoading={isLoading}
         error={error}
         onRetry={fetchData}

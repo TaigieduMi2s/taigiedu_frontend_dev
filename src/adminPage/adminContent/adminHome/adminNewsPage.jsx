@@ -7,6 +7,7 @@ import { authenticatedFetch } from '../../../services/authService';
 import { useAuth } from '../../../contexts/AuthContext';
 import { can } from '../../../config/permissions';
 import './adminNewsPage.css';
+import DragConfirmButton from '../../../components/DragConfirmButton/DragConfirmButton';
 import editIcon from '../../../assets/adminPage/pencil.svg';
 import deleteIcon from '../../../assets/adminPage/trash.svg';
 import addIcon from '../../../assets/adminPage/plus.svg';
@@ -481,13 +482,10 @@ const AdminNewsPage = () => {
         onRetry={fetchNews}
         emptyState={{ message: '目前沒有快訊資料' }}
       />
-      {isDirty && statusFilter === 'published' && (
-        <div className="drag-confirm-row">
-          <button className="btn btn-primary admin-add-button" onClick={handleConfirmOrder}>
-            確認順序
-          </button>
-        </div>
-      )}
+      <DragConfirmButton
+        visible={isDirty && statusFilter === 'published'}
+        onClick={handleConfirmOrder}
+      />
 
       {/* 使用 AdminModal 組件 */}
       <AdminModal

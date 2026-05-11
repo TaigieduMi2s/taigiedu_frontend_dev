@@ -1,0 +1,5 @@
+.drag-confirm-row {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 12px;
+}

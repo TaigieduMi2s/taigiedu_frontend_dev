@@ -4,6 +4,7 @@ import { authenticatedFetch } from '../../../services/authService';
 import AdminDataTable from '../../../components/AdminDataTable';
 import AdminModal from '../../../components/AdminModal';
 import './adminTestPage.css';
+import DragConfirmButton from '../../../components/DragConfirmButton/DragConfirmButton';
 import editIcon from '../../../assets/adminPage/pencil.svg';
 import deleteIcon from '../../../assets/adminPage/trash.svg';
 import addIcon from '../../../assets/adminPage/plus.svg';
@@ -342,13 +343,10 @@ const AdminTestPage = () => {
                 onRetry={fetchTestInfo}
                 emptyState={{ message: '目前沒有公告資料' }}
             />
-            {isDirty && statusFilter === 'published' && (
-                <div className="drag-confirm-row">
-                    <button className="btn btn-primary admin-add-button" onClick={handleConfirmOrder}>
-                        確認順序
-                    </button>
-                </div>
-            )}
+            <DragConfirmButton
+                visible={isDirty && statusFilter === 'published'}
+                onClick={handleConfirmOrder}
+            />
 
             <AdminModal
                 isOpen={showAddModal}
