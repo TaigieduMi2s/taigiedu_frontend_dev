@@ -37,9 +37,3 @@ tests/e2e/test-results/
 tests/e2e/.auth/
 
 eng.traineddata
-
-# wrangler files
-.wrangler
-.dev.vars*
-!.dev.vars.example
-!.env.example
