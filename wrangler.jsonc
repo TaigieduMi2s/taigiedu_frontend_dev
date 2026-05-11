@@ -11,9 +11,15 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  "routes": [
+    { "pattern": "www.taigiedu.com/*", "zone_name": "taigiedu.com" }
+  ],
   "env": {
     "dev": {
-      "name": "taiwanese-omg-dev"
+      "name": "taiwanese-omg-dev",
+      "routes": [
+        { "pattern": "dev.taigiedu.com/*", "zone_name": "taigiedu.com" }
+      ]
     }
   }
 }
