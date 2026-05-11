@@ -11,7 +11,9 @@ import uturnIcon from '../../../assets/adminPage/uturn.svg';
 import speakerIcon from '../../../assets/speaker-wave.svg';
 import { authenticatedFetch } from '../../../services/authService';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/backend';
+import envConfig from '../../../config';
+
+const API_BASE_URL = envConfig.apiUrl;
 
 const blobUrlToBase64 = async (blobUrl) => {
   const response = await fetch(blobUrl);
@@ -128,7 +130,7 @@ const AdminFestivalPage = () => {
           twDesc: i.intro_taigi || '',
           audioUrl: getFullImageUrl(i.audio_data),
           timestamp: label || 'N/A',
-          status: i.status === 'publish' ? 'published' : i.status === 'archive' ? 'archived' : i.status,
+          status: (i.status === 'publish' || i.status === 'published') ? 'published' : (i.status === 'archive' || i.status === 'archived' || i.status === 'deleted') ? 'archived' : i.status,
           dateMonth: i.date ? i.date.split('-')[0] : '',
           dateDay: i.date ? i.date.split('-')[1] : '',
           dateType: (i.islunar === '1' || String(i.islunar) === 'true') ? 'lunar' : 'solar'
@@ -398,22 +400,6 @@ const AdminFestivalPage = () => {
 
   const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
 
-  // 拖曳處理
-  const handleDragEnd = useCallback((activeId, overId) => {
-    if (!overId) return;
-
-    setAllFestival(prev => {
-      const oldIndex = prev.findIndex(i => i.id === activeId);
-      const newIndex = prev.findIndex(i => i.id === overId);
-      if (oldIndex === -1 || newIndex === -1) return prev;
-
-      const newItems = [...prev];
-      const [removed] = newItems.splice(oldIndex, 1);
-      newItems.splice(newIndex, 0, removed);
-      return newItems;
-    });
-  }, []);
-
   // 定義表格欄位
   const columns = useMemo(() => [
     {
@@ -500,7 +486,7 @@ const AdminFestivalPage = () => {
   return (
     <div className="admin-test-page p-4">
       <div className="admin-header-main">
-        <h5 className="mb-3 text-secondary">台語文化 &gt; 節慶 &gt; <span>{statusFilter === 'published' ? '目前項目' : '刪除紀錄'}</span></h5>
+        <h5 className="mb-3 text-secondary">節慶飲食 &gt; 節慶 &gt; <span>{statusFilter === 'published' ? '目前項目' : '刪除紀錄'}</span></h5>
         <div className="admin-controls-row">
           <button className="btn btn-primary me-3 admin-add-button" onClick={handleAddClick}>
             <img src={addIcon} alt="新增項目" />新增項目
@@ -518,9 +504,8 @@ const AdminFestivalPage = () => {
       <AdminDataTable
         data={festivalList}
         columns={columns}
-        enableDragging={true}
+        enableDragging={false}
         enableSorting={true}
-        onDragEnd={handleDragEnd}
         isLoading={isLoading}
         error={error}
         onRetry={fetchFestival}

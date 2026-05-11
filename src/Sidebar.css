@@ -140,14 +140,26 @@
   .sidebar {
     position: fixed;
     top: var(--header-height);
+    bottom: 0;
     left: 0;
     height: calc(100vh - var(--header-height));
+    max-height: calc(100vh - var(--header-height));
     width: var(--sidebar-width);
     max-width: 80vw;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     transform: translateX(-100%);
     transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: var(--shadow-lg);
     z-index: var(--z-sidebar);
+  }
+
+  @supports (height: 100dvh) {
+    .sidebar {
+      height: calc(100dvh - var(--header-height));
+      max-height: calc(100dvh - var(--header-height));
+    }
   }
 
   .sidebar.sidebar-open {

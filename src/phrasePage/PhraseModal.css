@@ -148,8 +148,7 @@
 }
 
 .pronun-diff-container {
-  max-height: 250px;  /* 設置最大高度 */
-  overflow-y: auto;   /* 當內容超出時顯示垂直滾動條 */
+  /* 不設固定高度，讓表格自由撐高；滾動由外層 UnifiedModal 統一處理 */
 }
 
 .pronun-diff-table {

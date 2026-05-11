@@ -4,7 +4,7 @@ import blackboardBg from '../../assets/blackboard.png';
 import bearGif from '../../assets/bear1.gif';
 
 // ── 停電停服時間設定 ──────────────────────────────────────────
-// 5月10日(星期日)上午8時至下午17時。
+// 使用者要求修改為 5月10日(星期日)上午8時至下午17時。
 const OUTAGE_START = new Date('2026-05-10T08:00:00'); 
 const OUTAGE_END   = new Date('2026-05-10T17:00:00'); 
 

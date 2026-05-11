@@ -4,6 +4,7 @@ import { useToast } from "../components/Toast";
 import { useAuth } from "../contexts/AuthContext";
 import { UnifiedModal } from "../components/UnifiedModal/UnifiedModal";
 import ForgetPassword from "./ForgetPassword";
+import envConfig from "../config";
 import "./LoginPage.css";
 
 const LoginPage = ({ onClose }) => {
@@ -27,7 +28,7 @@ const LoginPage = ({ onClose }) => {
   const fetchCaptcha = async () => {
     setIsLoadingCaptcha(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/captcha`, {
+      const response = await fetch(`${envConfig.apiUrl}/api/captcha`, {
         method: "GET"
       });
 
@@ -130,7 +131,7 @@ const LoginPage = ({ onClose }) => {
       setIsSubmitting(true);
 
       // 呼叫後端 API 驗證 Google token
-      const apiResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/user/google_login`, {
+      const apiResponse = await fetch(`${envConfig.apiUrl}/api/user/google_login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

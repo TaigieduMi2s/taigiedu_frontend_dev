@@ -1,11 +1,17 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-import { cloudflare } from "@cloudflare/vite-plugin";
+// @cloudflare/vite-plugin 會在 build 時驗證 wrangler.jsonc，
+// 而本地端的 wrangler.jsonc 含有 __WORKER_NAME__ 等 placeholder，
+// 因此只在 CI 環境（GitHub Actions）中才載入此插件。
+const isCI = !!process.env.CI;
+const plugins = isCI
+  ? [react(), (await import("@cloudflare/vite-plugin")).cloudflare()]
+  : [react()];
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), cloudflare()],
+  plugins,
   preview: {
     // If you want to bind the server to all network interfaces
     port: 3000,

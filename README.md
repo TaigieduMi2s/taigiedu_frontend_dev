@@ -111,7 +111,7 @@ npm run preview
 ```
 taiwaneseOMG/
 ├── src/
-│   ├── components/         # 可重用元件（Header、Sidebar、Modal 等）
+│   ├── components/         # 可重用元件（Header、Sidebar、ServiceSuspensionNotice、Modal 等）
 │   ├── contexts/           # React Context（認證、主題等）
 │   ├── services/           # API 服務層（認證、資源管理等）
 │   ├── shared/             # 共用工具與常數
@@ -121,6 +121,8 @@ taiwaneseOMG/
 │   ├── celebrity/          # 名人介紹頁面
 │   ├── culture/            # 文化相關頁面
 │   ├── examPage/           # 認證考試頁面
+│   ├── featuredResourcePage/ # 主題融入資源頁面
+│   ├── relativeCalculatorPage/ # 親屬關係計算機頁面
 │   ├── resourcePage/       # 學習資源頁面
 │   ├── translatePage/      # 翻譯工具頁面
 │   ├── transcriptPage/     # 轉譯工具頁面

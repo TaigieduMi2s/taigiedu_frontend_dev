@@ -63,6 +63,11 @@
   font-size: 0.9rem;
 }
 
+.admin-category-dropdown {
+  width: 160px;
+  font-size: 0.9rem;
+}
+
 /* 圖片預覽樣式 */
 .image-preview-cell {
   display: flex;

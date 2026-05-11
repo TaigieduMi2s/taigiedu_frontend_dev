@@ -11,7 +11,9 @@ import addIcon from '../../../assets/adminPage/plus.svg';
 import uturnIcon from '../../../assets/adminPage/uturn.svg';
 import speakerIcon from '../../../assets/speaker-wave.svg';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/backend';
+import envConfig from '../../../config';
+
+const API_BASE_URL = envConfig.apiUrl;
 
 const getFileNameFromUrl = (url) => {
   if (!url) return '';
@@ -129,7 +131,7 @@ const AdminFoodPage = () => {
         audioUrl: getFullImageUrl(item.audio_data),
         ttsText: '',
         timestamp: item.timestamp || 'N/A',
-        status: item.status === 'publish' ? 'published' : item.status === 'archive' ? 'archived' : item.status,
+        status: (item.status === 'publish' || item.status === 'published') ? 'published' : (item.status === 'archive' || item.status === 'archived' || item.status === 'deleted') ? 'archived' : item.status,
       }));
       setAllFood(formatted);
     } catch (e) {
@@ -398,22 +400,6 @@ const AdminFoodPage = () => {
 
   const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
 
-  // 拖曳處理（本地排序，API 無 change endpoint）
-  const handleDragEnd = useCallback((activeId, overId) => {
-    if (!overId) return;
-
-    setAllFood(prev => {
-      const oldIndex = prev.findIndex(i => i.id === activeId);
-      const newIndex = prev.findIndex(i => i.id === overId);
-      if (oldIndex === -1 || newIndex === -1) return prev;
-
-      const newItems = [...prev];
-      const [removed] = newItems.splice(oldIndex, 1);
-      newItems.splice(newIndex, 0, removed);
-      return newItems;
-    });
-  }, []);
-
   const columns = useMemo(() => [
     {
       id: 'edit',
@@ -499,7 +485,7 @@ const AdminFoodPage = () => {
   return (
     <div className="admin-test-page p-4">
       <div className="admin-header-main">
-        <h5 className="mb-3 text-secondary">台語文化 &gt; 飲食 &gt; <span>{statusFilter === 'published' ? '目前項目' : '刪除紀錄'}</span></h5>
+        <h5 className="mb-3 text-secondary">節慶飲食 &gt; 飲食 &gt; <span>{statusFilter === 'published' ? '目前項目' : '刪除紀錄'}</span></h5>
         <div className="admin-controls-row">
           <button className="btn btn-primary me-3 admin-add-button" onClick={handleAddClick}>
             <img src={addIcon} alt="新增項目" />新增項目
@@ -517,9 +503,8 @@ const AdminFoodPage = () => {
       <AdminDataTable
         data={foodList}
         columns={columns}
-        enableDragging={true}
+        enableDragging={false}
         enableSorting={true}
-        onDragEnd={handleDragEnd}
         isLoading={isLoading}
         error={error}
         onRetry={fetchFood}

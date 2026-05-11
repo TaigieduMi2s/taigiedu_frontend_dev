@@ -4,13 +4,18 @@ import { useToast } from '../../../components/Toast';
 import AdminDataTable from '../../../components/AdminDataTable';
 import AdminModal from '../../../components/AdminModal';
 import { authenticatedFetch } from '../../../services/authService';
+import { useAuth } from '../../../contexts/AuthContext';
+import { can } from '../../../config/permissions';
 import './adminNewsPage.css';
+import DragConfirmButton from '../../../components/DragConfirmButton/DragConfirmButton';
 import editIcon from '../../../assets/adminPage/pencil.svg';
 import deleteIcon from '../../../assets/adminPage/trash.svg';
 import addIcon from '../../../assets/adminPage/plus.svg';
 import uturnIcon from '../../../assets/adminPage/uturn.svg';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/backend';
+import envConfig from '../../../config';
+
+const API_BASE_URL = envConfig.apiUrl;
 const columnHelper = createColumnHelper();
 
 const NEWS_CATEGORIES_KEY = 'newsCategories';
@@ -34,6 +39,9 @@ function saveCategories(cats) {
 
 const AdminNewsPage = () => {
   const { showToast } = useToast();
+  const { user } = useAuth();
+  // 依角色決定連結是否為非必填（SUPER_ADMIN 可省略連結）
+  const isLinkOptional = can(user?.role, 'news', 'optionalLink');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [allNews, setAllNews] = useState([]);
@@ -81,7 +89,7 @@ const AdminNewsPage = () => {
         content: item.content,
         link: item.link,
         timestamp: item.timestamp || 'N/A',
-        status: item.status === 'publish' ? 'published' : item.status === 'archive' ? 'archived' : item.status,
+        status: (item.status === 'publish' || item.status === 'published') ? 'published' : (item.status === 'archive' || item.status === 'archived' || item.status === 'deleted') ? 'archived' : item.status,
       }));
 
       const sortByTimestampDesc = (a, b) => {
@@ -384,15 +392,19 @@ const AdminNewsPage = () => {
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
-    if (!newCategory || !newContent || !newLink) {
-      showToast('請填寫所有欄位', 'warning');
+    // 必填驗證：SUPER_ADMIN 的連結為非必填，其餘角色連結必填
+    if (!newCategory || !newContent || (!isLinkOptional && !newLink)) {
+      showToast('請填寫所有必填欄位', 'warning');
       return;
     }
-    try {
-      new URL(newLink);
-    } catch {
-      showToast('請輸入有效的 URL', 'warning');
-      return;
+    // 若有填入連結，統一驗證格式
+    if (newLink) {
+      try {
+        new URL(newLink);
+      } catch {
+        showToast('請輸入有效的 URL', 'warning');
+        return;
+      }
     }
 
     try {
@@ -438,7 +450,7 @@ const AdminNewsPage = () => {
     <div className="admin-test-page p-4">
       <div className="admin-header-main">
         <h5 className="mb-3 text-secondary">
-          首頁搜尋 &gt; 最新消息 &gt;
+          首頁搜尋 &gt; 活動快訊 &gt;
           <span>{statusFilter === 'published' ? "活動快訊" : "刪除紀錄"}</span>
         </h5>
         <div className="admin-controls-row">
@@ -447,7 +459,7 @@ const AdminNewsPage = () => {
             新增項目
           </button>
           <div className="status-filter">
-            <span className="me-2 text-secondary">目前狀態：</span>
+            <span className="me-2 text-secondary">目前公告：</span>
             <select
               className="form-select admin-status-dropdown"
               value={statusFilter}
@@ -472,13 +484,10 @@ const AdminNewsPage = () => {
         onRetry={fetchNews}
         emptyState={{ message: '目前沒有快訊資料' }}
       />
-      {isDirty && statusFilter === 'published' && (
-        <div className="drag-confirm-row">
-          <button className="btn btn-primary admin-add-button" onClick={handleConfirmOrder}>
-            確認順序
-          </button>
-        </div>
-      )}
+      <DragConfirmButton
+        visible={isDirty && statusFilter === 'published'}
+        onClick={handleConfirmOrder}
+      />
 
       {/* 使用 AdminModal 組件 */}
       <AdminModal
@@ -558,7 +567,7 @@ const AdminNewsPage = () => {
         </div>
         <div className="mb-3">
           <label htmlFor="newLink" className="form-label admin-form-label">
-            *連結
+            {isLinkOptional ? '連結（選填）' : '*連結'}
           </label>
           <input
             type="url"
@@ -566,7 +575,7 @@ const AdminNewsPage = () => {
             id="newLink"
             value={newLink}
             onChange={(e) => setNewLink(e.target.value)}
-            required
+            required={!isLinkOptional}
           />
         </div>
       </AdminModal>

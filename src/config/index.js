@@ -6,8 +6,8 @@
 export const envConfig = {
     // 基礎設定
     basePath: import.meta.env.VITE_BASE_PATH || '/',
-    apiUrl: import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/backend',
-    imageUrl: import.meta.env.VITE_IMAGE_URL || 'https://dev.taigiedu.com',
+    apiUrl: import.meta.env.VITE_API_URL || '/backend',
+    imageUrl: import.meta.env.VITE_IMAGE_URL || '',
 
     // 功能開關 (Feature Toggles)
     features: {

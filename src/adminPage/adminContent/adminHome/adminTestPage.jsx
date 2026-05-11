@@ -4,12 +4,15 @@ import { authenticatedFetch } from '../../../services/authService';
 import AdminDataTable from '../../../components/AdminDataTable';
 import AdminModal from '../../../components/AdminModal';
 import './adminTestPage.css';
+import DragConfirmButton from '../../../components/DragConfirmButton/DragConfirmButton';
 import editIcon from '../../../assets/adminPage/pencil.svg';
 import deleteIcon from '../../../assets/adminPage/trash.svg';
 import addIcon from '../../../assets/adminPage/plus.svg';
 import uturnIcon from '../../../assets/adminPage/uturn.svg';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://dev.taigiedu.com/backend';
+import envConfig from '../../../config';
+
+const API_BASE_URL = envConfig.apiUrl;
 const TEST_ORDER_KEY = 'testPublishedOrder';
 const ALLOWED_CATEGORIES = ['成大', '教育部'];
 
@@ -45,7 +48,7 @@ const AdminTestPage = () => {
                 content: item.content,
                 link: item.link,
                 timestamp: item.timestamp || 'N/A',
-                status: item.status === 'publish' ? 'published' : item.status === 'archive' ? 'archived' : item.status,
+                status: (item.status === 'publish' || item.status === 'published') ? 'published' : (item.status === 'archive' || item.status === 'archived' || item.status === 'deleted') ? 'archived' : item.status,
             }));
 
             const sortByTimestampDesc = (a, b) => {
@@ -342,13 +345,10 @@ const AdminTestPage = () => {
                 onRetry={fetchTestInfo}
                 emptyState={{ message: '目前沒有公告資料' }}
             />
-            {isDirty && statusFilter === 'published' && (
-                <div className="drag-confirm-row">
-                    <button className="btn btn-primary admin-add-button" onClick={handleConfirmOrder}>
-                        確認順序
-                    </button>
-                </div>
-            )}
+            <DragConfirmButton
+                visible={isDirty && statusFilter === 'published'}
+                onClick={handleConfirmOrder}
+            />
 
             <AdminModal
                 isOpen={showAddModal}

@@ -8,7 +8,7 @@ import AdminDataTable from '../../../components/AdminDataTable';
 import '../../../components/AdminDataTable/AdminDataTable.css';
 import AdminModal from '../../../components/AdminModal';
 import './adminMemberPage.css';
-import './adminMemberPage.css';
+import envConfig from '../../../config';
 import adjustmentsIcon from '../../../assets/adjustments-horizontal.svg';
 import uturnIcon from '../../../assets/adminPage/uturn.svg';
 
@@ -253,7 +253,7 @@ const AdminMemberPage = () => {
   }, [authUser, checkSuperAdmin]);
 
   // API base URL
-  const apiBaseUrl = import.meta.env.VITE_API_URL || "https://dev.taigiedu.com/backend";
+  const apiBaseUrl = envConfig.apiUrl;
 
   // 載入會員資料
   const fetchMembers = useCallback(async () => {
@@ -552,32 +552,6 @@ const AdminMemberPage = () => {
     ];
   }, [viewFilter, isSuperAdmin, handleDeleteClick, activeMenuId, handleDisableUpload, handleAssignAdmin]);
 
-  // 拖曳結束處理（僅前端排序預覽）
-  const handleDragEnd = useCallback((activeId, overId) => {
-    if (!overId) return;
-    setMemberList((items) => {
-      const oldIndex = items.findIndex(item => item.id === activeId);
-      const newIndex = items.findIndex(item => item.id === overId);
-      if (oldIndex === -1 || newIndex === -1) return items;
-      const newItems = [...items];
-      const [removed] = newItems.splice(oldIndex, 1);
-      newItems.splice(newIndex, 0, removed);
-      // 同步更新 allMembers 順序
-      setAllMembers(prevAll => {
-        const tempAll = [...prevAll];
-        const activeItemInAll = tempAll.find(item => item.id === activeId);
-        const overItemInAll = tempAll.find(item => item.id === overId);
-        if (!activeItemInAll || !overItemInAll) return prevAll;
-        const oldAllIndex = tempAll.indexOf(activeItemInAll);
-        const newAllIndex = tempAll.indexOf(overItemInAll);
-        const [removedAll] = tempAll.splice(oldAllIndex, 1);
-        tempAll.splice(newAllIndex, 0, removedAll);
-        return tempAll;
-      });
-      return newItems;
-    });
-  }, []);
-
   useEffect(() => {
     fetchMembers();
   }, [fetchMembers]);
@@ -708,8 +682,7 @@ const AdminMemberPage = () => {
         data={memberList}
         columns={columns}
         enableSorting={true}
-        enableDragging={true}
-        onDragEnd={handleDragEnd}
+        enableDragging={false}
         isLoading={isLoading}
         error={error}
         onRetry={fetchMembers}

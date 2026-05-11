@@ -13,6 +13,7 @@
 
 ## 2. 核心版面結構 (Layout Structure)
 應用程式由 `AppLayout` 進行組裝（位於 `src/App.jsx`），負責決定在不同路由下應該顯示哪些佈局元素：
+- **`ServiceSuspensionNotice`**: 全站服務公告元件，固定掛載於 `AppLayout` 最上層，用於顯示停機或維護通知。
 - **`Header`**: 頂部導覽列，包含漢堡選單（可觸發側邊欄）。
 - **`Sidebar`**: 主網站的側邊導覽列（在特定頁面如管理後台會隱藏）。
 - **`AdminSidebar`**: 專為 `/admin` 網址下的管理員後台顯示的側邊欄。
@@ -38,6 +39,7 @@
 - **文化介紹 (`/culture/food`, `/culture/festival`)**: 介紹台灣在地美食 (`CultureFood`) 與節慶 (`CultureFestival`)。
 - **社群媒體/影音 (`/socialmedia`)**: `socialmediaPage/SocialmediaPage`，整合外部平台（如 YouTube/Podcast）的影音資源。
 - **認證考試 (`/exam`)**: `examPage/ExamPage`，提供台語認證的相關資訊。
+- **親屬關係計算機 (`/relative-calculator`)**: `relativeCalculatorPage/RelativeCalculatorPage.jsx`，提供親屬稱謂查詢與計算功能。
 - **驗證登入 (`/login`, `/register`)**: 使用者登入註冊頁面 (`resourcePage/` 目錄內)。
 - **其他靜態頁面**: 
   - `/terms` (服務條款)
@@ -56,7 +58,7 @@
 - **文化內容管理 (`/admin/culture/food`, `./festival`)**: 編輯美食與節慶內容。
 - **社群媒體管理 (`/admin/socialmedia`)**: 編輯與新增推薦的影音/Podcast連結。
 - **考試資訊管理 (`/admin/exam/...`)**: `/info` (基本資訊), `/books` (推薦書籍), `/channels` (推薦頻道)。
-- **教學資源管理 (`/admin/resource...`)**: 審核、上傳資源 (`AdminResourcePage`) 及其首圖/標題 (`ResourceHeaderPage`)。
+- **教學資源管理 (`/admin/resource`, `/admin/resource/upload`, `/admin/resource/header`)**: 審核、上傳資源 (`AdminResourcePage`) 及其首圖/標題 (`ResourceHeaderPage`)。
 - **會員管理 (`/admin/member`)**: `AdminMemberPage`，管理網站後台/前台會員權限。
 - **檔案預覽 (`/admin/file-preview`)**: 管理後台專屬的預覽介面。
 
@@ -66,9 +68,10 @@
 src/
  ├── adminPage/          # 所有後台管理的介面與邏輯元件
  ├── assets/             # 靜態圖片、圖示資源
- ├── components/         # 共用的小型 UI 元件 (如 Toast, ProtectedRoute 等)
+ ├── components/         # 共用 UI 元件 (如 Toast, ProtectedRoute, ServiceSuspensionNotice, UnifiedModal 等)
  ├── config/             # 環境或全域設置
  ├── contexts/           # React Context (AuthContext)
+ ├── relativeCalculatorPage/ # 親屬關係計算機頁面與樣式
  ├── services/           # 負責呼叫後端 API 的各種函式
  ├── styles/             # 全局樣式 (`global.css`)
  └── [各功能資料夾]/       # 如 readPage, resourcePage, culture, examPage 等，各自包含 JSX 與專屬 CSS 樣式

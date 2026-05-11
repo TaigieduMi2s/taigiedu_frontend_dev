@@ -12,10 +12,10 @@ const AdminMain = () => {
     {
       title: "主頁搜尋",
       icon: houseIcon,
-      functions: ["考試資訊", "最新消息"]
+      functions: ["考試資訊", "活動快訊"]
     },
     {
-      title: "台語文化",
+      title: "節慶飲食",
       icon: bookIcon,
       functions: ["飲食", "節慶"]
     },
@@ -27,7 +27,7 @@ const AdminMain = () => {
     {
       title: "認證考試",
       icon: testIcon,
-      functions: ["認證類型", "推薦用書", "教育頻道"]
+      functions: ["認證考試"]
     },
     {
       title: "媒體與社群資源",
@@ -44,7 +44,7 @@ const AdminMain = () => {
   const navigate = useNavigate();
   const routeMap = {
     "考試資訊": "/admin/main-search/test",
-    "最新消息": "/admin/main-search/news",
+    "活動快訊": "/admin/main-search/news",
     "飲食": "/admin/culture/food",
     "節慶": "/admin/culture/festival",
     // 台語教學資源共享平台
@@ -61,9 +61,7 @@ const AdminMain = () => {
     "卡通動漫": "/admin/socialmedia",
     "音樂": "/admin/socialmedia",
     "戲劇": "/admin/socialmedia",
-    "認證類型": "/admin/exam/info",
-    "推薦用書": "/admin/exam/books",
-    "教育頻道": "/admin/exam/channels",
+    "認證考試": "/admin/exam/info",
     "會員管理": "/admin/member"
     // ...
   };

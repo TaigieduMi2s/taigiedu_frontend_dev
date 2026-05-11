@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "taiwanese-omg",
+  "name": "__WORKER_NAME__",
   "compatibility_date": "2026-05-11",
   "observability": {
     "enabled": true
@@ -10,5 +10,11 @@
   },
   "compatibility_flags": [
     "nodejs_compat"
+  ],
+  "routes": [
+    {
+      "pattern": "__ROUTE_PATTERN__",
+      "zone_name": "taigiedu.com"
+    }
   ]
 }

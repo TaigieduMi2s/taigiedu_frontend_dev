@@ -177,6 +177,18 @@
   font-weight: 700;
 }
 
+.section-title-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+
+.section-title-link:hover {
+  color: var(--color-primary-dark, #017AB1);
+  text-decoration: none;
+}
+
 /* ─── 資訊列表 ──────────────────────────────────────────── */
 .info-list {
   list-style-type: disc;

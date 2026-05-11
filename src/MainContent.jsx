@@ -4,6 +4,7 @@ import "./MainContent.css";
 import heroImage from "./assets/Rectangle 7310.svg";
 import searchIcon from "./assets/home/search_logo.svg";
 import todayEventsIcon from "./assets/todayEvents.svg";
+import { EventModal } from "./components/UnifiedModal/EventModal";
 
 const MainContent = () => {
   const navigate = useNavigate(); // 使用 useNavigate 來進行頁面跳轉
@@ -179,21 +180,24 @@ const MainContent = () => {
     }
   };
 
-  // 從API獲取今日大事
+  // 從API獲取今日大事 (使用新的依日期獲取 API)
   const fetchTodayEvents = async () => {
     setEventsLoading(true);
     setEventsError(false);
     try {
-      const parameters = {}; // 傳送空的 JSON 物件
+      // 獲取當前日期的 MMDD 格式
+      const now = new Date();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const dateString = `${month}${day}`;
 
       const response = await fetch(
-        "https://dev.taigiedu.com/backend/events",
+        `https://dev.taigiedu.com/backend/events_calendar/${dateString}`,
         {
-          method: 'POST',
+          method: 'GET',
           headers: {
             'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(parameters)
+          }
         }
       );
 
@@ -202,15 +206,16 @@ const MainContent = () => {
       }
 
       const data = await response.json();
-      console.log("今日大事API回傳:", data);
+      console.log("今日大事 (Events Calendar) API回傳:", data);
 
       if (data.status === "success" && Array.isArray(data.data)) {
-        setTodayEvents(data.data);
+        // 過濾掉標題為「今日無大事」或包含「OO」佔位符的項
+        const filteredEvents = data.data.filter(item => 
+          item.title !== "今日無大事" && 
+          !item.title.includes("OO")
+        );
+        setTodayEvents(filteredEvents);
         setEventsError(false);
-      } else if (data.status === "error") {
-        console.error("今日大事API回傳錯誤:", data.message);
-        setTodayEvents([]);
-        setEventsError(true);
       } else {
         console.error("今日大事API回傳格式錯誤:", data);
         setTodayEvents([]);
@@ -348,60 +353,46 @@ const MainContent = () => {
         {/* Right Top Column */}
         <div className="fade-in">
           <div className="content-section">
-            <h2 className="section-title">今日大事</h2>
+            <h2 className="section-title">
+              <a 
+                href="#" 
+                className="section-title-link"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (todayEvents.length > 0) {
+                    setSelectedEvent(todayEvents[0]);
+                    setShowEventModal(true);
+                  }
+                }}
+              >
+                今日大事
+              </a>
+            </h2>
             {eventsLoading ? (
               <span style={{ color: '#6b7280' }}>載入中...</span>
             ) : (
               <ul className="info-list">
                 {todayEvents.length > 0 ? (
                   todayEvents.map((item, index) => {
-                    // 相容處理：如果是純字串，將其轉為基本物件
-                    const eventObj = typeof item === 'string' ? { title: item, content: "" } : item;
-
-                    // 根據您目前的字串處理邏輯解析標題（若是字串格式則解析，若是物件則優先使用 title 欄位）
-                    let displayTitle = eventObj.title;
-                    let displayDate = eventObj.date || "";
-
-                    if (typeof item === 'string' && item.includes(' ')) {
-                      const parts = item.split(' ');
-                      const firstPart = parts[0] || '';
-                      const fullDateStr = firstPart.includes('：') ? firstPart.split('：')[1] : firstPart;
-                      displayTitle = parts.slice(1).join(' ') || item;
-                      displayDate = fullDateStr.replace(/(\d{4})年(\d{1,2})月(\d{1,2})日/, '$1 年 $2 月 $3 日');
-                    }
-
-                    // 判斷是否具備細節內容 (以此決定黑色或藍色)
-                    const hasDetail = eventObj.content && eventObj.content.trim() !== "";
-
+                    const hasContent = item.content && item.content.trim() !== "";
+                    const displayTitle = `歷史上的今天：${item.title} ${item.date ? `( ${item.date} )` : ""}`;
+                    
                     return (
                       <li key={index}>
-                        {hasDetail ? (
-                          // 有資料：藍色連結
+                        {hasContent ? (
                           <a
                             href="#"
                             className="event-link"
-                            style={{ color: '#2d92c1', cursor: 'pointer', textDecoration: 'none' }}
                             onClick={(e) => {
                               e.preventDefault();
-                              const eventData = {
-                                date: displayDate || '1998 年 10 月 28 日',
-                                title: displayTitle,
-                                content: eventObj.content,
-                                footnote: eventObj.footnote || '歷史大事記',
-                                source: eventObj.source || '台灣獨曆',
-                                sourceUrl: eventObj.sourceUrl || 'https://www.facebook.com/indepcalendar/'
-                              };
-                              setSelectedEvent(eventData);
+                              setSelectedEvent(item);
                               setShowEventModal(true);
                             }}
                           >
                             {displayTitle}
                           </a>
                         ) : (
-                          // 無資料：黑色純文字
-                          <span style={{ color: '#424242', cursor: 'default' }}>
-                            {displayTitle}
-                          </span>
+                          <span style={{ color: '#424242' }}>{displayTitle}</span>
                         )}
                       </li>
                     );
@@ -485,40 +476,13 @@ const MainContent = () => {
         </div>
       </div>
 
-      {/* 今日大事詳細資訊彈窗 */}
-      {showEventModal && selectedEvent && (
-        <div className="event-modal-overlay" onClick={() => setShowEventModal(false)}>
-          <div className="event-modal" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="event-modal-close"
-              onClick={() => setShowEventModal(false)}
-            >
-              ×
-            </button>
-
-            <div className="event-modal-header">
-              <img src={todayEventsIcon} alt="今日大事" className="event-modal-icon" />
-              <div className="event-modal-title-section">
-                <div className="event-modal-date">{selectedEvent.date}</div>
-                <h2 className="event-modal-title">{selectedEvent.title}</h2>
-              </div>
-            </div>
-
-            <div className="event-modal-content">
-              <div className="event-content-text">
-                {selectedEvent.content.split('\n\n').map((paragraph, idx) => (
-                  <p key={idx}>{paragraph}</p>
-                ))}
-              </div>
-            </div>
-
-            <div className="event-modal-source">
-              <p>資料來源：{selectedEvent.source}</p>
-              <p>官方粉專：<a href={selectedEvent.sourceUrl} target="_blank" rel="noopener noreferrer">{selectedEvent.sourceUrl}</a></p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* 今日大事詳細資訊彈窗 (使用新的 EventModal 組件) */}
+      <EventModal
+        isOpen={showEventModal}
+        onClose={() => setShowEventModal(false)}
+        event={selectedEvent}
+        icon={todayEventsIcon}
+      />
     </main>
   );
 };

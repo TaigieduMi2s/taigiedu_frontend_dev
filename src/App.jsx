@@ -31,6 +31,7 @@ import LoginPage from "./resourcePage/LoginPage";
 import RegisterPage from "./resourcePage/RegisterPage";
 import CelebrityDetails from "./celebrity/CelebrityDetails";
 import ServiceSuspensionNotice from "./components/ServiceSuspensionNotice/ServiceSuspensionNotice.jsx";
+import RelativeCalculatorPage from "./relativeCalculatorPage/RelativeCalculatorPage.jsx";
 import TermsPage from "./TermsPage.jsx";
 import TeamPage from "./TeamPage.jsx";
 import PolicyPage from "./PolicyPage.jsx";
@@ -39,8 +40,6 @@ import AdminSidebar from "./adminPage/adminSidebar";
 import AdminTestPage from "./adminPage/adminContent/adminHome/adminTestPage";
 import AdminNewsPage from "./adminPage/adminContent/adminHome/adminNewsPage";
 import AdminExamInfo from "./adminPage/adminContent/adminHome/examPage/adminExamInfo";
-import AdminExamBooks from "./adminPage/adminContent/adminHome/examPage/adminExamBooks";
-import AdminExamChannels from "./adminPage/adminContent/adminHome/examPage/adminExamChannels";
 import AdminMemberPage from "./adminPage/adminContent/adminHome/adminMemberPage";
 import AdminFilePreview from "./adminPage/adminContent/adminHome/adminresourcePage/AdminFilePreview";
 import AdminFoodPage from "./adminPage/adminContent/adminHome/adminFoodPage";
@@ -91,6 +90,7 @@ const AppLayout = () => {
 
   return (
     <div className="app">
+      <ServiceSuspensionNotice />
       <Header onMenuToggle={() => setSidebarOpen(prev => !prev)} sidebarOpen={sidebarOpen} />
       <ServiceSuspensionNotice />
 
@@ -150,6 +150,7 @@ const AppLayout = () => {
                 : <Navigate to="/" replace />
             }
           />
+          <Route path="/relative-calculator" element={<RelativeCalculatorPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
@@ -231,22 +232,6 @@ const AppLayout = () => {
             element={
               <AdminRoute>
                 <AdminExamInfo />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/exam/books"
-            element={
-              <AdminRoute>
-                <AdminExamBooks />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/admin/exam/channels"
-            element={
-              <AdminRoute>
-                <AdminExamChannels />
               </AdminRoute>
             }
           />
