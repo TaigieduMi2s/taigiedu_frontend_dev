@@ -320,7 +320,7 @@ const LoginPage = ({ onClose }) => {
     return (
       <>
         <UnifiedModal isOpen={true} onClose={handleClose} className="login-unified-modal">
-          {/* <h2 className="login-modal-title">登入</h2> */}
+          <h2 className="login-modal-title">登入</h2>
           {formBody}
         </UnifiedModal>
         <ForgetPassword

@@ -17,17 +17,15 @@ export const UnifiedModal = ({ isOpen, onClose, children, className = '' }) => {
   return (
     <div className="unified-modal-overlay active" onClick={handleOverlayClick}>
       <div className={`unified-modal-container ${className}`}>
-        <div className="unified-modal-header-bar">
-          <button
-            className="unified-modal-close"
-            onClick={onClose}
-            aria-label="關閉"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M1 1L15 15M15 1L1 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-          </button>
-        </div>
+        <button
+          className="unified-modal-close"
+          onClick={onClose}
+          aria-label="關閉"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M1 1L15 15M15 1L1 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </button>
         <div className="unified-modal-content">
           {children}
         </div>
