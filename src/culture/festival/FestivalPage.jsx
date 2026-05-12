@@ -41,8 +41,8 @@ const FestivalPage = () => {
                         name: festival.name || '',
                         image: festival.image ? `${import.meta.env.VITE_IMAGE_URL}${festival.image}` : festivalN,
                         pron: festival.pron || '',
-                        date: festival.date_mandarin || '',
-                        intro: festival.intro_mandarin || '',
+                        date: festival.date_mandarin || festival.date || '',
+                        intro: festival.intro_mandarin || festival.intro || '',
                         intro_taigi: festival.intro_taigi || ''
                     }));
                     setFestivals(formattedFestivals);
@@ -92,8 +92,8 @@ const FestivalPage = () => {
                         name: festival.name || '',
                         image: festival.image ? `${import.meta.env.VITE_IMAGE_URL}${festival.image}` : festivalN,
                         pron: festival.pron || '',
-                        date: festival.date_mandarin || '',
-                        intro: festival.intro_mandarin || '',
+                        date: festival.date_mandarin || festival.date || '',
+                        intro: festival.intro_mandarin || festival.intro || '',
                         intro_taigi: festival.intro_taigi || ''
                     }));
                     setFestivals(formattedFestivals);
