@@ -1,6 +1,8 @@
 import React from 'react';
 import { UnifiedModal, InfoRow } from '../../components/UnifiedModal/UnifiedModal';
 import megaPhoneIcon from '../../assets/megaphone.svg';
+import nofestival from "../../assets/culture/festivalN.png";
+import './FestivalModal.css';
 
 const FestivalModal = ({ isOpen, onClose, festival }) => {
     if (!isOpen || !festival) return null;
@@ -9,7 +11,7 @@ const FestivalModal = ({ isOpen, onClose, festival }) => {
         try {
             const parameters = {
                 tts_lang: 'tb',
-                tts_data: festival.name
+                tts_data: festival.pron || festival.name
             };
 
             const response = await fetch(`${import.meta.env.VITE_API_URL}/synthesize_speech`, {
@@ -30,31 +32,37 @@ const FestivalModal = ({ isOpen, onClose, festival }) => {
 
     return (
         <UnifiedModal isOpen={isOpen} onClose={onClose} className="festival-modal">
-            <div className="festival-header" style={{ marginBottom: '20px' }}>
-                <h2 style={{ margin: '0 0 10px 0', color: 'var(--color-primary-dark)' }}>{festival.name}</h2>
-                <div className="festival-pronunciation-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{festival.pron}</div>
-                    <button 
-                        onClick={playAudio} 
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding:0 }}
-                    >
-                        <img src={megaPhoneIcon} alt="播放" style={{ width: '24px' }} />
-                    </button>
+            <div className="festival-header-container">
+                <div className="festival-image-container">
+                    <img
+                        className="festival-modal-image"
+                        src={festival.image}
+                        alt={festival.name}
+                        onError={(e) => { e.target.src = nofestival; }}
+                    />
+                </div>
+                <div className="festival-header-content">
+                    <h2 className="festival-modal-name">{festival.name}</h2>
+                    <div className="festival-pronunciation-container">
+                        <div className="festival-pron-text">{festival.pron}</div>
+                        <button
+                            className="festival-play-btn"
+                            onClick={playAudio}
+                        >
+                            <img src={megaPhoneIcon} alt="播放" style={{ width: '24px' }} />
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <div className="festival-modal-body">
-                <InfoRow label="活動日期">
-                    {festival.date}
+                <InfoRow label="華文釋義">
+                    {festival.intro}
                 </InfoRow>
 
-                <InfoRow label="內容釋義">
-                    {festival.content}
-                </InfoRow>
-
-                {festival.taigi_intro && (
+                {festival.intro_taigi && festival.intro_taigi.trim() !== "" && (
                     <InfoRow label="台語釋義">
-                        {festival.taigi_intro}
+                        {festival.intro_taigi}
                     </InfoRow>
                 )}
 
