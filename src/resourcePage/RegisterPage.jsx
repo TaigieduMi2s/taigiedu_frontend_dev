@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
 import TermsDialog from "../components/TermsDialog";
+import { UnifiedModal } from "../components/UnifiedModal/UnifiedModal";
 import "./RegisterPage.css";
 
-const RegisterPage = () => {
+const RegisterPage = ({ onClose }) => {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [isVerificationVisible, setIsVerificationVisible] = useState(false);
@@ -258,24 +259,18 @@ const RegisterPage = () => {
     }
   }, [resendCooldown]);
 
+  const isModalMode = typeof onClose === 'function';
+
   const handleClose = () => {
-    navigate(-1); // 返回上一頁
+    if (isModalMode) {
+      onClose();
+    } else {
+      navigate(-1); // 返回上一頁
+    }
   };
 
-  return (
-    <div className="register-modal-overlay">
-      {!isVerificationVisible ? (
-        <>
-          {/* 註冊表單 */}
-          <div className="register-modal-container">
-            <div className="register-modal-header">
-              <div>註冊</div>
-              <button className="close-button" onClick={handleClose}>
-                ×
-              </button>
-            </div>
-
-            <form className="register-modal-form" onSubmit={handleSubmit}>
+  const formBody = (
+    <form className="register-modal-form" onSubmit={handleSubmit}>
               {/* 帳號（電子郵件信箱） */}
               <label className="form-label">
                 <span className="form-label-title">
@@ -494,7 +489,57 @@ const RegisterPage = () => {
               >
                 {isSubmitting ? "處理中..." : "送出"}
               </button>
-            </form>
+    </form>
+  );
+
+  const verificationBody = (
+    <div className="verification-modal-content">
+      <p>驗證信件已寄出，請於30分鐘之內至您的信箱完成驗證喔！</p>
+      <button
+        className="resend-button"
+        onClick={handleResendCode}
+        disabled={resendCooldown > 0}
+      >
+        {resendCooldown > 0
+          ? `再次獲取驗證碼 (${resendCooldown}s)`
+          : "再次獲取驗證碼"}
+      </button>
+    </div>
+  );
+
+  if (isModalMode) {
+    return (
+      <>
+        <UnifiedModal isOpen={true} onClose={handleClose} className="register-unified-modal">
+          <h2 className="register-modal-title">
+            {!isVerificationVisible ? "註冊" : "驗證您的信箱"}
+          </h2>
+          {!isVerificationVisible ? formBody : verificationBody}
+        </UnifiedModal>
+        
+        {/* 條款對話框 */}
+        <TermsDialog
+          isOpen={termsDialogType !== null}
+          onClose={closeTermsDialog}
+          onAccept={handleAcceptTerms}
+          type={termsDialogType}
+        />
+      </>
+    );
+  }
+
+  return (
+    <div className="register-modal-overlay">
+      {!isVerificationVisible ? (
+        <>
+          <div className="register-modal-container">
+            <div className="register-modal-header">
+              <div>註冊</div>
+              <button className="close-button" onClick={handleClose}>
+                ×
+              </button>
+            </div>
+            {formBody}
           </div>
 
           {/* 條款對話框 */}
@@ -506,29 +551,15 @@ const RegisterPage = () => {
           />
         </>
       ) : (
-        <>
-          {/* 信箱驗證提醒視窗 */}
-          <div className="verification-modal-container">
-            <div className="verification-modal-header">
-              <div>驗證您的信箱</div>
-              <button className="close-button" onClick={handleClose}>
-                ×
-              </button>
-            </div>
-            <div className="verification-modal-content">
-              <p>驗證信件已寄出，請於30分鐘之內至您的信箱完成驗證喔！</p>
-              <button
-                className="resend-button"
-                onClick={handleResendCode}
-                disabled={resendCooldown > 0}
-              >
-                {resendCooldown > 0
-                  ? `再次獲取驗證碼 (${resendCooldown}s)`
-                  : "再次獲取驗證碼"}
-              </button>
-            </div>
+        <div className="verification-modal-container">
+          <div className="verification-modal-header">
+            <div>驗證您的信箱</div>
+            <button className="close-button" onClick={handleClose}>
+              ×
+            </button>
           </div>
-        </>
+          {verificationBody}
+        </div>
       )}
     </div>
   );

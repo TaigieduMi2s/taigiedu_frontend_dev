@@ -26,7 +26,7 @@
     width: 90%;
     max-width: 650px;
     max-height: 90vh;
-    overflow-y: auto;
+    overflow: hidden;
     animation: modalScaleIn 0.25s ease-out;
     display: flex;
     flex-direction: column;
@@ -72,10 +72,10 @@
     transform: rotate(90deg);
 }
 
-/* Modal 內容區域 */
 .unified-modal-content {
     padding: 28px 28px;
     flex: 1;
+    overflow-y: auto;
 }
 
 /* ──────────────────────────────────────────────────────────
@@ -132,7 +132,7 @@
     }
 
     .unified-modal-content {
-        padding: 20px 24px;
+        padding: 28px 24px;
     }
 
     .unified-info-row {
