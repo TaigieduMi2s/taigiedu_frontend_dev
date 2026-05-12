@@ -18,7 +18,7 @@
   width: 50%;
   max-width: 1200px;
   height: 80%;
-  padding: 16px;
+  padding: 28px 28px;
   flex-shrink: 0;
   box-sizing: border-box;
 
@@ -32,8 +32,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-right: 10px;
-  padding-bottom: 10px;
+  padding-bottom: 16px;
   color: #000;
   font-family: Inter;
   font-size: 22px;
@@ -211,7 +210,7 @@
   /* 最大寬度 */
 
   min-height: 120px;
-  padding: 16px;
+  padding: 28px 28px;
   flex-shrink: 0;
   box-sizing: border-box;
 
@@ -365,13 +364,8 @@
     height: auto;
     max-height: 92vh;
     border-radius: 20px 20px 0 0;
-    padding: 20px 24px;
+    padding: 28px 24px;
     margin: 0;
-  }
-
-  .register-modal-header,
-  .verification-modal-header {
-    padding-right: 0;
   }
 
   /* Bottom sheet 模式下表單間距與按鈕 */
