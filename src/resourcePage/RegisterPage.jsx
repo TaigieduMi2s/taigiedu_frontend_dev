@@ -271,6 +271,7 @@ const RegisterPage = ({ onClose }) => {
 
   const formBody = (
     <form className="register-modal-form" onSubmit={handleSubmit}>
+              <div className="register-form-separator">&nbsp;</div>
               {/* 帳號（電子郵件信箱） */}
               <label className="form-label">
                 <span className="form-label-title">

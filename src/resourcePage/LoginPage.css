@@ -112,6 +112,12 @@
   background-color: #ccc;
 }
 
+/* 「本站帳號登入：」下方的分隔線留白多一些 */
+.third-party-login .separator:last-child {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
 /* 表單樣式 */
 .login-modal-form {
   display: flex;
@@ -268,7 +274,7 @@
 
 /* ─── 統一 Modal 模式下的樣式 ─── */
 .login-unified-modal {
-  max-width: 480px;
+  max-width: 560px;
 }
 
 .login-modal-title {
