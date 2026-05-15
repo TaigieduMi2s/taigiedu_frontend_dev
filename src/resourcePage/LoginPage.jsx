@@ -316,39 +316,17 @@ const LoginPage = ({ onClose }) => {
     </>
   );
 
-  if (isModalMode) {
-    return (
-      <>
-        <UnifiedModal isOpen={true} onClose={handleClose} className="login-unified-modal">
-          <h2 className="login-modal-title">登入</h2>
-          {formBody}
-        </UnifiedModal>
-        <ForgetPassword
-          isOpen={isForgotPasswordOpen}
-          onClose={() => setIsForgotPasswordOpen(false)}
-        />
-      </>
-    );
-  }
-
   return (
-    <div className="login-modal-overlay">
-      <div className="login-modal-container">
-        <div className="login-modal-header">
-          <div>登入</div>
-          <button className="close-button" onClick={handleClose}>
-            ×
-          </button>
-        </div>
+    <>
+      <UnifiedModal isOpen={true} onClose={handleClose} className="login-unified-modal">
+        <h2 className="login-modal-title">登入</h2>
         {formBody}
-      </div>
-
-      {/* 忘記密碼 Modal */}
+      </UnifiedModal>
       <ForgetPassword
         isOpen={isForgotPasswordOpen}
         onClose={() => setIsForgotPasswordOpen(false)}
       />
-    </div>
+    </>
   );
 };
 

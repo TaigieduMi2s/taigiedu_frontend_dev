@@ -1,69 +1,9 @@
-/* 模態框的背景覆蓋層 */
-.login-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  /* 黑色半透明背景 */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  /* 保證在最上層 */
-}
-
-/* 模態框容器 */
-.login-modal-container {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  overflow-y: auto;
-
-  width: 50%;
-  max-width: 1200px;
-  /* 最大寬度 */
-  height: 70%;
-  /* 最大高度 */
-  padding: 16px;
-  flex-shrink: 0;
-  box-sizing: initial !important;
-
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0px 8px 8px 0px rgba(0, 0, 0, 0.14);
-}
-
-/* 模態框頭部 */
-.login-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #000;
-  font-family: Inter;
-  font-size: 22px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: 30px;
-  /* 136.364% */
-}
-
-.close-button {
-  display: flex;
-  align-items: flex-end;
-  background: none;
-  border: none;
-  font-size: 28px;
-  cursor: pointer;
-}
-
 /* 第三方登入區 */
 .third-party-login {
   display: flex;
   flex-direction: column;
   text-align: center;
-  margin-top: 20px;
+  margin-top: 15px;
   gap: 10px;
 }
 
@@ -281,7 +221,7 @@
   font-size: 22px;
   font-weight: 700;
   color: #000;
-  margin: 0 0 10px 0;
+  margin: 0 0 5px 0;
   line-height: 32px;
   font-family: Inter;
 }
@@ -307,12 +247,6 @@
 
 /* ─── RWD ─── */
 @media (max-width: 768px) {
-  .login-modal-container {
-    width: 92%;
-    height: auto;
-    max-height: 90vh;
-  }
-
   .login-submit-button,
   .register-button {
     width: 100%;

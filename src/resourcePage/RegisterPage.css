@@ -1,46 +1,3 @@
-/* 背景覆蓋層 */
-.register-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.register-modal-container {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  overflow-y: auto;
-
-  width: 50%;
-  max-width: 1200px;
-  height: 80%;
-  padding: 16px;
-  flex-shrink: 0;
-  box-sizing: initial !important;
-
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0px 8px 8px 0px rgba(0, 0, 0, 0.14);
-}
-
-.register-modal-header,
-.verification-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #000;
-  font-family: Inter;
-  font-size: 22px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: 30px;
-  /* 136.364% */
-}
-
 .register-modal-title {
   font-size: 22px;
   font-weight: 700;
@@ -61,7 +18,7 @@
   flex-shrink: 0;
   background-color: #ccc;
   align-self: stretch;
-  margin-top: 15px;
+  margin-top: 5px;
   margin-bottom: 10px;
 }
 
@@ -198,25 +155,11 @@
 }
 
 /* 信箱驗證視窗 */
-.verification-modal-container {
+.verification-modal-content {
   display: flex;
   text-align: center;
   flex-direction: column;
-  position: relative;
-  overflow-y: auto;
-
-  width: 50%;
-  max-width: 1200px;
-  /* 最大寬度 */
-
-  min-height: 120px;
-  padding: 16px;
-  flex-shrink: 0;
-  box-sizing: initial !important;
-
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0px 8px 8px 0px rgba(0, 0, 0, 0.14);
+  gap: 16px;
 }
 
 .verification-modal-content p {
@@ -331,36 +274,8 @@
   opacity: 0.6;
 }
 
-.close-button {
-  display: flex;
-  align-items: flex-end;
-  background: none;
-  border: none;
-  font-size: 28px;
-  cursor: pointer;
-  padding: 0;
-  color: inherit;
-}
-
 /* ─── RWD 手機版 ─── */
 @media (max-width: 768px) {
-  /* 非 modal 模式 (/register 路由) 改為 bottom sheet 風格 */
-  .register-modal-overlay {
-    align-items: flex-end;
-    padding: 0;
-  }
-
-  .register-modal-container,
-  .verification-modal-container {
-    width: 100%;
-    max-width: 100%;
-    height: auto;
-    max-height: 92vh;
-    border-radius: 20px 20px 0 0;
-    padding: 28px 24px;
-    margin: 0;
-  }
-
   .register-submit-button,
   .resend-button {
     width: 100%;

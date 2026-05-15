@@ -508,61 +508,23 @@ const RegisterPage = ({ onClose }) => {
     </div>
   );
 
-  if (isModalMode) {
-    return (
-      <>
-        <UnifiedModal isOpen={true} onClose={handleClose} className="register-unified-modal">
-          <h2 className="register-modal-title">
-            {!isVerificationVisible ? "註冊" : "驗證您的信箱"}
-          </h2>
-          {!isVerificationVisible ? formBody : verificationBody}
-        </UnifiedModal>
-        
-        {/* 條款對話框 */}
-        <TermsDialog
-          isOpen={termsDialogType !== null}
-          onClose={closeTermsDialog}
-          onAccept={handleAcceptTerms}
-          type={termsDialogType}
-        />
-      </>
-    );
-  }
-
   return (
-    <div className="register-modal-overlay">
-      {!isVerificationVisible ? (
-        <>
-          <div className="register-modal-container">
-            <div className="register-modal-header">
-              <div>註冊</div>
-              <button className="close-button" onClick={handleClose}>
-                ×
-              </button>
-            </div>
-            {formBody}
-          </div>
+    <>
+      <UnifiedModal isOpen={true} onClose={handleClose} className="register-unified-modal">
+        <h2 className="register-modal-title">
+          {!isVerificationVisible ? "註冊" : "驗證您的信箱"}
+        </h2>
+        {!isVerificationVisible ? formBody : verificationBody}
+      </UnifiedModal>
 
-          {/* 條款對話框 */}
-          <TermsDialog
-            isOpen={termsDialogType !== null}
-            onClose={closeTermsDialog}
-            onAccept={handleAcceptTerms}
-            type={termsDialogType}
-          />
-        </>
-      ) : (
-        <div className="verification-modal-container">
-          <div className="verification-modal-header">
-            <div>驗證您的信箱</div>
-            <button className="close-button" onClick={handleClose}>
-              ×
-            </button>
-          </div>
-          {verificationBody}
-        </div>
-      )}
-    </div>
+      {/* 條款對話框 */}
+      <TermsDialog
+        isOpen={termsDialogType !== null}
+        onClose={closeTermsDialog}
+        onAccept={handleAcceptTerms}
+        type={termsDialogType}
+      />
+    </>
   );
 };
 
