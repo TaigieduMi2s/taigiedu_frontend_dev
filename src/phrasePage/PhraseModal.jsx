@@ -202,8 +202,10 @@ const PhraseModal = ({ isOpen, onClose, phrase, pronunciation, interpretation, p
                   return null;
                 }
 
-                // 獲取所有位置和發音
-                const locations = Object.keys(wordItem.pronunciations || {});
+                // 獲取所有位置和發音（排除鹿港腔）
+                const locations = Object.keys(wordItem.pronunciations || {}).filter(
+                  loc => loc !== 'lokkang'
+                );
 
                 if (locations.length === 0) {
                   console.log(`項目 ${wordIndex} 無發音位置數據`);

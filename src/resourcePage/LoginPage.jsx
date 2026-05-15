@@ -212,8 +212,8 @@ const LoginPage = ({ onClose }) => {
         <p>使用第三方登入：</p>
         <div id="googleSignInButton" style={{ display: 'flex', justifyContent: 'center', margin: '10px 0' }}></div>
         <p>或是</p>
-        <div className="separator">&nbsp;</div>
         <p>本站帳號登入：</p>
+        <div className="separator">&nbsp;</div>
       </div>
 
       {/* 本站帳號登入表單 */}

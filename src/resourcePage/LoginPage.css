@@ -40,7 +40,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-right: 10px;
   color: #000;
   font-family: Inter;
   font-size: 22px;
@@ -111,6 +110,12 @@
   height: 1px;
   flex-shrink: 0;
   background-color: #ccc;
+}
+
+/* 「本站帳號登入：」下方的分隔線留白多一些 */
+.third-party-login .separator:last-child {
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 /* 表單樣式 */
@@ -269,7 +274,7 @@
 
 /* ─── 統一 Modal 模式下的樣式 ─── */
 .login-unified-modal {
-  max-width: 480px;
+  max-width: 560px;
 }
 
 .login-modal-title {

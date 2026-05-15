@@ -18,9 +18,9 @@
   width: 50%;
   max-width: 1200px;
   height: 80%;
-  padding: 28px 28px;
+  padding: 16px;
   flex-shrink: 0;
-  box-sizing: border-box;
+  box-sizing: initial !important;
 
   background: #fff;
   border-radius: 8px;
@@ -32,7 +32,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 16px;
   color: #000;
   font-family: Inter;
   font-size: 22px;
@@ -51,16 +50,19 @@
   font-family: Inter;
 }
 
-/* ─── 統一 Modal 模式下的樣式 (Desktop) ─── */
-@media (min-width: 769px) {
-  .register-unified-modal {
-    max-width: 500px;
-  }
+/* ─── 統一 Modal 模式下的樣式 ─── */
+.register-unified-modal {
+  max-width: 560px;
 }
 
-/* 標題留右側空間給關閉按鈕 */
-.register-unified-modal .register-modal-title {
-  padding-right: 40px;
+/* 表單上方分隔線 */
+.register-form-separator {
+  height: 1px;
+  flex-shrink: 0;
+  background-color: #ccc;
+  align-self: stretch;
+  margin-top: 15px;
+  margin-bottom: 10px;
 }
 
 /* 表單標籤 */
@@ -126,7 +128,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
+  gap: 15px;
   align-self: stretch;
 }
 
@@ -135,9 +137,8 @@
 .register-modal-form input[name="confirmPassword"],
 .register-modal-form input[name="lastName"],
 .register-modal-form input[name="firstName"],
-.register-modal-form input[name="organization"],
-.register-modal-form input[name="professionOther"],
-.register-modal-form input[name="customPurpose"] {
+.register-modal-form input[name="organization"] {
+  width: 100%;
   padding: 10px;
   align-self: stretch;
   border-radius: 8px;
@@ -173,9 +174,8 @@
 
 /* 送出按鈕 */
 .register-submit-button {
-  align-self: flex-end;
-  /* 靠右對齊 */
-  width: 70px;
+  align-self: center;
+  width: 40%;
   height: 40px;
   background-color: #2d92c1;
   border: 1px solid transparent;
@@ -210,9 +210,9 @@
   /* 最大寬度 */
 
   min-height: 120px;
-  padding: 28px 28px;
+  padding: 16px;
   flex-shrink: 0;
-  box-sizing: border-box;
+  box-sizing: initial !important;
 
   background: #fff;
   border-radius: 8px;
@@ -332,21 +332,14 @@
 }
 
 .close-button {
+  display: flex;
+  align-items: flex-end;
   background: none;
   border: none;
   font-size: 28px;
-  color: #666;
   cursor: pointer;
   padding: 0;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.close-button:hover {
-  color: #333;
+  color: inherit;
 }
 
 /* ─── RWD 手機版 ─── */
@@ -366,11 +359,6 @@
     border-radius: 20px 20px 0 0;
     padding: 28px 24px;
     margin: 0;
-  }
-
-  /* Bottom sheet 模式下表單間距與按鈕 */
-  .register-unified-modal .register-modal-form {
-    gap: 14px;
   }
 
   .register-submit-button,
