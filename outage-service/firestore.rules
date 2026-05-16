@@ -1,0 +1,17 @@
+rules_version = '2';
+
+// 規則設計：
+//   - system/outage 文件僅供「讀取」公開（前端可直接讀取以顯示公告）。
+//   - 寫入一律透過 outage-service Cloud Function（使用 Admin SDK，不受規則限制）。
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /system/outage {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

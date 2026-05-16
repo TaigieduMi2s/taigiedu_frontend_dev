@@ -92,7 +92,6 @@ const AppLayout = () => {
     <div className="app">
       <ServiceSuspensionNotice />
       <Header onMenuToggle={() => setSidebarOpen(prev => !prev)} sidebarOpen={sidebarOpen} />
-      <ServiceSuspensionNotice />
 
       {/* 手機版 sidebar overlay 遮罩 */}
       {showSidebar && (
