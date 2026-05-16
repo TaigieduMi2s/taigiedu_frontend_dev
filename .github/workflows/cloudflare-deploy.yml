@@ -35,6 +35,10 @@ jobs:
           echo "VITE_ENABLE_TOPIC_INTEGRATION_FEATURE=${{ vars.VITE_ENABLE_TOPIC_INTEGRATION_FEATURE }}" >> .env
           echo "VITE_ENABLE_ROBOTS_NOINDEX=${{ vars.VITE_ENABLE_ROBOTS_NOINDEX }}" >> .env
           echo "VITE_ENABLE_SERVICE_SUSPENSION_NOTICE=${{ vars.VITE_ENABLE_SERVICE_SUSPENSION_NOTICE }}" >> .env
+          echo "VITE_OUTAGE_FIREBASE_API_KEY=${{ vars.VITE_OUTAGE_FIREBASE_API_KEY }}" >> .env
+          echo "VITE_OUTAGE_FIREBASE_AUTH_DOMAIN=${{ vars.VITE_OUTAGE_FIREBASE_AUTH_DOMAIN }}" >> .env
+          echo "VITE_OUTAGE_FIREBASE_PROJECT_ID=${{ vars.VITE_OUTAGE_FIREBASE_PROJECT_ID }}" >> .env
+          echo "VITE_OUTAGE_FIREBASE_APP_ID=${{ vars.VITE_OUTAGE_FIREBASE_APP_ID }}" >> .env
 
       - name: Configure wrangler.jsonc for branch
         run: |
