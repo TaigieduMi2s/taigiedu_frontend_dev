@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Footer.css';
 
@@ -17,7 +16,7 @@ const Footer = () => {
         <button className="footer-button" onClick={() => handleLinkClick('policy')}>隱私政策</button>
       </div>
       <div className="footer-text">
-        © 2024 台語文教學共融平台 All Rights Reserved.
+        © {new Date().getFullYear()} 台語文教學共融平台 All Rights Reserved.
       </div>
     </footer>
   );
