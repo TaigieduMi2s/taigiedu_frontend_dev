@@ -21,7 +21,6 @@ import envConfig from '../../../config';
 const API_BASE_URL = envConfig.apiUrl;
 const columnHelper = createColumnHelper();
 
-const NEWS_ORDER_KEY = 'newsPublishedOrder';
 const CONTENT_MAX_LENGTH = 20;
 
 const AdminNewsPage = () => {
@@ -45,6 +44,7 @@ const AdminNewsPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentEditItem, setCurrentEditItem] = useState(null);
   const [isDirty, setIsDirty] = useState(false);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
 
   // 下拉類別完全來自後端資料：取「目前公告」這些快訊的 category 去重，沒有任何前端寫死的清單。
   // 後端沒有獨立的類別表（category 只是每筆快訊上的字串欄位），所以在此新增的類別
@@ -106,35 +106,23 @@ const AdminNewsPage = () => {
         return new Date(b.timestamp) - new Date(a.timestamp);
       };
 
-      const publishedItems = formatted.filter(f => f.status === 'published');
+      // 前後台一律「由新到舊」排序（TAIGIE-254）。
+      // 前台 POST /info/news 是照日期新到舊輸出（同日期再依 id），這裡用同一套規則即可對齊：
+      // sort 是穩定排序，而 API 回傳本身是 seq／id 遞增，所以同日期的先後也會跟前台一致。
+      // ⚠️ 舊版還會再蓋上一份存在 localStorage 的順序，那份順序只存在單一瀏覽器，
+      //    換一台電腦看後台、或看前台都是另一種順序——這正是前後台對不起來的成因，已移除。
+      // ⚠️ 也不要改成「照 API 回傳的順序顯示」：/admin/main-search/news 是照 seq（建立順序）遞增，
+      //    等於由舊到新，跟前台相反。後端的 seq 目前沒有被 /info/news 使用，詳見 TAIGIE-254 的討論。
+      const publishedItems = [...formatted.filter(f => f.status === 'published')].sort(sortByTimestampDesc);
       const otherItems = formatted.filter(f => f.status !== 'published').sort(sortByTimestampDesc);
 
-      let orderedPublished;
-      try {
-        const savedIds = JSON.parse(localStorage.getItem(NEWS_ORDER_KEY) || 'null');
-        if (savedIds) {
-          orderedPublished = savedIds.reduce((acc, id) => {
-            const item = publishedItems.find(f => String(f.id) === String(id));
-            if (item) acc.push(item);
-            return acc;
-          }, []);
-          // 新增的項目（不在已存順序裡）加到最前面
-          const unseenItems = publishedItems
-            .filter(f => !savedIds.includes(String(f.id)))
-            .sort(sortByTimestampDesc);
-          orderedPublished = [...unseenItems, ...orderedPublished];
-        } else {
-          orderedPublished = [...publishedItems].sort(sortByTimestampDesc);
-        }
-      } catch {
-        orderedPublished = [...publishedItems].sort(sortByTimestampDesc);
-      }
-
-      setAllNews([...orderedPublished, ...otherItems]);
+      setAllNews([...publishedItems, ...otherItems]);
+      return publishedItems;
     } catch (error) {
       showToast(`載入最新消息失敗: ${error.message}`, 'error');
       setAllNews([]);
       setError(error.message);
+      return [];
     } finally {
       setIsLoading(false);
     }
@@ -281,25 +269,38 @@ const AdminNewsPage = () => {
     setIsDirty(true);
   }, [newsList]);
 
+  // 把一份清單的順序寫回後端（前台 /info/news 就是讀這個順序）
+  const saveOrder = useCallback(async (list) => {
+    const response = await authenticatedFetch(`${API_BASE_URL}/admin/main-search/news/change`, {
+      method: 'POST',
+      body: JSON.stringify({ ids: list.map(item => String(item.id)) }),
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || '排序更新失敗');
+    }
+  }, []);
+
   const handleConfirmOrder = useCallback(async () => {
-    localStorage.setItem(NEWS_ORDER_KEY, JSON.stringify(newsList.map(item => String(item.id))));
+    setIsSavingOrder(true);
     try {
-      const response = await authenticatedFetch(`${API_BASE_URL}/admin/main-search/news/change`, {
-        method: 'POST',
-        body: JSON.stringify({ ids: newsList.map(item => String(item.id)) }),
-      });
-      const result = await response.json();
-      if (!response.ok || !result.success) {
-        throw new Error(result.message || '排序更新失敗');
-      }
+      await saveOrder(newsList);
       showToast('順序已成功更新！', 'success');
       setIsDirty(false);
     } catch (error) {
       showToast(`排序更新失敗: ${error.message}`, 'error');
       fetchNews();
       setIsDirty(false);
+    } finally {
+      setIsSavingOrder(false);
     }
-  }, [newsList, showToast, fetchNews]);
+  }, [newsList, saveOrder, showToast, fetchNews]);
+
+  // 取消未儲存的拖曳結果：重新抓一次後端順序即可還原
+  const handleCancelOrder = useCallback(async () => {
+    setIsDirty(false);
+    await fetchNews();
+  }, [fetchNews]);
 
   useEffect(() => {
     fetchNews();
@@ -476,6 +477,8 @@ const AdminNewsPage = () => {
       <DragConfirmButton
         visible={isDirty && statusFilter === 'published'}
         onClick={handleConfirmOrder}
+        onCancel={handleCancelOrder}
+        isLoading={isSavingOrder}
       />
 
       {/* 使用 AdminModal 組件 */}

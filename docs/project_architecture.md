@@ -134,6 +134,22 @@
 - **主頁搜尋管理**:
   - 考試資訊 (`/admin/main-search/test`): `adminTestPage.jsx`。
   - 活動快訊 (`/admin/main-search/news`): `adminNewsPage.jsx`。
+  - **前後台一律依日期「由新到舊」排序**（TAIGIE-254，2026-09）。這兩支後台與前台首頁的排序規則必須一致：
+    - 前台 `POST /info/test`、`POST /info/news` 是 **ORDER BY 日期 DESC**（同日期再依 `id` 遞增）。
+    - 後台因此也用同一套規則：`[...publishedItems].sort(sortByTimestampDesc)`。
+      JS 的 `sort` 是穩定排序，而 `GET /admin/main-search/*` 回傳本身是 `seq`／`id` 遞增，
+      所以**同日期的先後也會跟前台一致**（已於 2026-09 用正式資料逐筆比對驗證過）。
+    - ⚠️ **不要再用 localStorage 記順序**：舊版兩支後台都會把排序寫進 localStorage 再蓋回畫面，
+      那份順序只存在單一瀏覽器，導致「後台看到 A 排序、前台與別台電腦看到 B 排序」，正是這張票的成因，已移除。
+    - ⚠️ **也不要改成「照 API 回傳的順序顯示」**：`GET /admin/main-search/*` 是照 `seq` 遞增（＝建立順序，
+      由舊到新），跟前台相反，照著顯示會讓後台整個反過來。
+  - ⚠️ **拖曳排序目前對前台無效（待後端處理）**：`POST …/change` 會把順序寫進後端的 `seq`，
+    但 `/info/test`、`/info/news` **並不讀 `seq`**（實測：後台 `seq` 為 `2,3,6,7,8,16,17,23,31,32`，
+    前台卻回 `32,31,23,17,16,…` 的日期新到舊）。要讓拖曳的順序在前台生效，
+    需要後端把這兩支端點改成 `ORDER BY seq`。
+    - 拖曳只改本地 state，**要按「儲存順序」才會送 `POST …/change`**；未儲存時畫面底部會浮出
+      `components/DragConfirmButton` 的 sticky 操作列（見下），並在關閉分頁時攔截。
+    - 「刪除紀錄」沒有排序需求，同樣依 `timestamp` 由新到舊。
 - **節慶飲食管理 (`/admin/culture/food`, `/admin/culture/festival`)**: `adminFoodPage.jsx` / `adminFestivalPage.jsx`。
 - **台語文化（test）管理 (`/admin/culture-test`)**: `adminCultureTestPage.jsx`，台語文化影音的內容管理頁。
   - **版面與操作整套比照「媒體與社群資源」後台**（`adminSocialmediaPage.jsx`）：
@@ -229,7 +245,7 @@ src/
  │    ├── AdminDataTable/      # 後台資料表格（tanstack table 封裝）
  │    ├── AdminModal/          # 後台彈窗
  │    ├── DatePicker/          # 日期選擇器
- │    ├── DragConfirmButton/   # 拖曳確認按鈕
+ │    ├── DragConfirmButton/   # 拖曳排序的「未儲存」sticky 操作列（固定在視窗底部，見 §3.3 主頁搜尋管理）
  │    ├── HorizontalScrollRow/ # 水平捲動列
  │    ├── UnifiedModal/        # 通用 Modal
  │    ├── ReportIssue/         # 前台「回報問題」入口與彈窗（建構在 UnifiedModal 之上）
@@ -277,15 +293,24 @@ src/
 前台頁面共用的「回報問題」流程，元件放在 `components/ReportIssue/`，依 Figma
 （PD 台語文 workshop － WF paper prototype 2025，node `2946-3629`）實作：
 
-- **一行接入**：頁面內容區最後放 `<ReportIssueLink pageKey="phrase" className="…" />` 即可，
-  彈窗開關由元件自己管理；`className` 只用來給該頁的間距／對齊。
-  已套用：台語俗諺語、節慶飲食（飲食／節慶）、媒體與社群資源、認證考試。
+- **入口統一在全站 Footer**（TAIGIE-252 定案，2026-09）：`src/Footer.jsx` 多一顆「回報問題」按鈕，
+  點了開同一個 `ReportIssueModal`；**後台（`/admin` 開頭）不顯示**。
+  ⚠️ 原本各頁面內容區底部那一行入口（`ReportIssueLink`）已依 PM 指示隱藏，
+  該元件目前固定回傳 `null`，五個頁面的 `<ReportIssueLink pageKey="…" />` 呼叫端保留但不會渲染任何東西。
+  日後若要恢復「從某一頁直接帶著功能開啟」，把 `pageKey` 傳給 `ReportIssueModal` 即可（會當成預設值）。
 - **彈窗是 UnifiedModal 的延伸**：`ReportIssueModal` 以 `components/UnifiedModal` 當外框
   （沿用遮罩、關閉鈕、動畫與手機版 bottom sheet），只負責表單內容，因此不需要改動 UnifiedModal 本身。
-- **各頁差異全部收斂在 `reportIssueConfig.js`**：一個 `pageKey` 對應「彈窗標題後綴」與「第二層問題細項選項」。
-  新頁面要加入回報功能時，只要在這支檔案加一筆設定，不必碰彈窗程式碼。
-- **兩層下拉的連動**：第一層固定為「問題回報 / 其他」；**只有選「問題回報」才會出現第二層細項**，
-  切回「其他」時會清掉第二層的值（避免送出殘留資料）。兩個下拉都用共用的 `components/CustomSelect`。
+- **各頁差異全部收斂在 `reportIssueConfig.js`**：一個 `pageKey` 對應「功能名稱」與「問題細項選項」。
+  新頁面要加入回報功能時，只要在這支檔案加一筆設定，不必碰彈窗程式碼；
+  `REPORT_FEATURE_OPTIONS` 會自動長出「功能頁面」下拉的選項（陣列順序＝下拉顯示順序）。
+- **三個下拉的連動**（都用共用的 `components/CustomSelect`）：
+  1. **功能頁面**（必填）：因為入口在 Footer，彈窗無從得知使用者要回報哪個功能，**由使用者自己選**
+     （台語俗諺語／台語文化－飲食／台語文化－節慶／資源共享平台／媒體與社群資源／認證考試）。
+  2. **問題類別**：固定為「問題回報 / 其他」。
+  3. **問題細項**：**只有選「問題回報」才會出現**，選項由步驟 1 選到的功能決定；
+     切回「其他」或換功能時都會清掉細項的值（避免送出殘留或不屬於該功能的資料）。
+- ⚠️ **功能與細項清單目前是前端寫死的**。是否改由後端提供（讓管理員自行維護）已另開票與後端討論，
+  規格與待確認事項見 `docs/jira/report-issue-category-api.md`。
 - **附件**：非必填，**僅收 JPG／PNG、上限 100MB**，送出時先呼叫 `services/uploadService.js` 的
   `uploadFile()` 取得路徑再帶進 payload。
   （設計稿中「媒體與社群資源」那張圖的提示文字寫成 PDF／PPT／DOC，與流程圖註記衝突，一律以「只有圖片檔」為準。）

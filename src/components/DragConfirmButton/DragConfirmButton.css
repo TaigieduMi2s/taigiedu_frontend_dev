@@ -1,5 +1,90 @@
-.drag-confirm-row {
+/* ============================================================
+   DragConfirmButton.css — 拖曳排序的未儲存操作列 (Sticky Save Bar)
+   固定在視窗底部，列表捲到哪裡都看得到（TAIGIE-254）
+   ============================================================ */
+
+.drag-save-bar {
+    position: fixed;
+    /* 讓開左側 AdminSidebar，不要蓋在選單上 */
+    left: var(--sidebar-width, 230px);
+    right: 0;
+    bottom: 0;
+    z-index: var(--z-filter-bar, 500);
+    background: var(--bg-card, #ffffff);
+    border-top: 1px solid #e5e7eb;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+    animation: dragSaveBarSlideUp 0.2s ease;
+}
+
+@keyframes dragSaveBarSlideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+.drag-save-bar-inner {
     display: flex;
-    justify-content: flex-start;
-    margin-top: 12px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 24px;
+    flex-wrap: wrap;
+}
+
+.drag-save-bar-message {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text-secondary, #333333);
+}
+
+.drag-save-bar-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #FDE68A;
+    color: #92400E;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.drag-save-bar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.drag-save-bar-cancel {
+    border: 1px solid #D1D5DB;
+    background: #ffffff;
+    color: var(--text-secondary, #333333);
+}
+
+.drag-save-bar-cancel:hover:not(:disabled) {
+    background: #f3f4f6;
+}
+
+/* ─── RWD：手機（≤768px）───────────────────────────────── */
+@media (max-width: 768px) {
+    .drag-save-bar {
+        /* 手機版 sidebar 是滑入式抽屜，不佔版面寬度 */
+        left: 0;
+    }
+
+    .drag-save-bar-inner {
+        padding: 12px 16px;
+    }
+
+    .drag-save-bar-actions {
+        margin-left: auto;
+    }
 }

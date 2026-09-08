@@ -10,6 +10,7 @@ import { submitIssueReport } from '../../services/reportIssueService';
 import {
     ISSUE_TYPE_OPTIONS,
     ISSUE_TYPE_PROBLEM,
+    REPORT_FEATURE_OPTIONS,
     UPLOAD_ACCEPT,
     UPLOAD_HINT,
     UPLOAD_MAX_BYTES,
@@ -20,15 +21,21 @@ import './ReportIssue.css';
 /**
  * 回報問題彈窗
  * 以共用的 UnifiedModal 為外框（沿用遮罩、關閉鈕、動畫與手機版 bottom sheet 樣式），
- * 內容則是這支元件自己的表單；各頁面的差異全部收斂在 reportIssueConfig。
+ * 內容則是這支元件自己的表單；各功能頁面的差異全部收斂在 reportIssueConfig。
  *
- * 流程（依 Figma）：
- * 問題類別 →（選「問題回報」才出現第二層細項）→ 問題名稱 → 問題描述 → 上傳檔案（非必填）→ 送出
+ * 流程（依 Figma + TAIGIE-252 定案）：
+ * 功能頁面 → 問題類別 →（選「問題回報」才出現細項）→ 問題名稱 → 問題描述 → 上傳檔案（非必填）→ 送出
+ *
+ * 入口統一在全站 Footer，彈窗不知道使用者要回報哪個功能，所以「功能頁面」由使用者自己選；
+ * pageKey 只有在「從某個頁面直接帶著功能開啟」時才需要傳，會被當成預設值。
  */
 const ReportIssueModal = ({ isOpen, onClose, pageKey, label, detailOptions }) => {
+    // 使用者在下拉選到的功能頁面；有帶 pageKey 就以它為預設值
+    const [featureKey, setFeatureKey] = useState(pageKey || '');
+
     const config = useMemo(
-        () => getReportPageConfig(pageKey, { label, detailOptions }),
-        [pageKey, label, detailOptions]
+        () => getReportPageConfig(featureKey, { label, detailOptions }),
+        [featureKey, label, detailOptions]
     );
 
     const { showToast } = useToast();
@@ -47,6 +54,7 @@ const ReportIssueModal = ({ isOpen, onClose, pageKey, label, detailOptions }) =>
     // 每次開啟都重置表單，避免上次的內容殘留
     useEffect(() => {
         if (!isOpen) return;
+        setFeatureKey(pageKey || '');
         setIssueType('');
         setIssueCategory('');
         setTitle('');
@@ -55,21 +63,30 @@ const ReportIssueModal = ({ isOpen, onClose, pageKey, label, detailOptions }) =>
         setIsSubmitting(false);
         setIsSubmitted(false);
         if (fileInputRef.current) fileInputRef.current.value = '';
-    }, [isOpen]);
+    }, [isOpen, pageKey]);
 
-    // 第二層下拉只在「問題回報」且該頁有設定細項時出現
+    // 細項下拉只在「已選功能頁面」＋「問題回報」＋「該功能有設定細項」時出現
     const showDetailSelect =
-        issueType === ISSUE_TYPE_PROBLEM && config.detailOptions.length > 0;
+        Boolean(featureKey) &&
+        issueType === ISSUE_TYPE_PROBLEM &&
+        config.detailOptions.length > 0;
 
     const isFormValid =
+        Boolean(featureKey) &&
         Boolean(issueType) &&
         (!showDetailSelect || Boolean(issueCategory)) &&
         title.trim().length > 0 &&
         description.trim().length > 0;
 
+    // 換功能頁面時細項清單會整組換掉，舊的選擇留著就會送出不屬於該功能的細項
+    const handleFeatureChange = (value) => {
+        setFeatureKey(value);
+        setIssueCategory('');
+    };
+
     const handleIssueTypeChange = (value) => {
         setIssueType(value);
-        // 切回「其他」時要一併清掉第二層，否則會送出殘留的細項
+        // 切回「其他」時要一併清掉細項，否則會送出殘留的資料
         if (value !== ISSUE_TYPE_PROBLEM) setIssueCategory('');
     };
 
@@ -130,10 +147,26 @@ const ReportIssueModal = ({ isOpen, onClose, pageKey, label, detailOptions }) =>
     return (
         <UnifiedModal isOpen={isOpen} onClose={onClose} className="report-issue-modal">
             <h2 className="report-issue-title">
-                回報問題{config.label ? ` - ${config.label}` : ''}
+                {/* 從指定頁面開啟時才在標題帶出功能名稱；Footer 開啟時功能由使用者自己選 */}
+                回報問題{pageKey && config.label ? ` - ${config.label}` : ''}
             </h2>
 
             <form className="report-issue-form" onSubmit={handleSubmit} noValidate>
+                <div className="report-issue-field">
+                    <label className="report-issue-label" htmlFor="report-issue-feature">
+                        <span className="report-issue-required">*</span>功能頁面
+                    </label>
+                    <CustomSelect
+                        id="report-issue-feature"
+                        className="report-issue-select-feature"
+                        options={REPORT_FEATURE_OPTIONS}
+                        value={featureKey || null}
+                        onChange={handleFeatureChange}
+                        placeholder="請選擇要回報的功能"
+                        size="sm"
+                    />
+                </div>
+
                 <div className="report-issue-field">
                     <label className="report-issue-label" htmlFor="report-issue-type">
                         <span className="report-issue-required">*</span>問題類別
@@ -245,8 +278,11 @@ const ReportIssueModal = ({ isOpen, onClose, pageKey, label, detailOptions }) =>
 ReportIssueModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
-    /** reportIssueConfig 的頁面代碼，如 'phrase'、'exam' */
-    pageKey: PropTypes.string.isRequired,
+    /**
+     * reportIssueConfig 的頁面代碼，如 'phrase'、'exam'。
+     * 非必填：從全站 Footer 開啟時不指定，改由使用者在「功能頁面」下拉自己選。
+     */
+    pageKey: PropTypes.string,
     /** 覆寫彈窗標題後綴（未指定時取 config） */
     label: PropTypes.string,
     /** 覆寫第二層細項選項（未指定時取 config） */

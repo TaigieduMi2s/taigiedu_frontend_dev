@@ -33,6 +33,40 @@ const getFullAudioUrl = (path, type) => {
     return `${apiUrl}/static/${type}/${filename}`;
 };
 
+/**
+ * 節慶日期顯示字串 (TAIGIE-256)
+ *
+ * 後端 /culture/festival 回傳三個相關欄位：
+ * - date          ：'MM-DD'，也可能是逗號分隔的多個日期（例：冬至 '12-21,12-22,12-23'）
+ * - islunar       ：1 = 農曆、0 = 國曆
+ * - date_mandarin ：後端組好的字串（例：'農曆 01-01'）
+ *
+ * 優先用 date + islunar 自己組成「農曆1月1日」這種讀得順的格式，
+ * 沒有 islunar 或組不出來時才退回後端的 date_mandarin。
+ * 未設定日期的節慶（母親節、迎媽祖、搶孤等非固定日期，見 TAIGIE-257）回傳空字串，
+ * 畫面上就不顯示日期這一列。
+ */
+const formatFestivalDate = ({ date, islunar, dateMandarin } = {}) => {
+    const hasLunarFlag = islunar !== undefined && islunar !== null && islunar !== '';
+    if (!hasLunarFlag) return (dateMandarin || '').trim();
+
+    const isSolar = String(islunar) === '0' || String(islunar) === 'false';
+    const prefix = isSolar ? '國曆' : '農曆';
+
+    const parts = String(date || '')
+        .split(',')
+        .map((part) => part.trim())
+        .filter(Boolean)
+        .map((part) => {
+            const [month, day] = part.split('-').map(Number);
+            return month && day ? `${month}月${day}日` : '';
+        })
+        .filter(Boolean);
+
+    if (parts.length > 0) return `${prefix}${parts.join('、')}`;
+    return (dateMandarin || '').trim();
+};
+
 const FestivalModal = ({ isOpen, onClose, festival }) => {
     if (!isOpen || !festival) return null;
 
@@ -94,6 +128,11 @@ const FestivalModal = ({ isOpen, onClose, festival }) => {
             </div>
 
             <div className="festival-modal-body">
+                {/* 有設定日期才顯示（非固定日期的節慶可以不填，見 TAIGIE-257） */}
+                <InfoRow label="日期">
+                    {formatFestivalDate(festival)}
+                </InfoRow>
+
                 <InfoRow label="華文釋義">
                     {festival.intro}
                 </InfoRow>

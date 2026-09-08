@@ -372,18 +372,24 @@ const AdminFestivalPage = () => {
       return;
     }
     if (!newZhName || !newTwName || !newZhDesc || !newTwDesc) { showToast('請填寫必填欄位', 'warning'); return; }
-    if (!dateMonth || !dateDay) { showToast('請填寫日期', 'warning'); return; }
     if (imageUploading) { showToast('圖片上傳中，請稍候', 'warning'); return; }
     if (newImageFile && !newImageUrl) { showToast('圖片尚未上傳成功，請重新選擇圖片', 'warning'); return; }
     if (!newImageFile && !newImageUrl && !newImageName) { showToast('請上傳圖片', 'warning'); return; }
-    // 範圍防呆
-    const m = Number(dateMonth); const d = Number(dateDay);
-    if (isNaN(m) || isNaN(d)) { showToast('日期需為數字', 'warning'); return; }
-    if (m < 1 || m > 12) { showToast('月份需介於 1-12', 'warning'); return; }
-    const maxD = dateType === 'solar' ? 31 : 30;
-    if (d < 1 || d > maxD) { showToast(`日期(${dateType === 'solar' ? '國曆' : '農曆'})需介於 1-${maxD}`, 'warning'); return; }
-    
-    const dateStr = `${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+    // 日期為選填（TAIGIE-257）：母親節、迎媽祖、搶孤這類非固定日期的節慶填不出月／日，
+    // 欄位設計還在討論，先開放留空；月與日要嘛都填、要嘛都留空。
+    const hasDate = Boolean(dateMonth) || Boolean(dateDay);
+    let dateStr = '';
+    if (hasDate) {
+      if (!dateMonth || !dateDay) { showToast('日期請同時填寫月與日，或兩欄都留空', 'warning'); return; }
+      // 範圍防呆
+      const m = Number(dateMonth); const d = Number(dateDay);
+      if (isNaN(m) || isNaN(d)) { showToast('日期需為數字', 'warning'); return; }
+      if (m < 1 || m > 12) { showToast('月份需介於 1-12', 'warning'); return; }
+      const maxD = dateType === 'solar' ? 31 : 30;
+      if (d < 1 || d > maxD) { showToast(`日期(${dateType === 'solar' ? '國曆' : '農曆'})需介於 1-${maxD}`, 'warning'); return; }
+      dateStr = `${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    }
     let mappedAudio = '';
     if (usingRecording && recordUrl) {
       mappedAudio = await blobUrlToBase64(recordUrl);
@@ -647,7 +653,7 @@ const AdminFestivalPage = () => {
           </div>
         </div>
         <div className="mb-3 admin-form-grid-full">
-          <label className="form-label admin-form-label">*日期</label>
+          <label className="form-label admin-form-label">日期（選填）</label>
           <div className="d-flex align-items-center gap-2 flex-wrap">
             <CustomSelect
               size="sm"

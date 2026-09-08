@@ -43,7 +43,10 @@ const FestivalPage = () => {
                         image: festival.image ? `${import.meta.env.VITE_IMAGE_URL}${festival.image}` : festivalN,
                         pron: festival.pron || '',
                         audio_data: festival.audio_data || '',
-                        date: festival.date_mandarin || festival.date || '',
+                        // 日期相關欄位原樣帶進彈窗，由 formatFestivalDate 決定怎麼顯示（TAIGIE-256）
+                        date: festival.date || '',
+                        islunar: festival.islunar,
+                        dateMandarin: festival.date_mandarin || '',
                         intro: festival.intro_mandarin || festival.intro || '',
                         intro_taigi: festival.intro_taigi || ''
                     }));
@@ -95,7 +98,10 @@ const FestivalPage = () => {
                         image: festival.image ? `${import.meta.env.VITE_IMAGE_URL}${festival.image}` : festivalN,
                         pron: festival.pron || '',
                         audio_data: festival.audio_data || '',
-                        date: festival.date_mandarin || festival.date || '',
+                        // 日期相關欄位原樣帶進彈窗，由 formatFestivalDate 決定怎麼顯示（TAIGIE-256）
+                        date: festival.date || '',
+                        islunar: festival.islunar,
+                        dateMandarin: festival.date_mandarin || '',
                         intro: festival.intro_mandarin || festival.intro || '',
                         intro_taigi: festival.intro_taigi || ''
                     }));

@@ -68,6 +68,10 @@
     margin-right: 2px;
 }
 
+.report-issue-select-feature {
+    width: 260px;
+}
+
 .report-issue-selects {
     display: flex;
     align-items: center;
@@ -210,6 +214,7 @@
         gap: 12px;
     }
 
+    .report-issue-select-feature,
     .report-issue-select-type,
     .report-issue-select-detail {
         width: 100%;
