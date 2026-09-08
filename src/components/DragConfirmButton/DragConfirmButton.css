@@ -3,11 +3,19 @@
    固定在視窗底部，列表捲到哪裡都看得到（TAIGIE-254）
    ============================================================ */
 
+/* 操作列是 fixed、不佔版面，靠這個佔位區把下方內容往下推，
+   避免蓋住表格的最後一列。高度由元件依實際列高動態帶入。 */
+.drag-save-bar-spacer {
+    flex-shrink: 0;
+}
+
 .drag-save-bar {
     position: fixed;
     /* 讓開左側 AdminSidebar，不要蓋在選單上 */
     left: var(--sidebar-width, 230px);
     right: 0;
+    /* bottom 由元件動態計算：平常是 0，捲到頁尾時等於 Footer 露出的高度，
+       讓操作列停在 Footer 上緣而不是蓋住它 */
     bottom: 0;
     z-index: var(--z-filter-bar, 500);
     background: var(--bg-card, #ffffff);
