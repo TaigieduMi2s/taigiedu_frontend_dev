@@ -1,5 +1,6 @@
 import React from 'react';
 import './TermsPage.css';
+import ContributorCredits from './ContributorCredits';
 
 const TeamPage = () => {
   return (
@@ -33,6 +34,8 @@ const TeamPage = () => {
 
         <h2>歡迎聯絡我們</h2>
         <p>Email：<a href="mailto:lekunoffice@gmail.com">lekunoffice@gmail.com</a></p>
+
+        <ContributorCredits />
 
         <p className="terms-note">最後更新：2026-04-09</p>
       </div>

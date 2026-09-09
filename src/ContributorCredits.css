@@ -1,0 +1,55 @@
+.credits {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 2px solid #e0e0e0;
+}
+
+.credits .credits-title {
+  font-size: 20px;
+  /* 蓋掉 .terms-content h2 的 margin，讓標題與第一個類別之間留出間距 */
+  margin: 0 0 20px;
+  color: #444;
+}
+
+.credits-group + .credits-group {
+  margin-top: 20px;
+}
+
+.credits-category {
+  font-size: 16px;
+  margin: 0 0 4px;
+  color: #222;
+}
+
+.credits-names {
+  margin: 0;
+  color: #333;
+  /* 姓名以「、」相連，換行時不要把單一姓名拆開 */
+  word-break: keep-all;
+}
+
+.credits-name {
+  display: inline-block;
+}
+
+.credits-subgroup + .credits-subgroup {
+  margin-top: 12px;
+}
+
+.credits-subcategory {
+  font-size: 15px;
+  font-weight: normal;
+  margin: 0 0 2px;
+  color: #666;
+}
+
+/* ─── RWD ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .credits .credits-title {
+    font-size: 17px;
+  }
+
+  .credits-category {
+    font-size: 15px;
+  }
+}

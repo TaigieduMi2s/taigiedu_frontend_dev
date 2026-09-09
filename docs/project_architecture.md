@@ -132,6 +132,15 @@
   - `/terms` (服務條款，`TermsPage.jsx`)
   - `/policy` (隱私權政策，`PolicyPage.jsx`)
   - `/team` (團隊介紹，`TeamPage.jsx`)
+    - 頁尾的**網站貢獻名單**（TAIGIE-236）由 `ContributorCredits.jsx` 渲染，資料寫死在 `contributorsData.js`。
+      呈現方式比照電影片尾 Credits：依貢獻類別分區，姓名以「、」相連不各自成列。
+      類別底下若有 `subgroups` 就再分小段各給一個標題（目前只有「內容提供與授權」用到：
+      原本是每個姓名後各自標註貢獻內容，但 37/38 人的內容相同、畫面太冗長，PM 2026-09 同意改為分小段）。
+      ⚠️ **PM 於 2026-09 指定先走「前端寫死」**，名單異動就是改 `contributorsData.js` 再重新部署，後台改不了；
+      日後若要交給管理員自行維護才升級為後端 API + 後台管理頁。
+      類別順序、姓名依筆畫排序的規則寫在 `contributorsData.js` 的檔頭註解，維護時請照著走。
+      ⚠️ 資料檔刻意命名為 `contributorsData.js` 而非 `contributorCredits.js`：macOS 檔案系統不分大小寫，
+      後者會跟 `ContributorCredits.jsx` 撞名，`import ... from './ContributorCredits'` 會解析到資料檔而不是元件。
 
 ### 3.2. 會員/保護頁面 (Protected - requireAuth)
 需要一般會員登入才能操作的路由（透過 `ProtectedRoute` 封裝）：
