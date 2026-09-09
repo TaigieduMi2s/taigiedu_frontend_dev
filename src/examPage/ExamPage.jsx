@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import './ExamPage.css';
 import CustomSelect from '../components/CustomSelect/CustomSelect';
 import PageLoading from '../components/PageLoading/PageLoading';
@@ -6,6 +7,12 @@ import Pagination from '../mainSearchPage/Pagination';
 import searchIcon from '../assets/home/search_logo.svg';
 import foodImage from '../assets/culture/foodN.png';
 import ReportIssueLink from '../components/ReportIssue/ReportIssueLink';
+import {
+    buildListSearchParams,
+    parsePage,
+    parseQuery,
+    parseSelectedItems,
+} from '../utils/listFilterParams';
 
 // 顯示規則：桌機版每列 4 筆、每頁最多 15 列；未篩選時每類別預覽第一列（4 筆）
 const ITEMS_PER_ROW = 4;
@@ -16,23 +23,37 @@ const PREVIEW_COUNT = ITEMS_PER_ROW;
 const ALL_TYPES = '類型';
 
 const ExamPage = () => {
-    const [selectedType, setSelectedType] = useState(ALL_TYPES);
-    const [query, setQuery] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
     const [examData, setExamData] = useState({});
     const [categories, setCategories] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // 類別篩選／關鍵字／頁碼一律以 query string 為準（規則見 utils/listFilterParams.js），
+    // 重新整理或把網址分享出去都能回到同一個畫面。本頁只支援單選，取第一個 cat 參數即可。
+    const [searchParams, setSearchParams] = useSearchParams();
+    const selectedType = Object.keys(parseSelectedItems(searchParams, categories))[0] ?? ALL_TYPES;
+    const query = parseQuery(searchParams);
+    const currentPage = parsePage(searchParams);
+
+    // 寫回網址的統一入口；未帶到的欄位沿用目前值。
+    // replace：關鍵字是邊打邊篩，逐字塞進 history 會讓上一頁按不完。
+    const updateListParams = useCallback((patch, { replace = false } = {}) => {
+        const { category = selectedType, ...rest } = patch;
+        setSearchParams(
+            buildListSearchParams({
+                selectedItems: category === ALL_TYPES ? {} : { [category]: [] },
+                query,
+                page: currentPage,
+                ...rest,
+            }),
+            { replace }
+        );
+    }, [selectedType, query, currentPage, setSearchParams]);
+
     // 組件掛載時獲取考試資料
     useEffect(() => {
         fetchExamData();
     }, []);
-
-    // 篩選條件（類別／關鍵字）變更時，回到第 1 頁
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [selectedType, query]);
 
     // 從 API 獲取考試資料
     const fetchExamData = async () => {
@@ -90,7 +111,7 @@ const ExamPage = () => {
     };
 
     const handleTypeChange = (selectedValue) => {
-        setSelectedType(selectedValue);
+        updateListParams({ category: selectedValue, page: 1 });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -134,7 +155,7 @@ const ExamPage = () => {
     };
 
     const handlePageChange = (pageNumber) => {
-        setCurrentPage(pageNumber);
+        updateListParams({ page: pageNumber });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -233,7 +254,10 @@ const ExamPage = () => {
                             <input
                                 type="text"
                                 value={query}
-                                onChange={(e) => setQuery(e.target.value)}
+                                onChange={(e) => updateListParams(
+                                    { query: e.target.value, page: 1 },
+                                    { replace: true }
+                                )}
                                 placeholder="搜尋..."
                                 className="exam-search-input"
                             />

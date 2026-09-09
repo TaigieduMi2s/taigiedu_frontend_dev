@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { useSearchParams } from 'react-router-dom';
 import './CultureTestPage.css';
 import searchIcon from '../assets/home/search_logo.svg';
 import chevronUp from '../assets/chevron-up.svg';
@@ -11,6 +12,12 @@ import { getTriggerLabel } from '../components/CategoryFilterSheet/categorySelec
 import useIsMobile from '../components/CategoryFilterSheet/useIsMobile';
 import useAnchoredMenu, { getMenuPortalTarget } from '../components/AnchoredMenu/useAnchoredMenu';
 import { fetchCultureItems, CATEGORY_TREE } from '../services/cultureTestMockApi';
+import {
+  buildListSearchParams,
+  parsePage,
+  parseQuery,
+  parseSelectedItems,
+} from '../utils/listFilterParams';
 
 /**
  * 台語文化（test）
@@ -43,12 +50,28 @@ const CultureTestPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 已選分類，格式 { 篩選第一層: [篩選第二層, ...] }；空陣列代表整個第一層被選取
-  const [selectedItems, setSelectedItems] = useState({});
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [query, setQuery] = useState('');
-  const [activeQuery, setActiveQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+
+  // 分類篩選／關鍵字／頁碼一律以 query string 為準（規則見 utils/listFilterParams.js），
+  // 重新整理或把網址分享出去都能回到同一個畫面。
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // 已選分類，格式 { 篩選第一層: [篩選第二層, ...] }；空陣列代表整個第一層被選取
+  const selectedItems = useMemo(
+    () => parseSelectedItems(searchParams, categoryOrder),
+    [searchParams, categoryOrder]
+  );
+  // activeQuery = 已送出查詢的關鍵字（存在網址上）；query = 輸入框當下的值
+  const activeQuery = parseQuery(searchParams);
+  const currentPage = parsePage(searchParams);
+  const [query, setQuery] = useState(activeQuery);
+
+  // 寫回網址的統一入口；未帶到的欄位沿用目前值
+  const updateListParams = useCallback((patch) => {
+    setSearchParams(
+      buildListSearchParams({ selectedItems, query: activeQuery, page: currentPage, ...patch })
+    );
+  }, [selectedItems, activeQuery, currentPage, setSearchParams]);
 
   // 手機版改用 bottom sheet（選擇先存 draft、按確認才套用），由元件自行處理
   const isMobile = useIsMobile();
@@ -145,9 +168,10 @@ const CultureTestPage = () => {
     loadData();
   }, []);
 
+  // 網址上的關鍵字改變（送出搜尋、上一頁／下一頁）時，同步回輸入框
   useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedItems, activeQuery]);
+    setQuery(activeQuery);
+  }, [activeQuery]);
 
   // 桌機下拉：點擊面板外關閉（手機版改由 bottom sheet 的遮罩處理）
   useEffect(() => {
@@ -199,14 +223,17 @@ const CultureTestPage = () => {
     return next;
   };
 
+  // 勾選條件一改就回到第 1 頁（頁碼同樣存在網址上）
+  const applySelection = (next) => updateListParams({ selectedItems: next, page: 1 });
+
   const toggleCategory = (category) =>
-    setSelectedItems(prev => withCategoryToggled(prev, category));
+    applySelection(withCategoryToggled(selectedItems, category));
 
   const toggleAllSubCategories = (category) =>
-    setSelectedItems(prev => withAllSubsToggled(prev, category, subCategoriesOf[category] || []));
+    applySelection(withAllSubsToggled(selectedItems, category, subCategoriesOf[category] || []));
 
   const toggleSubCategory = (category, sub) =>
-    setSelectedItems(prev => withSubToggled(prev, category, sub));
+    applySelection(withSubToggled(selectedItems, category, sub));
 
   const isSubSelected = (category, sub) => (selectedItems[category] || []).includes(sub);
 
@@ -249,7 +276,7 @@ const CultureTestPage = () => {
   const dismissSheet = () => setIsFilterOpen(false);
 
   const confirmSheet = (next) => {
-    setSelectedItems(next);
+    applySelection(next);
     setIsFilterOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -306,7 +333,7 @@ const CultureTestPage = () => {
 
   const handleSearch = (event) => {
     event.preventDefault();
-    setActiveQuery(query.trim().toLowerCase());
+    updateListParams({ query: query.trim(), page: 1 });
   };
 
   const handleCardClick = (url) => {
@@ -314,17 +341,17 @@ const CultureTestPage = () => {
   };
 
   const handleViewAll = (category) => {
-    setSelectedItems({ [category]: [] });
+    applySelection({ [category]: [] });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleClearFilter = () => {
-    setSelectedItems({});
+    applySelection({});
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
+    updateListParams({ page: pageNumber });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

@@ -61,6 +61,8 @@
     - 未篩選也未搜尋 → 依第一層分區預覽，每區顯示第一列 4 筆、附「共 N 筆」與「查看全部」
     - 有篩選或搜尋 → 攤平成完整列表 + 分頁（每頁 20 筆，4 欄 × 5 列），並提供「返回全部類別」
     - 卡片為「圖片 + 主標」，點擊開新分頁到該筆影音
+    - 分類篩選／關鍵字／頁碼同樣存在 query string（規則見 §3.1 的「分類瀏覽頁的 query string」）；
+      本頁是按 Enter 才送出搜尋，因此輸入框仍有自己的 state，網址上的 `q` 變動時再同步回輸入框
   - **手機版（`max-width: 768px`）的分類篩選改為 bottom sheet**，與桌機下拉是兩套 UI，由 `matchMedia` 在 JS 端擇一渲染（不是純 CSS 切換），因為兩者行為不同：
     - 由下往上滑出，高度上限 `70vh`，選項區可捲動、底部 56px 操作列固定；點遮罩、下滑手勢皆等同取消
     - **選擇暫存在 `draftSelected`，按「確認」才寫回 `selectedItems`**；桌機下拉則是點了就即時套用
@@ -106,7 +108,20 @@
     詳細頁的點讚只改前端狀態、下載尚無實際檔案。
   - 由 `VITE_ENABLE_OCCUPATION_TEST_FEATURE` 控制前台側邊欄、後台側邊欄、後台首頁卡片與三條路由是否顯示。
 - **社群媒體/影音 (`/socialmedia`)**: `socialmediaPage/SocialmediaPage`，整合外部平台（如 YouTube/Podcast）的影音資源。
+  - 分類篩選／關鍵字／頁碼存在 query string，規則見下方「分類瀏覽頁的 query string」。
 - **認證考試 (`/exam`)**: `examPage/ExamPage`，提供台語認證的相關資訊。
+  - 同上，只是類別為單選，因此 `cat` 最多一個。
+
+> **分類瀏覽頁的 query string**（`utils/listFilterParams.js`）
+> 媒體與社群資源、認證考試、台語文化（test）三頁的「分類篩選 + 關鍵字 + 頁碼」**不放 state，一律以網址為準**，
+> 重新整理／上一頁／把網址分享出去都會回到同一個畫面（2026-09 修正：原本只存 state，重整就跳回類別首頁）：
+> - `?cat=Podcast`：整個第一層類別（可重複；媒體與社群資源允許空字串類別，故 `cat=` 也是有效值）
+> - `?sub=戲曲:歌仔戲`：第一層:第二層（可重複，跨第一層複選也用這個）
+> - `?q=關鍵字`：搜尋關鍵字（媒體與社群資源／認證考試邊打邊篩，因此以 `replace` 寫入，不灌爆上一頁）
+> - `?page=2`：頁碼，第 1 頁不寫入；篩選條件一改就回到第 1 頁
+>
+> 三頁的 `selectedItems` 都是 `{ 第一層: [第二層, ...] }`（空陣列＝整個第一層），由 `parseSelectedItems()` 從網址還原、
+> `buildListSearchParams()` 寫回；頁碼超出總頁數時各頁原本的 `safePage` 夾擠邏輯照舊會擋下來。
 - **親屬關係計算機 (`/relative-calculator`)**: `relativeCalculatorPage/RelativeCalculatorPage.jsx`，提供親屬稱謂查詢與計算功能。
 - **驗證登入 (`/login`, `/register`)**: 使用者登入註冊頁面 (`resourcePage/` 目錄內，`LoginPage.jsx` / `RegisterPage.jsx`)。
 - **其他靜態頁面**:

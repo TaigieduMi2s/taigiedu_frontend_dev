@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { useSearchParams } from 'react-router-dom';
 import './SocialmediaPage.css';
 import searchIcon from '../assets/home/search_logo.svg';
 import chevronUp from '../assets/chevron-up.svg';
@@ -12,6 +13,12 @@ import { getTriggerLabel } from "../components/CategoryFilterSheet/categorySelec
 import useIsMobile from "../components/CategoryFilterSheet/useIsMobile";
 import useAnchoredMenu, { getMenuPortalTarget } from "../components/AnchoredMenu/useAnchoredMenu";
 import ReportIssueLink from "../components/ReportIssue/ReportIssueLink";
+import {
+    buildListSearchParams,
+    parsePage,
+    parseQuery,
+    parseSelectedItems,
+} from "../utils/listFilterParams";
 
 // 顯示規則：桌機版每列 4 筆、每頁最多 15 列；未篩選時每類別預覽第一列（4 筆）
 const ITEMS_PER_ROW = 4;
@@ -22,11 +29,10 @@ const PREVIEW_COUNT = ITEMS_PER_ROW;
 const SocialmediaPage = () => {
     const [selectedType, setSelectedType] = useState("分類");  // 將 "類型" 改為 "分類"
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [query, setQuery] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
 
-    // 儲存多選項目，格式為 { 主分類: [子項目1, 子項目2, ...] }
-    const [selectedItems, setSelectedItems] = useState({});
+    // 分類篩選／關鍵字／頁碼一律以 query string 為準（規則見 utils/listFilterParams.js），
+    // 重新整理或把網址分享出去都能回到同一個畫面。
+    const [searchParams, setSearchParams] = useSearchParams();
 
     // 新增 API 相關狀態
     const [socialMediaData, setSocialMediaData] = useState({});
@@ -34,6 +40,23 @@ const SocialmediaPage = () => {
     const [categoryOrder, setCategoryOrder] = useState([]);  // 新增：儲存類別順序
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // 由網址還原的畫面狀態：selectedItems 格式為 { 主分類: [子項目1, 子項目2, ...] }
+    const selectedItems = useMemo(
+        () => parseSelectedItems(searchParams, categoryOrder),
+        [searchParams, categoryOrder]
+    );
+    const query = parseQuery(searchParams);
+    const currentPage = parsePage(searchParams);
+
+    // 寫回網址的統一入口；未帶到的欄位沿用目前值。
+    // replace：關鍵字是邊打邊篩，逐字塞進 history 會讓上一頁按不完。
+    const updateListParams = useCallback((patch, { replace = false } = {}) => {
+        setSearchParams(
+            buildListSearchParams({ selectedItems, query, page: currentPage, ...patch }),
+            { replace }
+        );
+    }, [selectedItems, query, currentPage, setSearchParams]);
 
     // 儲存每個分類的滾動位置引用
     const categoryRefs = useRef({});
@@ -204,10 +227,6 @@ const SocialmediaPage = () => {
         fetchSocialMediaData();
     }, []);
 
-    // 篩選條件（分類／關鍵字）變更時，回到第 1 頁
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [selectedItems, query]);
 
     // 桌機下拉：點擊面板外關閉（手機版改由 bottom sheet 的遮罩處理）
     React.useEffect(() => {
@@ -232,7 +251,7 @@ const SocialmediaPage = () => {
     }, [isMobile]);
 
     // 更新顯示文字的統一函數
-    const updateDisplayText = (selectedItemsObj) => {
+    const updateDisplayText = useCallback((selectedItemsObj) => {
         const totalCategories = Object.keys(selectedItemsObj).length;
 
         if (totalCategories === 0) {
@@ -273,12 +292,15 @@ const SocialmediaPage = () => {
             // 多個分類被選擇，顯示總數
             setSelectedType(`${totalSelectedCount} 個選項`);
         }
-    };
+    }, []);
+
+    // 下拉按鈕文字跟著已選條件走（含重新整理後由網址還原的條件）
+    useEffect(() => {
+        updateDisplayText(selectedItems);
+    }, [selectedItems, updateDisplayText]);
 
     // 處理多選邏輯
     const handleTypeChange = (type, subType = null) => {
-        console.log('Before change:', { selectedType, selectedItems });
-
         if (!subType) {
             // 如果是無子選單的主類別
             if (!menuItems[type].hasSubMenu) {
@@ -287,14 +309,12 @@ const SocialmediaPage = () => {
                 if (newSelectedItems[type]) {
                     // 已選擇，則移除
                     delete newSelectedItems[type];
-                    setSelectedItems(newSelectedItems);
-                    updateDisplayText(newSelectedItems);
                 } else {
                     // 未選擇，則添加 (無子選單項目以空陣列表示已選擇)
                     newSelectedItems[type] = [];
-                    setSelectedItems(newSelectedItems);
-                    updateDisplayText(newSelectedItems);
                 }
+
+                updateListParams({ selectedItems: newSelectedItems, page: 1 });
 
                 // 保持下拉選單開啟，以支援多選功能
             } else {
@@ -304,36 +324,18 @@ const SocialmediaPage = () => {
         } else {
             // 子選單項目處理 -允許多個分類同時被選擇
             const newSelectedItems = { ...selectedItems };
+            const current = newSelectedItems[type] || [];
 
-            // 初始化該類別的數組，如果不存在
-            if (!newSelectedItems[type]) {
-                newSelectedItems[type] = [];
-            }
+            // 已選擇則移除，未選擇則添加；該類別下沒有項目時整個拿掉
+            const updated = current.includes(subType)
+                ? current.filter(item => item !== subType)
+                : [...current, subType];
 
-            // 檢查項目是否已選擇
-            const itemIndex = newSelectedItems[type].indexOf(subType);
+            if (updated.length === 0) delete newSelectedItems[type];
+            else newSelectedItems[type] = updated;
 
-            if (itemIndex > -1) {
-                // 已選擇，則移除
-                newSelectedItems[type].splice(itemIndex, 1);
-
-                // 檢查該類別下是否還有項目
-                if (newSelectedItems[type].length === 0) {
-                    delete newSelectedItems[type];
-                }
-            } else {
-                // 未選擇，則添加
-                newSelectedItems[type].push(subType);
-            }
-
-            // 一次性更新狀態，防止多次渲染
-            setSelectedItems(newSelectedItems);
-
-            // 更新顯示文字
-            updateDisplayText(newSelectedItems);
+            updateListParams({ selectedItems: newSelectedItems, page: 1 });
         }
-
-        console.log('After change:', { type, subType });
     };
 
     // 檢查項目是否被選擇
@@ -409,29 +411,25 @@ const SocialmediaPage = () => {
 
     // 「查看全部」：切換為該類別的完整列表
     const handleViewAll = (category) => {
-        const newSelectedItems = { [category]: [] };
-        setSelectedItems(newSelectedItems);
-        updateDisplayText(newSelectedItems);
+        updateListParams({ selectedItems: { [category]: [] }, page: 1 });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     // 清除分類篩選，回到分區預覽
     const handleClearFilter = () => {
-        setSelectedItems({});
-        setSelectedType("分類");
+        updateListParams({ selectedItems: {}, page: 1 });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handlePageChange = (pageNumber) => {
-        setCurrentPage(pageNumber);
+        updateListParams({ page: pageNumber });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     // ---- 手機版 bottom sheet ----
     // 確認：套用 draft 並同步觸發器文字（桌機下拉仍讀 selectedType）
     const handleSheetConfirm = (nextSelectedItems) => {
-        setSelectedItems(nextSelectedItems);
-        updateDisplayText(nextSelectedItems);
+        updateListParams({ selectedItems: nextSelectedItems, page: 1 });
         setIsDropdownOpen(false);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -642,7 +640,10 @@ const SocialmediaPage = () => {
                             <input
                                 type="text"
                                 value={query}
-                                onChange={(e) => setQuery(e.target.value)}
+                                onChange={(e) => updateListParams(
+                                    { query: e.target.value, page: 1 },
+                                    { replace: true }
+                                )}
                                 placeholder="搜尋..."
                                 className="social-search-input"
                             />
