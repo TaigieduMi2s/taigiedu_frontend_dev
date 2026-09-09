@@ -150,3 +150,51 @@
 .resconf-col-header {
     background: linear-gradient(90deg, var(--accent), #ffffff)
 }
+/* ── 工具列與狀態提示（TAIGIE-237）───────────────────────── */
+.resconf-notice {
+    margin-bottom: 12px;
+    line-height: 1.6;
+    padding: 10px 12px;
+    border: 1px solid #f5ac55;
+    border-radius: 8px;
+    background: #fff7ed;
+    color: #92400e;
+}
+
+.resconf-notice code {
+    background: rgba(0, 0, 0, .06);
+    border-radius: 4px;
+    padding: 0 4px;
+}
+
+.resconf-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.resconf-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #374151;
+    cursor: pointer;
+}
+
+.resconf-hint {
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.resconf-loading {
+    padding: 32px 0;
+    color: #6b7280;
+}
+
+/* 欄位總寬超過畫面時水平捲動，不要壓縮欄寬 */
+.resconf-grid {
+    overflow-x: auto;
+    padding-bottom: 8px;
+}

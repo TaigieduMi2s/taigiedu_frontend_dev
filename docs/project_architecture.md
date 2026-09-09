@@ -214,6 +214,16 @@
 - **教學資源平台管理**:
   - 審核/上傳資源 (`/admin/resource`, `/admin/resource/upload`): `adminresourcePage/AdminResourcePage.jsx`。
   - 編輯課本選單/首圖 (`/admin/resource/header`): `adminresourcePage/ResourceHeaderPage.jsx`。
+    - 每列有三個動作：**編輯（改名）／停用．啟用／刪除**，全部即時生效（沒有「儲存」按鈕）。
+      停用是軟停用（前台不顯示、後端保留資料，可再啟用）；刪除是硬刪除，**只有 `usage_count = 0` 時才可按**。
+      四支欄位元件 `HighSchoolColumn` / `MiddleSchoolColumn` / `ElementarySchoolColumn` / `ContentTypeColumn`
+      是同一份實作的四份複製（各自的 class 前綴 `hs-` / `ms-` / `es-` / `ct-`），**改一支就要四支一起改**。
+    - API 封裝在 `services/resourceMenuService.js`（`GET /admin/resource/menu` 加上 add／update／status／delete 各兩支）。
+    - ⚠️ 後端這批 API 尚未上線，`GET` 失敗時會退回**本機暫存模式**（黃色提示橫幅），
+      由 `LOCAL_FALLBACK_ENABLED` 常數控制，API 上線後改成 `false` 並刪掉相關分支。
+    - ⚠️ 前台 `resourcePage/ResourceHeader.jsx` 與 `AdminResourcePage.jsx` 的篩選器仍讀
+      `localStorage['resourceHeaderConfig']`，本頁在載入與每次異動成功後會把「啟用中」的清單寫回這份鏡像，
+      並發出 `resource-config-updated` 事件通知它們刷新。
 - **會員管理 (`/admin/member`)**: `adminMemberPage.jsx`，管理網站後台/前台會員權限。
   - 「停用／恢復上傳資格」走 `POST /admin/member/status`（需 CONTENT_MANAGER，後端據 `action` 設定 `isSuspended`、`suspendAt`、`suspendReason`）；「設定管理員身分」走 `POST /admin/member/flags`（需 SYSTEM_MANAGER，直接帶 flags 整數）。兩者封裝在 `services/memberService.js`。
   - 三個視圖的分流依據：管理員名單 = `!isSuspended && flags > 0`、會員名單 = `!isSuspended && flags === 0`、停用會員名單 = `isSuspended`（並顯示 `suspendReason` / `suspendAt`）。

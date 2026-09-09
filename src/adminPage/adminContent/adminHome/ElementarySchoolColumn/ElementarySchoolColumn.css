@@ -111,3 +111,86 @@
     flex-shrink: 0;
     white-space: nowrap;
 }
+/* ── 每列的操作圖示：編輯／停用．啟用／刪除（TAIGIE-237）────────── */
+.es-row {
+    height: auto;
+    min-height: 48px;
+    padding: 8px 16px;
+    gap: 8px;
+}
+
+.es-row.is-disabled {
+    background: #eceef3;
+}
+
+.es-row.is-disabled .es-label {
+    color: #9ca3af;
+}
+
+.es-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.es-badge {
+    flex-shrink: 0;
+    font-size: 12px;
+    line-height: 12px;
+    padding: 3px 6px;
+    border-radius: 9999px;
+    background: #d1d5db;
+    color: #4b5563;
+}
+
+.es-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.es-usage {
+    font-size: 12px;
+    line-height: 12px;
+    color: #6b7280;
+    cursor: default;
+}
+
+/* 已停用的列沒有編輯鈕，用等寬佔位讓各列圖示對齊 */
+.es-icon-placeholder {
+    display: block;
+    width: 24px;
+    height: 24px;
+}
+
+.es-icon-btn:hover:not(:disabled) .es-icon {
+    opacity: .6;
+}
+
+.es-icon-btn:disabled {
+    cursor: not-allowed;
+}
+
+.es-icon-btn:disabled .es-icon {
+    opacity: .3;
+}
+
+/* 刪除鈕維持同一套灰色圖示，hover 時才轉紅提示這是破壞性操作 */
+.es-icon-btn.danger:hover:not(:disabled) .es-icon {
+    opacity: 1;
+    filter: invert(38%) sepia(72%) saturate(1015%) hue-rotate(314deg) brightness(90%) contrast(89%);
+}
+
+.es-submit:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+/* 視窗變窄時欄位不被壓扁（名稱會被擠沒），改由 .resconf-grid 水平捲動 */
+.es-col {
+    flex: 0 0 240px;
+}

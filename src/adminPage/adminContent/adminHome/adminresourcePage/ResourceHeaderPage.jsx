@@ -1,188 +1,254 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import envConfig from '../../../../config';
+import { useCallback, useEffect, useState } from 'react';
 import './ResourceHeaderPage.css';
-import TableHeaderCell from '../TableHeaderCell/TableHeaderCell.jsx';
 import HighSchoolColumn from '../HighSchoolColumn/HighSchoolColumn.jsx';
 import MiddleSchoolColumn from '../MiddleSchoolColumn/MiddleSchoolColumn.jsx';
 import ElementarySchoolColumn from '../ElementarySchoolColumn/ElementarySchoolColumn.jsx';
 import ContentTypeColumn from '../ContentTypeColumn/ContentTypeColumn.jsx';
-import { authenticatedFetch } from '../../../../services/authService';
+import ConfirmDialog from './ConfirmDialog.jsx';
 import { useToast } from '../../../../components/Toast';
 import ReadOnlyNotice from '../../../../components/ReadOnlyNotice/ReadOnlyNotice';
 import { useContentEditPermission, NO_EDIT_PERMISSION_MESSAGE } from '../../../useContentEditPermission';
+import {
+  STAGES,
+  fetchResourceMenu,
+  addBook,
+  updateBook,
+  setBookStatus,
+  deleteBook,
+  addContentType,
+  updateContentType,
+  setContentTypeStatus,
+  deleteContentType,
+} from '../../../../services/resourceMenuService';
 
+/**
+ * 前台／後台篩選器仍然從 localStorage 讀這份鏡像
+ * （`resourcePage/ResourceHeader.jsx`、`adminresourcePage/AdminResourcePage.jsx`）。
+ * 這裡在每次載入或異動成功後同步覆寫，等那兩頁改吃 API 之後即可整組移除。
+ */
 const STORAGE_KEY = 'resourceHeaderConfig';
 
-const defaultConfig = {
+/**
+ * 後端選單 API 尚未上線時的本機暫存模式。
+ * 讓 DEV 上的畫面仍可操作；後端三支寫入 API 上線後把這個常數改成 false 並刪掉相關分支即可。
+ */
+const LOCAL_FALLBACK_ENABLED = true;
+
+const DEFAULT_MENU = {
   versions: {
     '高中': ['真平', '育達', '泰宇', '奇異果', '創新'],
     '國中': ['真平', '康軒', '奇異果', '師昀', '全華', '豪風', '長鴻'],
-    '國小': ['真平', '康軒']
+    '國小': ['真平', '康軒'],
   },
-  contentTypes: ['學習單', '簡報', '教案', '其他']
+  contentTypes: ['學習單', '簡報', '教案', '其他'],
 };
 
-function loadConfig() {
+const toItems = (names) => names.map((name) => ({ id: null, name, usageCount: 0, isActive: true }));
+
+const emptyMenu = () => ({
+  versions: STAGES.reduce((acc, stage) => ({ ...acc, [stage]: [] }), {}),
+  contentTypes: [],
+});
+
+/** 本機暫存模式的起始資料：先讀 localStorage 鏡像，沒有才用預設清單 */
+const loadLocalMenu = () => {
+  let parsed = null;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultConfig;
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object') return defaultConfig;
-    const safeVersions = {
-      '高中': Array.isArray(parsed?.versions?.['高中']) && parsed.versions['高中'].length > 0 ? parsed.versions['高中'] : defaultConfig.versions['高中'],
-      '國中': Array.isArray(parsed?.versions?.['國中']) && parsed.versions['國中'].length > 0 ? parsed.versions['國中'] : defaultConfig.versions['國中'],
-      '國小': Array.isArray(parsed?.versions?.['國小']) && parsed.versions['國小'].length > 0 ? parsed.versions['國小'] : defaultConfig.versions['國小']
-    };
-    const safeTypes = Array.isArray(parsed.contentTypes) && parsed.contentTypes.length > 0 ? parsed.contentTypes : defaultConfig.contentTypes;
-    return { versions: safeVersions, contentTypes: safeTypes };
+    parsed = raw ? JSON.parse(raw) : null;
   } catch {
-    return defaultConfig;
+    parsed = null;
   }
-}
 
-function saveConfig(cfg) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
-}
-
-const EditableList = ({ title, items, onChange, accentClass, showArrow = true }) => {
-  const [list, setList] = useState(items);
-  const [adding, setAdding] = useState('');
-
-  useEffect(() => { setList(items); }, [items]);
-
-  const updateItem = (idx, value) => {
-    const next = list.map((v, i) => (i === idx ? value : v));
-    setList(next); onChange(next);
+  return {
+    versions: STAGES.reduce((acc, stage) => {
+      const names = Array.isArray(parsed?.versions?.[stage]) && parsed.versions[stage].length > 0
+        ? parsed.versions[stage]
+        : DEFAULT_MENU.versions[stage];
+      return { ...acc, [stage]: toItems(names) };
+    }, {}),
+    contentTypes: toItems(
+      Array.isArray(parsed?.contentTypes) && parsed.contentTypes.length > 0
+        ? parsed.contentTypes
+        : DEFAULT_MENU.contentTypes
+    ),
   };
-  const removeItem = (idx) => {
-    const next = list.filter((_, i) => i !== idx);
-    setList(next); onChange(next);
-  };
-  const addItem = () => {
-    const v = adding.trim();
-    if (!v) return;
-    if (list.includes(v)) return;
-    const next = [...list, v];
-    setList(next); onChange(next); setAdding('');
-  };
+};
 
-  return (
-    <div className={`resconf-col ${accentClass}`}>
-      <div className="resconf-col-header">
-        <TableHeaderCell label={title} showArrow={showArrow} />
-      </div>
-      <div className="resconf-list">
-        {list.map((v, idx) => (
-          <div className="resconf-item" key={`${v}-${idx}`}>
-            <input value={v} onChange={(e) => updateItem(idx, e.target.value)} />
-            <div className="resconf-actions">
-              <button className="resconf-btn" onClick={() => removeItem(idx)}>刪除</button>
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="resconf-add">
-        <input placeholder="新增項目" value={adding} onChange={(e) => setAdding(e.target.value)} />
-        <button className="resconf-btn primary" onClick={addItem}>新增</button>
-      </div>
-    </div>
-  );
+/** 把「啟用中」的項目寫回 localStorage 鏡像，並通知其他頁面刷新 */
+const syncMirror = (menu) => {
+  const activeNames = (list) => list.filter((it) => it.isActive).map((it) => it.name);
+  const mirror = {
+    versions: STAGES.reduce((acc, stage) => ({ ...acc, [stage]: activeNames(menu.versions[stage] || []) }), {}),
+    contentTypes: activeNames(menu.contentTypes || []),
+  };
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(mirror));
+    window.dispatchEvent(new Event('resource-config-updated'));
+  } catch { /* localStorage 不可用時略過，不影響主流程 */ }
 };
 
 export default function ResourceHeaderPage() {
-  const [baseline, setBaseline] = useState(loadConfig());
-  const [config, setConfig] = useState(baseline);
-  const [pending, setPending] = useState(false);
+  const [menu, setMenu] = useState(emptyMenu);
+  const [isLoading, setIsLoading] = useState(true);
+  // 後端選單 API 還沒上線時退回本機暫存，畫面上會標示
+  const [isLocalMode, setIsLocalMode] = useState(false);
+  const [showDisabled, setShowDisabled] = useState(false);
+  const [confirmState, setConfirmState] = useState(null);
   const { showToast } = useToast();
-  // 新增／修改課本選單僅限內容管理員，系統管理員只能檢視
+  // 新增／修改／停用／刪除課本選單僅限內容管理員，系統管理員只能檢視
   const canEditContent = useContentEditPermission();
 
-  const apiBaseUrl = envConfig.apiUrl;
+  const applyMenu = useCallback((nextMenu) => {
+    setMenu(nextMenu);
+    syncMirror(nextMenu);
+  }, []);
 
-  const setStage = (stage, nextList) => {
-    setConfig((prev) => ({ ...prev, versions: { ...prev.versions, [stage]: nextList } }));
-  };
-  const setTypes = (next) => setConfig((prev) => ({ ...prev, contentTypes: next }));
-
-  const allStages = useMemo(() => ['高中', '國中', '國小'], []);
-
-  // 呼叫 API 新增課本版本
-  const handleAddBook = useCallback(async (stage, bookName) => {
-    if (!canEditContent) {
-      showToast(NO_EDIT_PERMISSION_MESSAGE, 'warning');
-      return false;
-    }
+  const loadMenu = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const response = await authenticatedFetch(`${apiBaseUrl}/admin/resource/add-book`, {
-        method: 'POST',
-        body: JSON.stringify({
-          stage: stage,
-          book: bookName
-        })
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        showToast(result.message || `已成功新增「${bookName}」到${stage}`, 'success');
-        return true;
-      } else {
-        throw new Error(result.message || '新增失敗');
-      }
+      const data = await fetchResourceMenu({ includeInactive: true });
+      setIsLocalMode(false);
+      applyMenu(data);
     } catch (error) {
-      console.error('新增課本版本失敗:', error);
-      showToast(`新增失敗: ${error.message}`, 'error');
-      return false;
+      console.error('取得課本選單失敗:', error);
+      if (LOCAL_FALLBACK_ENABLED) {
+        setIsLocalMode(true);
+        setMenu(loadLocalMenu());
+      } else {
+        showToast(`取得課本選單失敗：${error.message}`, 'error');
+      }
+    } finally {
+      setIsLoading(false);
     }
-  }, [apiBaseUrl, canEditContent, showToast]);
+  }, [applyMenu, showToast]);
 
-  // 呼叫 API 新增內容類型
-  const handleAddContentType = useCallback(async (typeName) => {
+  useEffect(() => { loadMenu(); }, [loadMenu]);
+
+  /**
+   * 所有異動的共用流程：權限檢查 → 打 API → 用回傳的最新選單刷新畫面。
+   * 本機暫存模式（後端 API 未上線）改走 localUpdate，並提醒使用者尚未寫入後端。
+   *
+   * @param {() => Promise<{ message: string, menu: Object|null }>} request
+   * @param {(menu: Object) => Object} localUpdate 本機暫存模式下如何改動選單
+   * @param {string} fallbackMessage
+   * @returns {Promise<boolean>} 是否成功
+   */
+  const runMutation = useCallback(async (request, localUpdate, fallbackMessage) => {
     if (!canEditContent) {
       showToast(NO_EDIT_PERMISSION_MESSAGE, 'warning');
       return false;
     }
+
+    if (isLocalMode) {
+      applyMenu(localUpdate(menu));
+      showToast(`${fallbackMessage}（後端選單 API 尚未上線，僅暫存於本機）`, 'warning');
+      return true;
+    }
+
     try {
-      const response = await authenticatedFetch(`${apiBaseUrl}/admin/resource/add-content-type`, {
-        method: 'POST',
-        body: JSON.stringify({
-          type: typeName
-        })
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        showToast(result.message || `已成功新增內容類型「${typeName}」`, 'success');
-        return true;
+      const { message, menu: latest } = await request();
+      if (latest) {
+        applyMenu(latest);
       } else {
-        throw new Error(result.message || '新增失敗');
+        await loadMenu();
       }
+      showToast(message || fallbackMessage, 'success');
+      return true;
     } catch (error) {
-      console.error('新增內容類型失敗:', error);
-      showToast(`新增失敗: ${error.message}`, 'error');
+      console.error('課本選單異動失敗:', error);
+      showToast(error.message || '操作失敗', 'error');
       return false;
     }
-  }, [apiBaseUrl, canEditContent, showToast]);
+  }, [applyMenu, canEditContent, isLocalMode, loadMenu, menu, showToast]);
 
-  const handleSave = () => {
-    if (!canEditContent) {
-      showToast(NO_EDIT_PERMISSION_MESSAGE, 'warning');
-      return;
+  /** 取代指定清單（versions[stage] 或 contentTypes）後回傳新的 menu */
+  const replaceList = (source, stage, mapper) => (
+    stage
+      ? { ...source, versions: { ...source.versions, [stage]: mapper(source.versions[stage] || []) } }
+      : { ...source, contentTypes: mapper(source.contentTypes || []) }
+  );
+
+  const askConfirm = (options) => new Promise((resolve) => {
+    setConfirmState({
+      ...options,
+      resolve: (answer) => { setConfirmState(null); resolve(answer); },
+    });
+  });
+
+  // ── 新增 ────────────────────────────────────────────────
+  const handleAdd = (stage) => (name) => runMutation(
+    () => (stage ? addBook(stage, name) : addContentType(name)),
+    (current) => replaceList(current, stage, (list) => [...list, { id: null, name, usageCount: 0, isActive: true }]),
+    stage ? `已新增「${name}」到${stage}` : `已新增內容類型「${name}」`
+  );
+
+  // ── 編輯（改名）──────────────────────────────────────────
+  const handleRename = (stage) => async (item, newName) => {
+    if (item.usageCount > 0) {
+      const ok = await askConfirm({
+        title: '確認修改名稱',
+        message: `目前有 ${item.usageCount} 筆教材使用「${item.name}」，改名後這些教材會一併更新為「${newName}」。確定修改？`,
+      });
+      if (!ok) return false;
     }
-    saveConfig(config);
-    setBaseline(config);
-    setPending(false);
-    // 觸發前台與後台同步刷新（若打開中）
-    try { window.dispatchEvent(new Event('resource-config-updated')); } catch { }
-    alert('已儲存設定');
+
+    return runMutation(
+      () => (stage ? updateBook(stage, item.name, newName) : updateContentType(item.name, newName)),
+      (current) => replaceList(current, stage, (list) => list.map((it) => (it.name === item.name ? { ...it, name: newName } : it))),
+      `已將「${item.name}」改名為「${newName}」`
+    );
   };
 
-  // 僅在設定與基準不同時才標記為「可儲存／可還原」
-  useEffect(() => {
-    const changed = JSON.stringify(config) !== JSON.stringify(baseline);
-    setPending(changed);
-  }, [config, baseline]);
+  // ── 停用／啟用 ──────────────────────────────────────────
+  const handleToggleStatus = (stage) => async (item) => {
+    const action = item.isActive ? 'disable' : 'enable';
+
+    if (action === 'disable') {
+      const usageNote = item.usageCount > 0
+        ? `目前有 ${item.usageCount} 筆教材使用「${item.name}」，停用後這些教材仍會保留，但前台選單與新上傳將無法選擇此項目。`
+        : `停用後「${item.name}」不會出現在前台選單與篩選器，資料仍保留於後端，隨時可以再啟用。`;
+      const ok = await askConfirm({ title: '確認停用', message: `${usageNote}確定停用？` });
+      if (!ok) return false;
+    }
+
+    return runMutation(
+      () => (stage ? setBookStatus(stage, item.name, action) : setContentTypeStatus(item.name, action)),
+      (current) => replaceList(current, stage, (list) => list.map((it) => (it.name === item.name ? { ...it, isActive: action === 'enable' } : it))),
+      action === 'disable' ? `已停用「${item.name}」` : `已啟用「${item.name}」`
+    );
+  };
+
+  // ── 刪除（硬刪除，僅限沒有教材使用）─────────────────────
+  const handleDelete = (stage) => async (item) => {
+    if (item.usageCount > 0) {
+      showToast(`「${item.name}」仍有 ${item.usageCount} 筆教材使用，請改用「停用」`, 'warning');
+      return false;
+    }
+
+    const ok = await askConfirm({
+      title: '確認刪除',
+      message: `刪除後「${item.name}」會從選單中永久移除，無法復原。若只是暫時不想讓使用者選到，請改用「停用」。確定刪除？`,
+    });
+    if (!ok) return false;
+
+    return runMutation(
+      () => (stage ? deleteBook(stage, item.name) : deleteContentType(item.name)),
+      (current) => replaceList(current, stage, (list) => list.filter((it) => it.name !== item.name)),
+      `已刪除「${item.name}」`
+    );
+  };
+
+  const visibleItems = (list) => (showDisabled ? list : list.filter((it) => it.isActive));
+
+  const columnProps = (stage) => ({
+    items: visibleItems(stage ? (menu.versions[stage] || []) : menu.contentTypes),
+    onAddItem: handleAdd(stage),
+    onRenameItem: handleRename(stage),
+    onToggleItemStatus: handleToggleStatus(stage),
+    onDeleteItem: handleDelete(stage),
+    readOnly: !canEditContent,
+  });
 
   return (
     <div className="resconf-page">
@@ -193,38 +259,42 @@ export default function ResourceHeaderPage() {
       </div>
       <ReadOnlyNotice show={!canEditContent} message="您目前的權限僅能檢視課本選單設定，修改需要「內容管理員」權限。" />
 
-      <div className="resconf-grid">
-        <HighSchoolColumn
-          items={config.versions['高中']}
-          onChange={(next) => setStage('高中', next)}
-          onAddItem={(bookName) => handleAddBook('高中', bookName)}
-          readOnly={!canEditContent}
-        />
-        <MiddleSchoolColumn
-          items={config.versions['國中']}
-          onChange={(next) => setStage('國中', next)}
-          onAddItem={(bookName) => handleAddBook('國中', bookName)}
-          readOnly={!canEditContent}
-        />
-        <ElementarySchoolColumn
-          items={config.versions['國小']}
-          onChange={(next) => setStage('國小', next)}
-          onAddItem={(bookName) => handleAddBook('國小', bookName)}
-          readOnly={!canEditContent}
-        />
-        <ContentTypeColumn
-          items={config.contentTypes}
-          onChange={setTypes}
-          onAddItem={handleAddContentType}
-          readOnly={!canEditContent}
-        />
-      </div>
-      {canEditContent && (
-        <div className="resconf-footer">
-          <button className="resconf-btn" disabled={!pending} onClick={() => setConfig(baseline)}>還原</button>
-          <button className="resconf-btn primary" disabled={!pending} onClick={handleSave}>儲存</button>
+      {isLocalMode && (
+        <div className="resconf-notice" role="status">
+          ⚠️ 後端選單 API（<code>/admin/resource/menu</code> 等）尚未上線，目前顯示本機暫存資料，異動不會寫入後端。
         </div>
       )}
+
+      <div className="resconf-toolbar">
+        <label className="resconf-toggle">
+          <input
+            type="checkbox"
+            checked={showDisabled}
+            onChange={(e) => setShowDisabled(e.target.checked)}
+          />
+          顯示已停用項目
+        </label>
+        <span className="resconf-hint">數字為使用該項目的教材筆數；停用後前台不顯示，資料仍保留於後端。</span>
+      </div>
+
+      {isLoading ? (
+        <div className="resconf-loading">載入中…</div>
+      ) : (
+        <div className="resconf-grid">
+          <HighSchoolColumn {...columnProps('高中')} />
+          <MiddleSchoolColumn {...columnProps('國中')} />
+          <ElementarySchoolColumn {...columnProps('國小')} />
+          <ContentTypeColumn {...columnProps(null)} />
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={!!confirmState}
+        title={confirmState?.title || ''}
+        message={confirmState?.message || ''}
+        onConfirm={() => confirmState?.resolve(true)}
+        onCancel={() => confirmState?.resolve(false)}
+      />
     </div>
   );
 }
