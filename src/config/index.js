@@ -21,6 +21,8 @@ export const envConfig = {
         enableCultureTestFeature: import.meta.env.VITE_ENABLE_CULTURE_TEST_FEATURE === 'true',
         // 是否顯示「職業台語（test）」功能（導覽列與對應路由）
         enableOccupationTestFeature: import.meta.env.VITE_ENABLE_OCCUPATION_TEST_FEATURE === 'true',
+        // 是否顯示「親戚計算機」功能（導覽列與對應路由）
+        enableRelativeCalculatorFeature: import.meta.env.VITE_ENABLE_RELATIVE_CALCULATOR_FEATURE === 'true',
         // 是否規範搜尋引擎不索引此網站（通常開發與測試環境為 true，正式環境為 false）
         enableRobotsNoindex: import.meta.env.VITE_ENABLE_ROBOTS_NOINDEX === 'true',
     }

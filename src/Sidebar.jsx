@@ -34,6 +34,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
   const isPlacenameCultureFeatureEnabled = envConfig.features.enablePlacenameCultureFeature;
   const isCultureTestFeatureEnabled = envConfig.features.enableCultureTestFeature;
   const isOccupationTestFeatureEnabled = envConfig.features.enableOccupationTestFeature;
+  const isRelativeCalculatorFeatureEnabled = envConfig.features.enableRelativeCalculatorFeature;
 
   const allMenuItems = [
     { id: 1, label: "主頁搜尋", icon: homeIcon, path: "/" },
@@ -83,6 +84,8 @@ const Sidebar = ({ isOpen = false, onClose }) => {
         // 子選單也要吃 feature toggle
         const submenuItems = item.submenuItems.filter(subItem => {
           if (!isTopicIntegrationFeatureEnabled && subItem.id === "topic-integration") return false;
+          // 親戚計算機（id 12）尚未對外開放，正式站以此 flag 隱藏；路由在 App.jsx 一併擋
+          if (!isRelativeCalculatorFeatureEnabled && subItem.id === 12) return false;
           if (!isPlacenameCultureFeatureEnabled && subItem.id === "placename-culture") return false;
           if (!isCultureTestFeatureEnabled && subItem.id === "culture-test") return false;
           if (!isOccupationTestFeatureEnabled && subItem.id === "occupation-test") return false;
@@ -100,6 +103,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
     isPlacenameCultureFeatureEnabled,
     isCultureTestFeatureEnabled,
     isOccupationTestFeatureEnabled,
+    isRelativeCalculatorFeatureEnabled,
   ]);
 
   // 當 URL 變更時，根據當前路徑來設定 activeItem

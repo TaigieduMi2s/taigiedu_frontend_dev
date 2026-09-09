@@ -85,6 +85,7 @@ const AppLayout = () => {
   const isPlacenameCultureFeatureEnabled = envConfig.features.enablePlacenameCultureFeature;
   const isCultureTestFeatureEnabled = envConfig.features.enableCultureTestFeature;
   const isOccupationTestFeatureEnabled = envConfig.features.enableOccupationTestFeature;
+  const isRelativeCalculatorFeatureEnabled = envConfig.features.enableRelativeCalculatorFeature;
 
   // 路由切換時自動收起 sidebar（手機版）
   useEffect(() => {
@@ -206,7 +207,15 @@ const AppLayout = () => {
                 : <Navigate to="/" replace />
             }
           />
-          <Route path="/relative-calculator" element={<RelativeCalculatorPage />} />
+          {/* 親戚計算機：側邊欄與路由要一起擋，只擋側邊欄的話直接輸入網址仍進得去 */}
+          <Route
+            path="/relative-calculator"
+            element={
+              isRelativeCalculatorFeatureEnabled
+                ? <RelativeCalculatorPage />
+                : <Navigate to="/" replace />
+            }
+          />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 

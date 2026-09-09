@@ -123,6 +123,10 @@
 > 三頁的 `selectedItems` 都是 `{ 第一層: [第二層, ...] }`（空陣列＝整個第一層），由 `parseSelectedItems()` 從網址還原、
 > `buildListSearchParams()` 寫回；頁碼超出總頁數時各頁原本的 `safePage` 夾擠邏輯照舊會擋下來。
 - **親屬關係計算機 (`/relative-calculator`)**: `relativeCalculatorPage/RelativeCalculatorPage.jsx`，提供親屬稱謂查詢與計算功能。
+  - 由 `VITE_ENABLE_RELATIVE_CALCULATOR_FEATURE` 控制側邊欄子項與路由是否顯示。
+    ⚠️ 側邊欄與路由**要一起擋**：只擋側邊欄的話直接輸入網址仍進得去，只擋路由的話點了會被 `<Navigate>` 導回首頁、看起來像壞掉。
+    ⚠️ 這個 flag 是「本站特色資源」底下唯一沒有 flag 的子項補上來的（TAIGIE-264）：
+    父選單只要還有子項就會顯示，所以正式站關掉其他子項後，親戚計算機會單獨把整個父選單撐出來。
 - **驗證登入 (`/login`, `/register`)**: 使用者登入註冊頁面 (`resourcePage/` 目錄內，`LoginPage.jsx` / `RegisterPage.jsx`)。
 - **其他靜態頁面**:
   - `/terms` (服務條款，`TermsPage.jsx`)
