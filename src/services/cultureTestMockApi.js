@@ -280,10 +280,9 @@ const buildMockTextItems = () => {
           category: node.name,
           subcategory,
           title: pattern(topic),
-          // 以下三個欄位只有文本有，前台搜尋結果列用來顯示作者、日期與摘要
+          // 以下兩個欄位只有文本有，前台搜尋結果列用來顯示作者與摘要
           author: TEXT_AUTHORS[Math.floor(random() * TEXT_AUTHORS.length)],
           summary: summary(topic, subcategory),
-          published_at: mockTimestamp(Math.floor(random() * 240)).slice(0, 10),
           image: null,
           url: `https://example.com/text/${id}`,
           sort_order: sortOrder++,
@@ -327,7 +326,6 @@ const groupForFrontend = () => {
         ...(item.type === 'text' && {
           author: item.author,
           summary: item.summary,
-          published_at: item.published_at,
         }),
       });
     });

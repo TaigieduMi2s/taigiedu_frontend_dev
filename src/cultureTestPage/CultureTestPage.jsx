@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
+import '../mainSearchPage/SearchResults.css';
 import './CultureTestPage.css';
 import searchIcon from '../assets/home/search_logo.svg';
 import chevronUp from '../assets/chevron-up.svg';
@@ -29,10 +30,10 @@ import {
  *       預設「類型下拉（全部）+ 關鍵字 + 搜尋鈕」；
  *       選了影音或文本後，搜尋列多出第二個下拉「分類」（第一層 + 第二層子選單，可複選）
  *   - 類型切換時清空分類：兩種類型的分類不一定相同，選「全部」時不提供分類篩選
- *   - 「全部」：不分分類，最上面一列「推薦影音」（4 筆 + 查看全部），下面全部是文本結果列，分頁只算文本
+ *   - 「全部」：不分分類，上方「推薦影音」一列 4 筆、下方「推薦文本」5 筆，各自附「查看全部」切到該類型；不分頁
  *   - 影音／文本：未篩選時依第一層分區預覽並附「查看全部」；有篩選或搜尋時攤平成完整列表 + 分頁
  *   - 影音為「圖片 + 主標」卡片，點擊開新分頁到該筆影音
- *   - 文本為搜尋引擎式的結果列（標題／作者／日期 + 摘要），關鍵字會標示出來
+ *   - 文本比照主頁搜尋的結果列（標題／作者標籤／摘要），關鍵字會標示出來
  *
  * 分類範圍（2026-08 依 PM 指示調整）：**只收來源表第一層的「文化」這一支**，
  * 並取其後兩層當作篩選：
@@ -49,7 +50,7 @@ const ITEMS_PER_ROW = 4;
 const MAX_ROWS_PER_PAGE = 5;
 const PAGE_SIZE = ITEMS_PER_ROW * MAX_ROWS_PER_PAGE;
 const PREVIEW_COUNT = ITEMS_PER_ROW;
-const TEXT_PREVIEW_COUNT = 3;
+const TEXT_PREVIEW_COUNT = 5;
 
 const CONTENT_TYPE_VALUES = CONTENT_TYPES.map(type => type.value);
 
@@ -366,13 +367,13 @@ const CultureTestPage = () => {
   const flatItems = visibleCategories.flatMap(category =>
     filteredByCategory[category].map(item => ({ item, category }))
   );
+  // 「全部」只做預覽（推薦影音／推薦文本），完整列表與分頁交給單一類型
   const mixedVideos = isMixedView ? flatItems.filter(({ item }) => !isTextItem(item)) : [];
-  // 「全部」的分頁只算文本（推薦影音固定一列、只在第 1 頁出現）
-  const pagedItems = isMixedView ? flatItems.filter(({ item }) => isTextItem(item)) : flatItems;
-  const totalItems = pagedItems.length;
+  const mixedTexts = isMixedView ? flatItems.filter(({ item }) => isTextItem(item)) : [];
+  const totalItems = flatItems.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
   const safePage = Math.min(currentPage, totalPages);
-  const pageItems = pagedItems.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const pageItems = flatItems.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   const pageGroups = [];
   pageItems.forEach(({ item, category }) => {
@@ -397,9 +398,9 @@ const CultureTestPage = () => {
     if (url) window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  // 推薦影音的「查看全部」：切到影音類型，保留關鍵字
-  const handleViewAllVideos = () => {
-    handleTypeChange('video');
+  // 推薦影音／推薦文本的「查看全部」：切到該類型，保留關鍵字
+  const handleViewAllOfType = (type) => {
+    handleTypeChange(type);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -438,36 +439,72 @@ const CultureTestPage = () => {
     </div>
   );
 
-  // 文本：搜尋引擎式結果列（標題 → 作者 → 日期 · 摘要）
+  // 文本：比照主頁搜尋的結果列（mainSearchPage/SearchResults），在來源標籤上方多一行標題。
+  // 樣式直接沿用 SearchResults.css 的 sr-* class，本頁只補標題與關鍵字標示。
   const renderTextResult = (item, category) => (
-    <article key={`${category}-${item.id}`} className="ctp-text-result">
+    <li key={`${category}-${item.id}`} className="sr-item ctp-text-result">
       <a
         href={item.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="ctp-text-result-title"
+        className="sr-item-link"
       >
-        {highlightText(item.title, activeQuery, 'ctp-hl-title')}
-      </a>
-      {item.author && (
-        <div className="ctp-text-result-author">
-          作者：{highlightText(item.author, activeQuery, 'ctp-hl-snippet')}
+        <h3 className="ctp-text-result-title">
+          {highlightText(item.title, activeQuery, 'ctp-hl')}
+        </h3>
+        {/* 來源資訊列：主頁搜尋放資料來源，本頁放作者 */}
+        <div className="sr-item-source">
+          {item.author && (
+            <span className="sr-source-tag">
+              {highlightText(item.author, activeQuery, 'ctp-hl')}
+            </span>
+          )}
+          <svg
+            className="sr-external-icon"
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M7.5 1H11m0 0v3.5M11 1L5.5 6.5"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </div>
-      )}
-      <p className="ctp-text-result-snippet">
-        {item.published_at && (
-          <span className="ctp-text-result-date">{item.published_at} · </span>
-        )}
-        {highlightText(item.summary, activeQuery, 'ctp-hl-snippet')}
-      </p>
-    </article>
+        <div className="sr-item-snippet">
+          {highlightText(item.summary, activeQuery, 'ctp-hl')}
+        </div>
+      </a>
+    </li>
+  );
+
+  // 「全部」的區塊標題：名稱 + 共 N 筆 + 查看全部（切到該類型）
+  const renderMixedHeader = (title, count, type) => (
+    <div className="ctp-section-header">
+      <h2 className="ctp-category-title">
+        {title}
+        <span className="ctp-category-count">共 {count} 筆</span>
+      </h2>
+      <button
+        type="button"
+        className="ctp-viewall-button"
+        onClick={() => handleViewAllOfType(type)}
+      >
+        查看全部 ›
+      </button>
+    </div>
   );
 
   // 單一類型的分區內容：影音為卡片牆、文本為結果列
   const renderItems = (items, category) => (activeType === 'text' ? (
-    <div className="ctp-text-results">
+    <ol className="sr-list ctp-text-results">
       {items.map(item => renderTextResult(item, category))}
-    </div>
+    </ol>
   ) : (
     <div className="row g-2 g-sm-4">
       {items.map(item => renderCard(item, category))}
@@ -634,47 +671,29 @@ const CultureTestPage = () => {
       </div>
 
       {isMixedView ? (
-        /* ─── 全部：推薦影音一列 + 文本結果列（含分頁）─── */
+        /* ─── 全部：推薦影音一列 + 推薦文本（不分頁）─── */
         <div className="ctp-mixed-view">
           <div className="container px-4">
-            {mixedVideos.length === 0 && totalItems === 0 && (
+            {totalItems === 0 && (
               <div className="ctp-empty">沒有符合條件的資料</div>
             )}
 
-            {safePage === 1 && mixedVideos.length > 0 && (
-              <div className="ctp-mixed-videos">
-                <div className="ctp-section-header">
-                  <h2 className="ctp-category-title">
-                    推薦影音
-                    <span className="ctp-category-count">共 {mixedVideos.length} 筆</span>
-                  </h2>
-                  <button
-                    type="button"
-                    className="ctp-viewall-button"
-                    onClick={handleViewAllVideos}
-                  >
-                    查看全部 ›
-                  </button>
-                </div>
+            {mixedVideos.length > 0 && (
+              <div className="ctp-mixed-block">
+                {renderMixedHeader('推薦影音', mixedVideos.length, 'video')}
                 <div className="row g-2 g-sm-4">
                   {mixedVideos.slice(0, PREVIEW_COUNT).map(({ item, category }) => renderCard(item, category))}
                 </div>
               </div>
             )}
 
-            {pageItems.length > 0 && (
-              <div className="ctp-text-results">
-                {pageItems.map(({ item, category }) => renderTextResult(item, category))}
+            {mixedTexts.length > 0 && (
+              <div className="ctp-mixed-block">
+                {renderMixedHeader('推薦文本', mixedTexts.length, 'text')}
+                <ol className="sr-list ctp-text-results">
+                  {mixedTexts.slice(0, TEXT_PREVIEW_COUNT).map(({ item, category }) => renderTextResult(item, category))}
+                </ol>
               </div>
-            )}
-
-            {totalPages > 1 && (
-              <Pagination
-                currentPage={safePage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-                maxVisible={4}
-              />
             )}
           </div>
         </div>

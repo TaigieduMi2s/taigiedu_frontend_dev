@@ -376,70 +376,45 @@
     word-break: break-word;
 }
 
-/* ---- 文本：搜尋引擎式結果列 ---- */
+/* ---- 文本：比照主頁搜尋的結果列 ----
+   結構與樣式沿用 mainSearchPage/SearchResults.css 的 sr-*（本頁已 import），
+   這裡只補「標題」與關鍵字標示，不覆寫 sr-* 本身。 */
 .ctp-text-results {
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
-    max-width: 760px;
+    width: 100%;
 }
-
-/* ---- 「全部」：推薦影音一列 + 文本結果列 ---- */
+/* ---- 「全部」：推薦影音 + 推薦文本 ---- */
 .ctp-mixed-view {
     padding-bottom: 40px;
 }
 
-.ctp-mixed-videos {
-    margin-bottom: 40px;
+.ctp-mixed-block + .ctp-mixed-block {
+    margin-top: 32px;
 }
 
-/* 沒有推薦影音（第 2 頁起或無符合影音）時，文本結果列與篩選列之間留白 */
-.ctp-mixed-view .ctp-text-results:first-child {
-    padding-top: 32px;
+/* 本頁的結果列比主頁搜尋緊湊：分區預覽 5 筆時，第一屏要看得到下一個類別。
+   只在 .ctp-text-result 範圍內覆寫，不影響主頁搜尋 */
+.ctp-text-result .sr-item-link {
+    padding: 10px 12px;
+}
+
+.ctp-text-result .sr-item-source {
+    margin-bottom: 2px;
 }
 
 .ctp-text-result-title {
-    display: inline-block;
+    margin: 0 0 4px;
     color: #1f1f1f;
-    font-size: 22px;
+    font-size: 18px;
+    font-weight: 600;
     line-height: 1.4;
-    text-decoration: none;
 }
 
-.ctp-text-result-title:hover {
-    text-decoration: underline;
-}
-
-.ctp-text-result-author {
-    margin-top: 4px;
-    color: #3c4043;
-    font-size: 15px;
-}
-
-.ctp-text-result-snippet {
-    display: -webkit-box;
-    margin: 8px 0 0;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    color: #4d5156;
-    font-size: 15px;
-    line-height: 1.7;
-}
-
-/* 關鍵字標示：覆蓋 Bootstrap 的 mark（黃底 + padding） */
-.ctp-text-result mark {
+/* 關鍵字標示：顏色比照主頁搜尋（.sr-item-snippet b），並覆蓋 Bootstrap 的 mark（黃底 + padding） */
+.ctp-text-result mark.ctp-hl {
     padding: 0;
     background: none;
-}
-
-.ctp-text-result mark.ctp-hl-title {
-    color: var(--color-primary-dark);
-}
-
-.ctp-text-result mark.ctp-hl-snippet {
-    color: #1f1f1f;
-    font-weight: 700;
+    color: #c5221f;
+    font-weight: 600;
 }
 
 /* ---- RWD ---- */
@@ -503,17 +478,8 @@
         font-size: 20px;
     }
 
-    .ctp-text-results {
-        gap: 22px;
-    }
-
     .ctp-text-result-title {
-        font-size: 18px;
-    }
-
-    .ctp-text-result-author,
-    .ctp-text-result-snippet {
-        font-size: 14px;
+        font-size: 16px;
     }
 
     .ctp-section-header {
