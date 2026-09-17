@@ -6,48 +6,118 @@
     width: 100%;
 }
 
-/* ---- 頁首：白底橫幅 + 分類下拉 + 搜尋 ----
+/* ---- 頁首：白底橫幅 + 膠囊狀搜尋列 ----
+   版面參考國家文化記憶庫的搜尋頁（2026-09）：
+   預設「類型下拉 | 關鍵字」，選了影音／文本後變成「類型下拉 | 分類下拉 | 關鍵字」。
    .ctp-header 的 sticky／白底／陰影統一由 global.css 的 .page-filter-header 提供 */
 
 .ctp-header-content {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 12px;
 }
 
-/* ---- 分類多選下拉 ---- */
+/* 膠囊外框：下拉、分隔線、關鍵字輸入框共用同一個外框，hover／focus 時整條一起亮 */
+.ctp-searchbar {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 780px;
+    height: 52px;
+    border: 1px solid #ddd;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.ctp-searchbar:hover,
+.ctp-searchbar:focus-within {
+    border-color: var(--color-primary-light);
+    box-shadow: 0 0 5px rgba(74, 163, 186, 0.3);
+}
+
+.ctp-searchbar-divider {
+    flex-shrink: 0;
+    width: 1px;
+    height: 24px;
+    background: #ddd;
+}
+
+/* 搜尋列內的下拉共用的 focus 樣式：瀏覽器預設 outline 不會跟著半邊圓角走，
+   改用內陰影畫在元素內側 */
+.ctp-type-select .custom-select-header:focus-visible,
+.ctp-dropdown-header:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 2px var(--color-primary-light);
+}
+
+/* ---- 類型下拉（搜尋列最左側，共用 CustomSelect，只在本頁覆寫外觀）---- */
+.ctp-type-select.custom-select {
+    flex-shrink: 0;
+    width: 140px;
+    height: 100%;
+}
+
+.ctp-type-select .custom-select-header {
+    height: 100%;
+    padding: 0 40px 0 24px;
+    border: none;
+    border-radius: 999px 0 0 999px;
+    background-color: transparent;
+    transition: background-color 0.2s;
+}
+
+.ctp-type-select .custom-select-header:hover,
+.ctp-type-select .custom-select-header:focus,
+.ctp-type-select .custom-select-header.open {
+    border-color: transparent;
+    box-shadow: none;
+    background-color: #f5f9fb;
+}
+
+.ctp-type-select .custom-select-arrow {
+    right: 16px;
+}
+
+/* ---- 分類多選下拉（選了類型後才出現，夾在類型下拉與關鍵字之間）---- */
 .ctp-dropdown {
     position: relative;
-    width: 250px;
+    flex-shrink: 0;
+    width: 180px;
+    height: 100%;
     z-index: 500;
 }
 
 .ctp-dropdown-container {
     position: relative;
     display: flex;
-    width: 250px;
+    width: 100%;
+    height: 100%;
 }
 
+/* 用 block + line-height 置中（flex 容器內的文字吃不到 text-overflow: ellipsis） */
 .ctp-dropdown-header {
     position: relative;
-    display: flex;
+    display: block;
     width: 100%;
-    height: 48px;
-    padding: 12px 40px 12px 16px;
-    align-items: center;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background: #fff;
+    height: 100%;
+    padding: 0 40px 0 16px;
+    line-height: 50px;
+    background: transparent;
     color: #424242;
     font-size: 16px;
-    line-height: 22px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: background-color 0.2s;
 }
 
-.ctp-dropdown-header:hover {
-    border-color: var(--color-primary-light);
-    box-shadow: 0 0 5px rgba(74, 163, 186, 0.3);
+.ctp-dropdown-header:hover,
+.ctp-dropdown-header[aria-expanded="true"] {
+    background-color: #f5f9fb;
 }
 
 .ctp-dropdown-arrow {
@@ -157,34 +227,34 @@
     color: #1976d2;
 }
 
-/* ---- 搜尋 ---- */
+/* ---- 關鍵字搜尋（搜尋列右側）---- */
 .ctp-search-container {
     position: relative;
     display: flex;
-    justify-content: center;
     align-items: center;
-    flex-grow: 0.5;
-    max-width: 30%;
+    flex: 1;
+    min-width: 0;
+    height: 100%;
 }
 
 .ctp-search-input {
     width: 100%;
-    padding: 0.75rem 2.5rem 0.75rem 0.75rem;
-    border: 1px solid #cbd5e0;
-    border-radius: 8px;
+    height: 100%;
+    padding: 0 56px 0 16px;
+    border: none;
+    border-radius: 0 999px 999px 0;
+    background: transparent;
+    font-size: 16px;
     outline: none;
-    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-.ctp-search-input:focus,
-.ctp-search-input:hover {
-    border-color: var(--color-primary-light);
-    box-shadow: 0 0 5px rgba(74, 163, 186, 0.3);
+.ctp-search-input::placeholder {
+    color: #9aa5b1;
 }
 
 .ctp-search-btn {
     position: absolute;
-    right: 0.5rem;
+    right: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -192,6 +262,12 @@
     border: none;
     background: none;
     cursor: pointer;
+}
+
+.ctp-search-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
 }
 
 /* ---- 類別區塊 ---- */
@@ -300,22 +376,122 @@
     word-break: break-word;
 }
 
+/* ---- 文本：搜尋引擎式結果列 ---- */
+.ctp-text-results {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    max-width: 760px;
+}
+
+/* ---- 「全部」：推薦影音一列 + 文本結果列 ---- */
+.ctp-mixed-view {
+    padding-bottom: 40px;
+}
+
+.ctp-mixed-videos {
+    margin-bottom: 40px;
+}
+
+/* 沒有推薦影音（第 2 頁起或無符合影音）時，文本結果列與篩選列之間留白 */
+.ctp-mixed-view .ctp-text-results:first-child {
+    padding-top: 32px;
+}
+
+.ctp-text-result-title {
+    display: inline-block;
+    color: #1f1f1f;
+    font-size: 22px;
+    line-height: 1.4;
+    text-decoration: none;
+}
+
+.ctp-text-result-title:hover {
+    text-decoration: underline;
+}
+
+.ctp-text-result-author {
+    margin-top: 4px;
+    color: #3c4043;
+    font-size: 15px;
+}
+
+.ctp-text-result-snippet {
+    display: -webkit-box;
+    margin: 8px 0 0;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    color: #4d5156;
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+/* 關鍵字標示：覆蓋 Bootstrap 的 mark（黃底 + padding） */
+.ctp-text-result mark {
+    padding: 0;
+    background: none;
+}
+
+.ctp-text-result mark.ctp-hl-title {
+    color: var(--color-primary-dark);
+}
+
+.ctp-text-result mark.ctp-hl-snippet {
+    color: #1f1f1f;
+    font-weight: 700;
+}
+
 /* ---- RWD ---- */
 @media (max-width: 768px) {
     .ctp-header-content {
-        flex-direction: column;
         align-items: stretch;
-        gap: 10px;
+        gap: 8px;
     }
 
-    .ctp-dropdown,
-    .ctp-dropdown-container {
-        width: 100%;
+    .ctp-searchbar {
+        height: 46px;
     }
 
-    .ctp-search-container {
-        max-width: 100%;
-        flex-grow: 1;
+    .ctp-type-select.custom-select {
+        width: 84px;
+    }
+
+    .ctp-type-select .custom-select-header {
+        padding: 0 28px 0 14px;
+        font-size: 14px;
+    }
+
+    .ctp-type-select .custom-select-arrow {
+        right: 8px;
+        width: 16px;
+        height: 16px;
+    }
+
+    .ctp-dropdown {
+        width: 104px;
+    }
+
+    .ctp-dropdown-header {
+        padding: 0 28px 0 10px;
+        line-height: 44px;
+        font-size: 14px;
+    }
+
+    .ctp-dropdown-arrow {
+        right: 8px;
+        width: 16px;
+        height: 16px;
+    }
+
+    .ctp-search-input {
+        padding: 0 48px 0 12px;
+        font-size: 14px;
+    }
+
+    .ctp-search-icon {
+        width: 32px;
+        height: 32px;
     }
 
     /* 未選任何分類時，觸發器文字為 placeholder 灰字 */
@@ -325,6 +501,19 @@
 
     .ctp-category-title {
         font-size: 20px;
+    }
+
+    .ctp-text-results {
+        gap: 22px;
+    }
+
+    .ctp-text-result-title {
+        font-size: 18px;
+    }
+
+    .ctp-text-result-author,
+    .ctp-text-result-snippet {
+        font-size: 14px;
     }
 
     .ctp-section-header {

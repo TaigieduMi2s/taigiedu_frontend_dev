@@ -6,27 +6,33 @@ import searchIcon from '../assets/home/search_logo.svg';
 import chevronUp from '../assets/chevron-up.svg';
 import noPics from '../assets/culture/festivalN.png';
 import PageLoading from '../components/PageLoading/PageLoading';
+import CustomSelect from '../components/CustomSelect/CustomSelect';
 import Pagination from '../mainSearchPage/Pagination';
 import CategoryFilterSheet from '../components/CategoryFilterSheet/CategoryFilterSheet';
 import { getTriggerLabel } from '../components/CategoryFilterSheet/categorySelection';
 import useIsMobile from '../components/CategoryFilterSheet/useIsMobile';
 import useAnchoredMenu, { getMenuPortalTarget } from '../components/AnchoredMenu/useAnchoredMenu';
-import { fetchCultureItems, CATEGORY_TREE } from '../services/cultureTestMockApi';
+import { fetchCultureItems, CATEGORY_TREE, CONTENT_TYPES } from '../services/cultureTestMockApi';
 import {
   buildListSearchParams,
   parsePage,
   parseQuery,
   parseSelectedItems,
+  parseType,
 } from '../utils/listFilterParams';
 
 /**
  * 台語文化（test）
  *
  * 篩選與呈現方式比照「媒體與社群資源」（socialmediaPage）：
- *   - 頁首白底橫幅：分類下拉（第一層 + 第二層子選單，可複選）+ 關鍵字搜尋
- *   - 未篩選時依第一層分區預覽，每區顯示第一列並附「查看全部」
- *   - 有篩選或搜尋時攤平成完整列表 + 分頁
- *   - 內容為「圖片 + 主標」卡片，點擊開新分頁到該筆影音
+ *   - 頁首白底橫幅：膠囊狀搜尋列，版面參考國家文化記憶庫的搜尋頁（2026-09）
+ *       預設「類型下拉（全部）+ 關鍵字 + 搜尋鈕」；
+ *       選了影音或文本後，搜尋列多出第二個下拉「分類」（第一層 + 第二層子選單，可複選）
+ *   - 類型切換時清空分類：兩種類型的分類不一定相同，選「全部」時不提供分類篩選
+ *   - 「全部」：不分分類，最上面一列「推薦影音」（4 筆 + 查看全部），下面全部是文本結果列，分頁只算文本
+ *   - 影音／文本：未篩選時依第一層分區預覽並附「查看全部」；有篩選或搜尋時攤平成完整列表 + 分頁
+ *   - 影音為「圖片 + 主標」卡片，點擊開新分頁到該筆影音
+ *   - 文本為搜尋引擎式的結果列（標題／作者／日期 + 摘要），關鍵字會標示出來
  *
  * 分類範圍（2026-08 依 PM 指示調整）：**只收來源表第一層的「文化」這一支**，
  * 並取其後兩層當作篩選：
@@ -43,6 +49,27 @@ const ITEMS_PER_ROW = 4;
 const MAX_ROWS_PER_PAGE = 5;
 const PAGE_SIZE = ITEMS_PER_ROW * MAX_ROWS_PER_PAGE;
 const PREVIEW_COUNT = ITEMS_PER_ROW;
+const TEXT_PREVIEW_COUNT = 3;
+
+const CONTENT_TYPE_VALUES = CONTENT_TYPES.map(type => type.value);
+
+const isTextItem = item => item.type === 'text';
+
+const escapeRegExp = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// 把文字中符合關鍵字的片段包成 <mark>（不分大小寫）；
+// split 帶捕捉群組時，奇數索引就是比對到的片段
+const highlightText = (text, term, className) => {
+  if (!text || !term) return text;
+  return text
+    .split(new RegExp(`(${escapeRegExp(term)})`, 'gi'))
+    .map((part, index) => (index % 2 === 1
+      ? <mark key={index} className={className}>{part}</mark>
+      : part));
+};
+
+// 搜尋列第一個下拉（value 空字串 = 全部）
+const TYPE_OPTIONS = [{ value: '', label: '全部' }, ...CONTENT_TYPES];
 
 const CultureTestPage = () => {
   const [itemsByCategory, setItemsByCategory] = useState({});
@@ -56,10 +83,13 @@ const CultureTestPage = () => {
   // 重新整理或把網址分享出去都能回到同一個畫面。
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // 已選分類，格式 { 篩選第一層: [篩選第二層, ...] }；空陣列代表整個第一層被選取
+  // 資料類型：'' = 全部、'video' = 影音、'text' = 文本
+  const activeType = parseType(searchParams, CONTENT_TYPE_VALUES);
+  // 已選分類，格式 { 篩選第一層: [篩選第二層, ...] }；空陣列代表整個第一層被選取。
+  // 「全部」沒有分類下拉，網址上就算殘留 cat／sub 也一律忽略
   const selectedItems = useMemo(
-    () => parseSelectedItems(searchParams, categoryOrder),
-    [searchParams, categoryOrder]
+    () => (activeType ? parseSelectedItems(searchParams, categoryOrder) : {}),
+    [activeType, searchParams, categoryOrder]
   );
   // activeQuery = 已送出查詢的關鍵字（存在網址上）；query = 輸入框當下的值
   const activeQuery = parseQuery(searchParams);
@@ -69,9 +99,15 @@ const CultureTestPage = () => {
   // 寫回網址的統一入口；未帶到的欄位沿用目前值
   const updateListParams = useCallback((patch) => {
     setSearchParams(
-      buildListSearchParams({ selectedItems, query: activeQuery, page: currentPage, ...patch })
+      buildListSearchParams({
+        type: activeType,
+        selectedItems,
+        query: activeQuery,
+        page: currentPage,
+        ...patch,
+      })
     );
-  }, [selectedItems, activeQuery, currentPage, setSearchParams]);
+  }, [activeType, selectedItems, activeQuery, currentPage, setSearchParams]);
 
   // 手機版改用 bottom sheet（選擇先存 draft、按確認才套用），由元件自行處理
   const isMobile = useIsMobile();
@@ -250,7 +286,7 @@ const CultureTestPage = () => {
   // 桌機下拉按鈕上的文字
   const dropdownLabel = useMemo(() => {
     const categories = Object.keys(selectedItems);
-    if (categories.length === 0) return '分類';
+    if (categories.length === 0) return '全部分類';
 
     const total = categories.reduce(
       (sum, category) => sum + Math.max(1, selectedItems[category].length),
@@ -284,7 +320,7 @@ const CultureTestPage = () => {
   const hasCategoryFilter = Object.keys(selectedItems).length > 0;
   const hasQuery = activeQuery !== '';
 
-  // 依分類勾選與關鍵字過濾，維持第一層分組
+  // 依資料類型、分類勾選與關鍵字過濾，維持第一層分組
   const filteredByCategory = useMemo(() => {
     const term = activeQuery.toLowerCase();
     const result = {};
@@ -294,14 +330,23 @@ const CultureTestPage = () => {
 
       let items = itemsByCategory[category] || [];
 
+      if (activeType) {
+        items = items.filter(item => item.type === activeType);
+      }
+
       const subs = selectedItems[category];
       if (subs && subs.length > 0) {
         items = items.filter(item => subs.includes(item.subcategory));
       }
 
       if (term) {
+        // 文本多比對作者與摘要（搜尋結果列上看得到的文字都要搜得到）
         items = items.filter(item =>
-          `${item.title} ${item.category} ${item.subcategory}`.toLowerCase().includes(term)
+          [item.title, item.category, item.subcategory, item.author, item.summary]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase()
+            .includes(term)
         );
       }
 
@@ -309,20 +354,25 @@ const CultureTestPage = () => {
     });
 
     return result;
-  }, [categoryOrder, itemsByCategory, selectedItems, hasCategoryFilter, activeQuery]);
+  }, [categoryOrder, itemsByCategory, selectedItems, hasCategoryFilter, activeQuery, activeType]);
 
   const visibleCategories = categoryOrder.filter(category => filteredByCategory[category]);
 
-  // 未篩選也未搜尋 → 分區預覽；否則 → 完整列表 + 分頁
+  // 「全部」：不分分類，上方一列推薦影音、下方文本結果列
+  const isMixedView = activeType === '';
+  // 單一類型時：未篩選也未搜尋 → 分區預覽；否則 → 完整列表 + 分頁
   const isFullList = hasCategoryFilter || hasQuery;
 
   const flatItems = visibleCategories.flatMap(category =>
     filteredByCategory[category].map(item => ({ item, category }))
   );
-  const totalItems = flatItems.length;
+  const mixedVideos = isMixedView ? flatItems.filter(({ item }) => !isTextItem(item)) : [];
+  // 「全部」的分頁只算文本（推薦影音固定一列、只在第 1 頁出現）
+  const pagedItems = isMixedView ? flatItems.filter(({ item }) => isTextItem(item)) : flatItems;
+  const totalItems = pagedItems.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
   const safePage = Math.min(currentPage, totalPages);
-  const pageItems = flatItems.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const pageItems = pagedItems.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   const pageGroups = [];
   pageItems.forEach(({ item, category }) => {
@@ -336,8 +386,21 @@ const CultureTestPage = () => {
     updateListParams({ query: query.trim(), page: 1 });
   };
 
+  // 切換類型時保留關鍵字、清空分類並回到第 1 頁（兩種類型的分類不一定相同）
+  const handleTypeChange = (type) => {
+    if (type === activeType) return;
+    setIsFilterOpen(false);
+    updateListParams({ type, selectedItems: {}, page: 1 });
+  };
+
   const handleCardClick = (url) => {
     if (url) window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  // 推薦影音的「查看全部」：切到影音類型，保留關鍵字
+  const handleViewAllVideos = () => {
+    handleTypeChange('video');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleViewAll = (category) => {
@@ -375,6 +438,42 @@ const CultureTestPage = () => {
     </div>
   );
 
+  // 文本：搜尋引擎式結果列（標題 → 作者 → 日期 · 摘要）
+  const renderTextResult = (item, category) => (
+    <article key={`${category}-${item.id}`} className="ctp-text-result">
+      <a
+        href={item.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="ctp-text-result-title"
+      >
+        {highlightText(item.title, activeQuery, 'ctp-hl-title')}
+      </a>
+      {item.author && (
+        <div className="ctp-text-result-author">
+          作者：{highlightText(item.author, activeQuery, 'ctp-hl-snippet')}
+        </div>
+      )}
+      <p className="ctp-text-result-snippet">
+        {item.published_at && (
+          <span className="ctp-text-result-date">{item.published_at} · </span>
+        )}
+        {highlightText(item.summary, activeQuery, 'ctp-hl-snippet')}
+      </p>
+    </article>
+  );
+
+  // 單一類型的分區內容：影音為卡片牆、文本為結果列
+  const renderItems = (items, category) => (activeType === 'text' ? (
+    <div className="ctp-text-results">
+      {items.map(item => renderTextResult(item, category))}
+    </div>
+  ) : (
+    <div className="row g-2 g-sm-4">
+      {items.map(item => renderCard(item, category))}
+    </div>
+  ));
+
   if (isLoading) {
     return (
       <div className="culture-test-page">
@@ -399,122 +498,187 @@ const CultureTestPage = () => {
       <div className="ctp-header page-filter-header">
         <div className="container px-4">
           <div className="ctp-header-content">
-            {/* 分類篩選：桌機為下拉選單，手機為 bottom sheet */}
-            <div className="ctp-dropdown" ref={dropdownRef}>
-              <div className="ctp-dropdown-container">
-                <div
-                  className={`ctp-dropdown-header ${isTriggerPlaceholder ? 'is-placeholder' : ''}`}
-                  role="button"
-                  tabIndex={0}
-                  aria-haspopup={isMobile ? 'dialog' : 'listbox'}
-                  aria-expanded={isFilterOpen}
-                  onClick={() => {
-                    if (!isFilterOpen) updatePosition();
-                    setIsFilterOpen(!isFilterOpen);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      if (!isFilterOpen) updatePosition();
-                      setIsFilterOpen(!isFilterOpen);
-                    }
-                  }}
-                >
-                  {triggerLabel}
-                </div>
-                <img src={chevronUp} alt="" className="ctp-dropdown-arrow" />
-              </div>
+            {/* 膠囊狀搜尋列：類型下拉（+ 選了類型後的分類下拉）+ 關鍵字 + 搜尋鈕 */}
+            <div className="ctp-searchbar">
+              <CustomSelect
+                className="ctp-type-select"
+                options={TYPE_OPTIONS}
+                value={activeType}
+                onChange={handleTypeChange}
+              />
 
-              {!isMobile && isFilterOpen && menuStyle && createPortal(
-                <div className="ctp-dropdown-menu" ref={dropdownMenuRef} style={menuStyle}>
-                  {categoryOrder.map(category => {
-                    const subs = subCategoriesOf[category] || [];
-                    const selected = selectedItems[category];
-                    const hasSelectedChildren = selected && selected.length > 0;
-                    const isAllSelected =
-                      subs.length > 0 && subs.every(sub => isSubSelected(category, sub));
+              <span className="ctp-searchbar-divider" aria-hidden="true" />
 
-                    // 無第三層的分類：直接當成可勾選項目（目前四類都有第三層，保留作防呆）
-                    if (subs.length === 0) {
-                      return (
-                        <div key={category} className="ctp-dropdown-row">
-                          <div
-                            className={`ctp-dropdown-item ${selected ? 'selected' : ''}`}
-                            onClick={(e) => { e.stopPropagation(); toggleCategory(category); }}
-                          >
-                            <span className="ctp-checkbox">{selected ? '✓' : ''}</span>
-                            {category}
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    return (
+              {activeType && (
+                <>
+                  {/* 分類篩選：桌機為下拉選單，手機為 bottom sheet */}
+                  <div className="ctp-dropdown" ref={dropdownRef}>
+                    <div className="ctp-dropdown-container">
                       <div
-                        key={category}
-                        className="ctp-dropdown-row"
-                        onMouseEnter={(e) => handleCategoryHover(category, true, e.currentTarget)}
-                        onMouseLeave={() => {
-                          if (openSubmenuCategory !== category) return;
-                          submenuAnchorRef.current = null;
-                          setOpenSubmenuCategory(null);
+                        className={`ctp-dropdown-header ${isTriggerPlaceholder ? 'is-placeholder' : ''}`}
+                        role="button"
+                        tabIndex={0}
+                        aria-haspopup={isMobile ? 'dialog' : 'listbox'}
+                        aria-expanded={isFilterOpen}
+                        onClick={() => {
+                          if (!isFilterOpen) updatePosition();
+                          setIsFilterOpen(!isFilterOpen);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            if (!isFilterOpen) updatePosition();
+                            setIsFilterOpen(!isFilterOpen);
+                          }
                         }}
                       >
-                        <div
-                          className={`ctp-dropdown-item with-submenu ${hasSelectedChildren ? 'has-selected-children' : ''}`}
-                          onClick={(e) => { e.stopPropagation(); toggleAllSubCategories(category); }}
-                        >
-                          <span className="ctp-checkbox">{isAllSelected ? '✓' : ''}</span>
-                          <span className="ctp-dropdown-label">{category}</span>
-                          <span className="ctp-submenu-arrow">›</span>
-                        </div>
-
-                        {openSubmenuCategory === category && submenuStyle && (
-                          <div
-                            className="ctp-submenu"
-                            style={submenuStyle}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {subs.map(sub => (
-                              <div
-                                key={sub}
-                                className={`ctp-submenu-item ${isSubSelected(category, sub) ? 'selected' : ''}`}
-                                onClick={() => toggleSubCategory(category, sub)}
-                              >
-                                <span className="ctp-checkbox">
-                                  {isSubSelected(category, sub) ? '✓' : ''}
-                                </span>
-                                {sub}
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                        {triggerLabel}
                       </div>
-                    );
-                  })}
-                </div>,
-                getMenuPortalTarget()
-              )}
-            </div>
+                      <img src={chevronUp} alt="" className="ctp-dropdown-arrow" />
+                    </div>
 
-            {/* 關鍵字搜尋 */}
-            <form onSubmit={handleSearch} className="ctp-search-container">
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="搜尋..."
-                className="ctp-search-input"
-              />
-              <button type="submit" className="ctp-search-btn" aria-label="搜尋">
-                <img src={searchIcon} alt="搜尋" className="ctp-search-icon" />
-              </button>
-            </form>
+                    {!isMobile && isFilterOpen && menuStyle && createPortal(
+                      <div className="ctp-dropdown-menu" ref={dropdownMenuRef} style={menuStyle}>
+                        {categoryOrder.map(category => {
+                          const subs = subCategoriesOf[category] || [];
+                          const selected = selectedItems[category];
+                          const hasSelectedChildren = selected && selected.length > 0;
+                          const isAllSelected =
+                            subs.length > 0 && subs.every(sub => isSubSelected(category, sub));
+
+                          // 無第三層的分類：直接當成可勾選項目（目前四類都有第三層，保留作防呆）
+                          if (subs.length === 0) {
+                            return (
+                              <div key={category} className="ctp-dropdown-row">
+                                <div
+                                  className={`ctp-dropdown-item ${selected ? 'selected' : ''}`}
+                                  onClick={(e) => { e.stopPropagation(); toggleCategory(category); }}
+                                >
+                                  <span className="ctp-checkbox">{selected ? '✓' : ''}</span>
+                                  {category}
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          return (
+                            <div
+                              key={category}
+                              className="ctp-dropdown-row"
+                              onMouseEnter={(e) => handleCategoryHover(category, true, e.currentTarget)}
+                              onMouseLeave={() => {
+                                if (openSubmenuCategory !== category) return;
+                                submenuAnchorRef.current = null;
+                                setOpenSubmenuCategory(null);
+                              }}
+                            >
+                              <div
+                                className={`ctp-dropdown-item with-submenu ${hasSelectedChildren ? 'has-selected-children' : ''}`}
+                                onClick={(e) => { e.stopPropagation(); toggleAllSubCategories(category); }}
+                              >
+                                <span className="ctp-checkbox">{isAllSelected ? '✓' : ''}</span>
+                                <span className="ctp-dropdown-label">{category}</span>
+                                <span className="ctp-submenu-arrow">›</span>
+                              </div>
+
+                              {openSubmenuCategory === category && submenuStyle && (
+                                <div
+                                  className="ctp-submenu"
+                                  style={submenuStyle}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {subs.map(sub => (
+                                    <div
+                                      key={sub}
+                                      className={`ctp-submenu-item ${isSubSelected(category, sub) ? 'selected' : ''}`}
+                                      onClick={() => toggleSubCategory(category, sub)}
+                                    >
+                                      <span className="ctp-checkbox">
+                                        {isSubSelected(category, sub) ? '✓' : ''}
+                                      </span>
+                                      {sub}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>,
+                      getMenuPortalTarget()
+                    )}
+                  </div>
+
+                  <span className="ctp-searchbar-divider" aria-hidden="true" />
+                </>
+              )}
+
+              {/* 關鍵字搜尋 */}
+              <form onSubmit={handleSearch} className="ctp-search-container">
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  // 手機版搜尋列還要塞兩個下拉，完整提示字會被截斷
+                  placeholder={isMobile ? '搜尋關鍵字' : '請輸入您有興趣的關鍵字'}
+                  className="ctp-search-input"
+                  aria-label="關鍵字"
+                />
+                <button type="submit" className="ctp-search-btn" aria-label="搜尋">
+                  <img src={searchIcon} alt="" className="ctp-search-icon" />
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </div>
 
-      {isFullList ? (
+      {isMixedView ? (
+        /* ─── 全部：推薦影音一列 + 文本結果列（含分頁）─── */
+        <div className="ctp-mixed-view">
+          <div className="container px-4">
+            {mixedVideos.length === 0 && totalItems === 0 && (
+              <div className="ctp-empty">沒有符合條件的資料</div>
+            )}
+
+            {safePage === 1 && mixedVideos.length > 0 && (
+              <div className="ctp-mixed-videos">
+                <div className="ctp-section-header">
+                  <h2 className="ctp-category-title">
+                    推薦影音
+                    <span className="ctp-category-count">共 {mixedVideos.length} 筆</span>
+                  </h2>
+                  <button
+                    type="button"
+                    className="ctp-viewall-button"
+                    onClick={handleViewAllVideos}
+                  >
+                    查看全部 ›
+                  </button>
+                </div>
+                <div className="row g-2 g-sm-4">
+                  {mixedVideos.slice(0, PREVIEW_COUNT).map(({ item, category }) => renderCard(item, category))}
+                </div>
+              </div>
+            )}
+
+            {pageItems.length > 0 && (
+              <div className="ctp-text-results">
+                {pageItems.map(({ item, category }) => renderTextResult(item, category))}
+              </div>
+            )}
+
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={safePage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+                maxVisible={4}
+              />
+            )}
+          </div>
+        </div>
+      ) : isFullList ? (
         /* ─── 完整列表（含分頁）─── */
         <>
           <div className="container px-4">
@@ -539,9 +703,7 @@ const CultureTestPage = () => {
               <div key={`${group.category}-${index}`} className="ctp-section">
                 <div className="container px-4">
                   <h2 className="ctp-category-title">{group.category}</h2>
-                  <div className="row g-2 g-sm-4">
-                    {group.items.map(item => renderCard(item, group.category))}
-                  </div>
+                  {renderItems(group.items, group.category)}
                 </div>
               </div>
             ))
@@ -578,9 +740,10 @@ const CultureTestPage = () => {
                     查看全部 ›
                   </button>
                 </div>
-                <div className="row g-2 g-sm-4">
-                  {items.slice(0, PREVIEW_COUNT).map(item => renderCard(item, category))}
-                </div>
+                {renderItems(
+                  items.slice(0, activeType === 'text' ? TEXT_PREVIEW_COUNT : PREVIEW_COUNT),
+                  category
+                )}
               </div>
             </div>
           );

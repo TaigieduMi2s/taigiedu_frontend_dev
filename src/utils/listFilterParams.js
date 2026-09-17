@@ -8,6 +8,7 @@
  *   ?sub=戲曲:歌仔戲          第一層:第二層（可重複，跨第一層複選也用這個）
  *   ?q=關鍵字                 搜尋關鍵字
  *   ?page=2                   頁碼（第 1 頁不寫入，維持網址乾淨）
+ *   ?type=video               資料類型（目前只有台語文化使用；「全部」不寫入）
  *
  * `selectedItems` 的形狀沿用各頁既有結構：`{ 第一層: [第二層, ...] }`，空陣列代表整個第一層。
  * 媒體與社群資源允許類別名稱為空字串（畫面顯示「（空白類別）」），因此 `cat=` 這種空值也算有效。
@@ -17,6 +18,7 @@ export const CATEGORY_PARAM = 'cat';
 export const SUBCATEGORY_PARAM = 'sub';
 export const QUERY_PARAM = 'q';
 export const PAGE_PARAM = 'page';
+export const TYPE_PARAM = 'type';
 
 const SUB_SEPARATOR = ':';
 
@@ -63,12 +65,20 @@ export const parsePage = (searchParams) => {
 /** 從 query string 讀關鍵字 */
 export const parseQuery = (searchParams) => searchParams.get(QUERY_PARAM) || '';
 
+/** 從 query string 讀資料類型；不在允許清單內的值一律當「全部」（空字串） */
+export const parseType = (searchParams, allowedTypes = []) => {
+    const type = searchParams.get(TYPE_PARAM) || '';
+    return allowedTypes.includes(type) ? type : '';
+};
+
 /**
  * 把畫面狀態組成新的 query string。
- * 只輸出這四個參數，預設值（無篩選／無關鍵字／第 1 頁）不寫入。
+ * 只輸出這五個參數，預設值（全部類型／無篩選／無關鍵字／第 1 頁）不寫入。
  */
-export const buildListSearchParams = ({ selectedItems = {}, query = '', page = 1 } = {}) => {
+export const buildListSearchParams = ({ type = '', selectedItems = {}, query = '', page = 1 } = {}) => {
     const params = new URLSearchParams();
+
+    if (type) params.set(TYPE_PARAM, type);
 
     Object.entries(selectedItems).forEach(([category, subs]) => {
         if (!subs || subs.length === 0) {

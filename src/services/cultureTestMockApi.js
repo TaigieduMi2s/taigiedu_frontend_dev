@@ -27,6 +27,20 @@
  */
 
 /**
+ * 資料類型（前台搜尋列的類型下拉：全部／影音／文本）
+ *
+ * 2026-09 台語文化要同時收影音與文本兩種資料，版面參考國家文化記憶庫的搜尋列。
+ * 目前先做**混合方案**：「全部」時兩種類型一起呈現，選了類型才出現分類下拉；
+ * 兩種類型暫時共用同一套分類。
+ * ⚠️ 前提是文本資料表的分類與影音「差不多」，尚待比對確認；若分類完全不同，
+ * 需改成先選類型、各自篩選。
+ */
+export const CONTENT_TYPES = [
+  { value: 'video', label: '影音' },
+  { value: 'text', label: '文本' },
+];
+
+/**
  * 兩層分類（陣列順序即前台顯示順序）
  *
  * name     = 來源表第二層（篩選第一層）
@@ -194,6 +208,7 @@ const buildMockItems = () => {
         const createdAt = mockTimestamp(id % 210);
         items.push({
           id,
+          type: 'video',
           category_id: getCategoryId(node.name, subcategory),
           // A 欄，前台不顯示，保留供後端對照
           parent_category: node.parent,
@@ -216,9 +231,76 @@ const buildMockItems = () => {
   return items;
 };
 
+// 假作者名（虛構），接上 API 後改用文本資料表的作者欄位
+const TEXT_AUTHORS = ['陳怡君', '林家豪', '黃淑芬', '張志偉', '李佩珊', '吳宗翰'];
+
+const TEXT_SUMMARY_PATTERNS = [
+  (topic, sub) => `整理${topic}的發展脈絡與在地說法，收錄${sub}相關的台語詞彙與例句，適合作為課堂延伸閱讀。`,
+  (topic, sub) => `訪談從事${sub}的在地耆老與職人，以台語逐字記錄${topic}的做法、禁忌與代代相傳的故事。`,
+  (topic, sub) => `從文獻與老照片回顧${topic}，說明${sub}在不同地區的差異，並附上台語發音與用字對照。`,
+  (topic) => `以${topic}為主題設計的教學講義，包含情境對話、詞彙練習與學習單，可直接用於台語課程。`,
+];
+
+const TEXT_TITLE_PATTERNS = [
+  topic => `${topic}文獻整理`,
+  topic => `${topic}田野調查報告`,
+  topic => `${topic}台語詞彙表`,
+  topic => `${topic}口述歷史逐字稿`,
+  topic => `${topic}教學講義`,
+];
+
+/**
+ * 建立文本類型的假資料（前台專用）
+ *
+ * ⚠️ 文本資料的真實分類尚未確認，這裡暫時套用影音的同一套分類，只為了讓
+ * 類型下拉切到「文本」時有東西可看。後台 /admin/culture-test 目前只管影音，
+ * 因此文本不放進 MOCK_ITEMS，後台看不到也改不到。
+ * id 以 `text-` 開頭，避免與影音的數字 id 撞 key。
+ */
+const buildMockTextItems = () => {
+  const random = seededRandom(20260917);
+  const items = [];
+  let id = 1;
+
+  CATEGORY_TREE.forEach(node => {
+    let sortOrder = 1;
+
+    node.children.forEach(subcategory => {
+      const topics = TOPICS[`${node.name}>${subcategory}`] || [subcategory];
+      const count = 3 + Math.floor(random() * 6); // 每組 3~8 筆
+
+      for (let index = 0; index < count; index += 1) {
+        const topic = topics[Math.floor(random() * topics.length)];
+        const pattern = TEXT_TITLE_PATTERNS[index % TEXT_TITLE_PATTERNS.length];
+        const summary = TEXT_SUMMARY_PATTERNS[Math.floor(random() * TEXT_SUMMARY_PATTERNS.length)];
+        items.push({
+          id: `text-${id}`,
+          type: 'text',
+          parent_category: node.parent,
+          category: node.name,
+          subcategory,
+          title: pattern(topic),
+          // 以下三個欄位只有文本有，前台搜尋結果列用來顯示作者、日期與摘要
+          author: TEXT_AUTHORS[Math.floor(random() * TEXT_AUTHORS.length)],
+          summary: summary(topic, subcategory),
+          published_at: mockTimestamp(Math.floor(random() * 240)).slice(0, 10),
+          image: null,
+          url: `https://example.com/text/${id}`,
+          sort_order: sortOrder++,
+          is_deleted: false,
+        });
+        id += 1;
+      }
+    });
+  });
+
+  return items;
+};
+
 // 記憶體資料表：前台讀未刪除的、後台讀全部，後台的異動直接改這個陣列
 let MOCK_ITEMS = buildMockItems();
 let nextItemId = MOCK_ITEMS.length + 1;
+const MOCK_TEXT_ITEMS = buildMockTextItems();
 
 /** 依 category_order 把攤平資料分組成前台要的格式，只收未刪除的 */
 const groupForFrontend = () => {
@@ -227,20 +309,26 @@ const groupForFrontend = () => {
     data[node.name] = [];
   });
 
-  MOCK_ITEMS
+  // 影音與文本合併後依 sort_order 排序（sort 為穩定排序，同序位時影音在前）
+  [...MOCK_ITEMS, ...MOCK_TEXT_ITEMS]
     .filter(item => !item.is_deleted)
-    .slice()
     .sort((a, b) => a.sort_order - b.sort_order)
     .forEach(item => {
       if (!data[item.category]) data[item.category] = [];
       data[item.category].push({
         id: item.id,
+        type: item.type,
         parent_category: item.parent_category,
         category: item.category,
         subcategory: item.subcategory,
         title: item.title,
         image: item.image,
         url: item.url,
+        ...(item.type === 'text' && {
+          author: item.author,
+          summary: item.summary,
+          published_at: item.published_at,
+        }),
       });
     });
 
@@ -256,7 +344,8 @@ const delay = (ms = 250) => new Promise(resolve => setTimeout(resolve, ms));
  *   {
  *     category_order: ['戲曲', '祭典', '傳統工藝', '地方/產業'],  // 篩選第一層
  *     categories: [{ name, parent, children }],
- *     data: { 戲曲: [{ ..., subcategory: '歌仔戲' }], ... }
+ *     content_types: [{ value: 'video', label: '影音' }, { value: 'text', label: '文本' }],
+ *     data: { 戲曲: [{ ..., type: 'video' | 'text', subcategory: '歌仔戲' }], ... }
  *   }
  */
 export const fetchCultureItems = async () => {
@@ -264,6 +353,7 @@ export const fetchCultureItems = async () => {
   return {
     category_order: CATEGORY_TREE.map(node => node.name),
     categories: CATEGORY_TREE,
+    content_types: CONTENT_TYPES,
     data: groupForFrontend(),
   };
 };
@@ -296,6 +386,7 @@ export const addCultureItem = async ({ category_id, title, url, image = null }) 
 
   MOCK_ITEMS.push({
     id: nextItemId++,
+    type: 'video',
     category_id,
     ...names,
     title,
