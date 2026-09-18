@@ -13,6 +13,8 @@ const Footer = () => {
 
   const handleLinkClick = (path) => {
     navigate(path);
+    // 換頁後回到頂部，讓使用者從頭開始閱讀
+    window.scrollTo(0, 0);
   };
 
   return (
