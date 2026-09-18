@@ -18,7 +18,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install dependencies
@@ -32,14 +32,23 @@ jobs:
           sed -i "s|__WORKER_NAME__|taiwanese-omg-test|g" wrangler.jsonc
           sed -i "s|__ROUTE_PATTERN__|test.taigiedu.com/*|g" wrangler.jsonc
 
-      - name: Run Playwright smoke tests
-        run: npm run test:e2e:smoke
+      - name: Run Playwright smoke & features tests
+        # regression（登入 + 真實上傳資源）會寫入後端，不在 CI 自動執行
+        run: npx playwright test --config=tests/e2e/playwright.config.js --project=smoke --project=features
         env:
           CI: true
           BASE_URL: http://localhost:3000
           VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://dev.taigiedu.com/backend' }}
           VITE_IMAGE_URL: ${{ secrets.VITE_IMAGE_URL || 'https://dev.taigiedu.com' }}
           VITE_ENABLE_UNSTABLE_FEATURES: 'true'
+          # features 測試涵蓋的頁面都受 feature flag 控制，沒開會被導回首頁而整批略過
+          VITE_ENABLE_TOPIC_INTEGRATION_FEATURE: 'true'
+          VITE_ENABLE_PLACENAME_CULTURE_FEATURE: 'true'
+          VITE_ENABLE_CULTURE_TEST_FEATURE: 'true'
+          VITE_ENABLE_OCCUPATION_TEST_FEATURE: 'true'
+          VITE_ENABLE_RELATIVE_CALCULATOR_FEATURE: 'true'
+          # 回報問題一律走 mock，避免 CI 送出真實回報
+          VITE_ENABLE_REPORT_ISSUE_MOCK: 'true'
           VITE_ENABLE_ROBOTS_NOINDEX: 'true'
           TEST_USER: ${{ secrets.TEST_USER }}
           TEST_PASS: ${{ secrets.TEST_PASS }}
@@ -49,7 +58,7 @@ jobs:
         if: always()
         with:
           name: playwright-report
-          path: playwright-report/
+          path: tests/e2e/playwright-report/
           retention-days: 30
 
       - name: Upload Test Results
@@ -57,5 +66,5 @@ jobs:
         if: failure()
         with:
           name: test-results
-          path: test-results/
+          path: tests/e2e/test-results/
           retention-days: 7
