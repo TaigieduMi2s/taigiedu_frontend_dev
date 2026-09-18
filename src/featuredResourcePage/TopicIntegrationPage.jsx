@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import searchIcon from "../assets/home/search_logo.svg";
 import CustomSelect from "../components/CustomSelect/CustomSelect";
@@ -136,9 +136,9 @@ const TopicIntegrationPage = () => {
 
   return (
     <div className="topic-integration-page">
-      {/* 上方：兩個下拉選單 + 搜尋框（沿用既有版位，跨三層恆存） */}
-      <div className="ti-toolbar">
-        <form className="ti-search-form" onSubmit={handleSearchSubmit}>
+      {/* 上方工具列：兩個下拉選單 + 搜尋框（sticky 由 page-filter-header 提供） */}
+      <div className="ti-toolbar page-filter-header">
+        <form className="ti-toolbar-content" onSubmit={handleSearchSubmit}>
           <div className="ti-select-wrap">
             <CustomSelect
               options={topicOptions}
@@ -166,11 +166,13 @@ const TopicIntegrationPage = () => {
               placeholder="輸入自訂搜尋內容..."
             />
             <button type="submit" className="ti-search-btn" aria-label="搜尋">
-              <img src={searchIcon} alt="搜尋" />
+              <img src={searchIcon} alt="搜尋" className="ti-search-icon" />
             </button>
           </div>
         </form>
       </div>
+
+      <div className="ti-container">
 
       {/* ============ 第一層：議題索引 ============ */}
       {level === 1 && (
@@ -255,6 +257,7 @@ const TopicIntegrationPage = () => {
           </div>
         </section>
       )}
+      </div>
     </div>
   );
 };

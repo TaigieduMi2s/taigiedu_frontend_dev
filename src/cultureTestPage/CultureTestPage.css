@@ -6,7 +6,7 @@
     width: 100%;
 }
 
-/* ---- 頁首：白底橫幅 + 膠囊狀搜尋列 ----
+/* ---- 頁首：白底橫幅 + 搜尋列 ----
    版面參考國家文化記憶庫的搜尋頁（2026-09）：
    預設「類型下拉 | 關鍵字」，選了影音／文本後變成「類型下拉 | 分類下拉 | 關鍵字」。
    .ctp-header 的 sticky／白底／陰影統一由 global.css 的 .page-filter-header 提供 */
@@ -18,7 +18,7 @@
     gap: 12px;
 }
 
-/* 膠囊外框：下拉、分隔線、關鍵字輸入框共用同一個外框，hover／focus 時整條一起亮 */
+/* 搜尋列外框：下拉、分隔線、關鍵字輸入框共用同一個外框，hover／focus 時整條一起亮，圓角 10px 對齊全站樣式 */
 .ctp-searchbar {
     display: flex;
     align-items: center;
@@ -26,7 +26,7 @@
     max-width: 780px;
     height: 52px;
     border: 1px solid #ddd;
-    border-radius: 999px;
+    border-radius: 10px;
     background: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
@@ -64,7 +64,7 @@
     height: 100%;
     padding: 0 40px 0 24px;
     border: none;
-    border-radius: 999px 0 0 999px;
+    border-radius: 10px 0 0 10px;
     background-color: transparent;
     transition: background-color 0.2s;
 }
@@ -242,7 +242,7 @@
     height: 100%;
     padding: 0 56px 0 16px;
     border: none;
-    border-radius: 0 999px 999px 0;
+    border-radius: 0 10px 10px 0;
     background: transparent;
     font-size: 16px;
     outline: none;
@@ -267,7 +267,6 @@
 .ctp-search-icon {
     width: 36px;
     height: 36px;
-    border-radius: 50%;
 }
 
 /* ---- 類別區塊 ---- */

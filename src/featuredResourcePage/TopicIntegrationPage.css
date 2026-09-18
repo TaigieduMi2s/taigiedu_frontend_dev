@@ -10,74 +10,88 @@
 
 .topic-integration-page {
   width: 100%;
-  max-width: 1200px;
-  margin: 20px auto;
-  padding: 20px 16px;
+  margin: 0 auto;
+  padding-bottom: 40px;
 }
 
-/* ---- 上方工具列：兩個下拉 + 搜尋框 ---- */
+/* ---- 上方工具列：兩個下拉 + 搜尋框（sticky 由 global.css 的 .page-filter-header 提供） ---- */
 .ti-toolbar {
-  width: 100%;
-  padding: 0 12px;
+  padding: 20px 32px;
 }
 
-.ti-search-form {
+.ti-toolbar-content {
   display: flex;
-  gap: 12px;
+  gap: 24px;
   align-items: center;
-  flex-wrap: nowrap;
-  padding: 12px;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+  max-width: var(--content-max-width, 1600px);
+  margin: 0 auto;
   width: 100%;
 }
 
 .ti-select-wrap {
-  width: 200px;
+  width: 190px;
   flex: 0 0 auto;
 }
 
 .ti-search-input-group {
+  position: relative;
   display: flex;
   align-items: center;
   flex: 1 1 auto;
-  min-width: 0;
+  min-width: 250px;
+  max-width: 500px;
+  height: 48px;
 }
 
 .ti-search-input {
-  flex: 1;
-  min-height: 42px;
-  padding: 8px 12px;
+  width: 100%;
+  height: 100%;
+  padding: 0 3.25rem 0 1rem;
   border: 1px solid #ddd;
-  border-right: none;
-  border-radius: 6px 0 0 6px;
-  outline: none;
+  border-radius: 10px;
+  background-color: #fff;
   font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-.ti-search-input:focus {
-  border-color: var(--ti-blue);
-  box-shadow: 0 0 5px rgba(47, 111, 176, 0.3);
+.ti-search-input:focus,
+.ti-search-input:hover {
+  border-color: var(--color-primary-light, #4AA3BA);
+  box-shadow: 0 0 5px rgba(74, 163, 186, 0.3);
 }
 
 .ti-search-btn {
-  min-height: 42px;
-  min-width: 56px;
-  border: 1px solid #ddd;
-  border-left: none;
-  border-radius: 0 6px 6px 0;
-  background-color: #fff;
-  cursor: pointer;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
 }
 
-.ti-search-btn img {
-  width: 30px;
-  height: 30px;
+.ti-search-icon {
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.ti-search-btn:hover .ti-search-icon {
+  opacity: 0.75;
+}
+
+/* 內容容器 */
+.ti-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
 }
 
 /* ================= 第一層：議題索引 ================= */
@@ -232,14 +246,18 @@
 }
 
 @media (max-width: 768px) {
-  .ti-search-form {
-    flex-wrap: wrap;
+  .ti-toolbar {
+    padding: 16px;
+  }
+  .ti-toolbar-content {
+    gap: 12px;
   }
   .ti-select-wrap {
     width: calc(50% - 6px);
   }
   .ti-search-input-group {
     flex-basis: 100%;
+    max-width: 100%;
   }
   .ti-topic-grid {
     gap: 10px 8px;
