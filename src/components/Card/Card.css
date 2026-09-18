@@ -115,6 +115,32 @@
   line-height: 18px; /* 262.5% */
 }
 
+/* 可點的愛心（Card.Stats 傳入 onLikeClick 時）：清掉 button 預設外觀，沿用 .cc-likes 的排版 */
+.cc-stats .cc-likes-button {
+  border: none;
+  background: none;
+  margin: 0;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: transform 0.15s ease;
+}
+
+.cc-stats .cc-likes-button:hover {
+  transform: scale(1.1);
+}
+
+.cc-stats .cc-likes-button[aria-disabled="true"] {
+  cursor: wait;
+  opacity: 0.6;
+  transform: none;
+}
+
+.cc-stats .cc-likes-button:focus-visible {
+  outline: 2px solid var(--cc-stats-color);
+  outline-offset: 1px;
+}
+
 .cc-likes-icon,
 .cc-downloads-icon {
   display: flex;

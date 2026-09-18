@@ -4,6 +4,7 @@ import { useToast } from "../components/Toast";
 import { useAuth } from "../contexts/AuthContext";
 import { authenticatedFetch } from "../services/authService";
 import envConfig from "../config";
+import { getCachedLikeState, subscribeLikeChanges, toggleResourceLike } from "../services/resourceLikeService";
 import "./FilePreview.css";
 import likesIconFilled from "../assets/resourcepage/Union (Stroke)(black).svg";
 import likesIconOutline from "../assets/resourcepage/heart-outline-black.svg";
@@ -19,7 +20,7 @@ const FilePreview = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [downloadsCount, setDownloadsCount] = useState(0);
@@ -128,8 +129,7 @@ const FilePreview = () => {
       setDownloadsCount(parseInt(searchParams.get("downloads") || "0", 10));
 
       const isLikeParam = searchParams.get("is_like");
-      const likeStorage = JSON.parse(localStorage.getItem("resourceLikeStates") || "{}");
-      const cachedLike = likeStorage[resourceId];
+      const cachedLike = getCachedLikeState(resourceId);
 
       if (isLikeParam === "true" || isLikeParam === "1" || isLikeParam === "false" || isLikeParam === "0") {
         setIsLiked(isLikeParam === "true" || isLikeParam === "1");
@@ -144,8 +144,21 @@ const FilePreview = () => {
     }
   }, [location.search]);
 
-  // 新增：當認證狀態改變時，重新取得資源詳情以更新使用者相關資訊（如是否點讚）
+  // 當認證狀態確定後，重新取得資源詳情以更新使用者相關資訊（如是否點讚）
+  // ⚠️ 要等 AuthContext 載入完：載入中 isAuthenticated 暫時是 false，若這時就重設成未點讚，
+  //    網址帶進來的 is_like=true 會先被蓋掉、按鈕閃成「點讚資源」
   useEffect(() => {
+    // 單一資源沒有獨立的查詢 API，只能透過搜尋 API 找回該筆的最新狀態
+    const findResource = async (keyword) => {
+      const response = await authenticatedFetch(`${apiBaseUrl}/api/resource/search`, {
+        method: "POST",
+        body: JSON.stringify({ keyword, page: 1, limit: keyword ? 100 : 1000 })
+      });
+      const result = await response.json();
+      if (!response.ok || result.status !== "success" || !Array.isArray(result.data?.resources)) return null;
+      return result.data.resources.find(r => String(r.id) === String(resourceData.resourceId)) || null;
+    };
+
     const fetchLatestResourceData = async () => {
       if (!resourceData.resourceId || !isAuthenticated) {
         if (!isAuthenticated) setIsLiked(false);
@@ -153,47 +166,41 @@ const FilePreview = () => {
       }
 
       try {
-        // 使用搜尋 API 來取得該資源的最新狀態
-        const parameters = {
-          keyword: resourceData.title, // 使用標題作為關鍵字
-          page: 1,
-          limit: 100
-        };
+        // 先用標題當關鍵字查；標題含特殊字元搜不到時，再退回不帶關鍵字的全量查詢
+        const currentResource = (await findResource(resourceData.title)) || (await findResource(""));
 
-        const response = await authenticatedFetch(`${apiBaseUrl}/api/resource/search`, {
-          method: "POST",
-          body: JSON.stringify(parameters)
-        });
+        if (currentResource) {
+          console.log("已更新資源最新狀態:", currentResource);
+          setIsLiked(Boolean(currentResource.is_like));
+          setLikesCount(currentResource.likes || 0);
+          setDownloadsCount(currentResource.downloads || 0);
 
-        const result = await response.json();
-
-        if (response.ok && result.status === "success" && Array.isArray(result.data?.resources)) {
-          // 找尋對應 ID 的資源
-          const currentResource = result.data.resources.find(r => String(r.id) === String(resourceData.resourceId));
-
-          if (currentResource) {
-            console.log("已更新資源最新狀態:", currentResource);
-            setIsLiked(Boolean(currentResource.is_like));
-            setLikesCount(currentResource.likes || 0);
-            setDownloadsCount(currentResource.downloads || 0);
-
-            // 同時更新 URL 參數，避免重新整理後又變回舊狀態
-            const nextParams = new URLSearchParams(location.search);
-            nextParams.set("is_like", currentResource.is_like ? "true" : "false");
-            nextParams.set("likes", String(currentResource.likes || 0));
-            nextParams.set("downloads", String(currentResource.downloads || 0));
-            window.history.replaceState(null, "", `${window.location.pathname}?${nextParams.toString()}`);
-          }
+          // 同時更新 URL 參數，避免重新整理後又變回舊狀態
+          const nextParams = new URLSearchParams(window.location.search);
+          nextParams.set("is_like", currentResource.is_like ? "true" : "false");
+          nextParams.set("likes", String(currentResource.likes || 0));
+          nextParams.set("downloads", String(currentResource.downloads || 0));
+          window.history.replaceState(null, "", `${window.location.pathname}?${nextParams.toString()}`);
         }
       } catch (error) {
         console.error("重新獲取資源詳情失敗:", error);
       }
     };
 
-    if (!isLoading) {
+    if (!isLoading && !isAuthLoading) {
       fetchLatestResourceData();
     }
-  }, [isAuthenticated, isLoading, resourceData.resourceId]);
+  }, [isAuthenticated, isAuthLoading, isLoading, resourceData.resourceId]);
+
+  // 列表頁（另一個分頁）點了卡片愛心時，同步本頁的點讚按鈕
+  useEffect(() => {
+    if (!resourceData.resourceId) return undefined;
+    return subscribeLikeChanges((id, nextIsLiked) => {
+      if (id !== String(resourceData.resourceId) || nextIsLiked === isLiked) return;
+      setIsLiked(nextIsLiked);
+      setLikesCount(prev => Math.max(0, prev + (nextIsLiked ? 1 : -1)));
+    });
+  }, [resourceData.resourceId, isLiked]);
 
   if (isLoading) {
     return (
@@ -275,51 +282,22 @@ const FilePreview = () => {
       if (isLikeLoading) return;
       setIsLikeLoading(true);
 
-      // 準備點讚請求參數
-      const parameters = {
-        id: parseInt(resourceData.resourceId, 10)  // 確保 ID 是整數
-      };
-
-      // 發送點讚請求
-      const response = await authenticatedFetch(`${apiBaseUrl}/api/resource/like`, {
-        method: "POST",
-        body: JSON.stringify(parameters)
+      const { isLiked: apiIsLiked, likes: nextLikes } = await toggleResourceLike(resourceData.resourceId, {
+        isLiked,
+        likes: likesCount,
       });
+      setIsLiked(apiIsLiked);
+      setLikesCount(nextLikes);
 
-      const result = await response.json();
-      console.log("點讚回應:", result);
+      const nextParams = new URLSearchParams(window.location.search);
+      nextParams.set("is_like", apiIsLiked ? "true" : "false");
+      nextParams.set("likes", String(nextLikes));
+      window.history.replaceState(null, "", `${window.location.pathname}?${nextParams.toString()}`);
 
-      // 處理回應結果
-      if (response.ok && (result?.status === "success" || result?.data?.success)) {
-        const apiIsLiked = typeof result?.data?.is_like === "boolean" ? result.data.is_like : !isLiked;
-        setIsLiked(apiIsLiked);
-
-        const likeStorage = JSON.parse(localStorage.getItem("resourceLikeStates") || "{}");
-        likeStorage[resourceData.resourceId] = apiIsLiked;
-        localStorage.setItem("resourceLikeStates", JSON.stringify(likeStorage));
-
-        if (typeof result?.data?.likes === "number") {
-          setLikesCount(result.data.likes);
-        } else {
-          setLikesCount(prev => Math.max(0, prev + (apiIsLiked ? 1 : -1)));
-        }
-
-        const nextLikes = typeof result?.data?.likes === "number"
-          ? result.data.likes
-          : Math.max(0, likesCount + (apiIsLiked ? 1 : -1));
-
-        const nextParams = new URLSearchParams(location.search);
-        nextParams.set("is_like", apiIsLiked ? "true" : "false");
-        nextParams.set("likes", String(nextLikes));
-        window.history.replaceState(null, "", `${window.location.pathname}?${nextParams.toString()}`);
-
-        showToast(apiIsLiked ? "已成功點讚此資源" : "已取消點讚", "success");
-      } else {
-        showToast(result?.data?.message || result.message || "點讚失敗，請稍後再試", "error");
-      }
+      showToast(apiIsLiked ? "已成功點讚此資源" : "已取消點讚", "success");
     } catch (error) {
       console.error("點讚操作錯誤:", error);
-      showToast("網絡連接錯誤，請稍後再試", "error");
+      showToast(error?.message || "網絡連接錯誤，請稍後再試", "error");
     } finally {
       setIsLikeLoading(false);
     }

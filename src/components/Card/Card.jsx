@@ -52,23 +52,51 @@ const FileType = ({ className = "", children }) => (
   <div className={`cc-file-type ${className}`.trim()}>{children}</div>
 );
 
-/** 點讚數／下載數：貼在預覽圖右上角 */
-const Stats = ({ likes, downloads, isLiked = false, className = "" }) => (
-  <div className={`cc-stats ${className}`.trim()}>
-    <div className="cc-likes">
+/**
+ * 點讚數／下載數：貼在預覽圖右上角
+ *
+ * 傳入 `onLikeClick` 時愛心改渲染成可點的 `<button>`（會 stopPropagation，不觸發卡片本身的 onClick）；
+ * 沒傳就跟原本一樣只是顯示用。`likeDisabled` 用於請求進行中避免連點。
+ */
+const Stats = ({ likes, downloads, isLiked = false, onLikeClick, likeDisabled = false, className = "" }) => {
+  const likeContent = (
+    <>
       <img
         src={isLiked ? loveIconFilled : loveIconOutline}
         alt={isLiked ? "Liked" : "Not liked"}
         className="cc-likes-icon"
       />
       <span>{likes}</span>
+    </>
+  );
+
+  return (
+    <div className={`cc-stats ${className}`.trim()}>
+      {onLikeClick ? (
+        <button
+          type="button"
+          className="cc-likes cc-likes-button"
+          aria-pressed={isLiked}
+          aria-label={isLiked ? "取消點讚" : "點讚"}
+          aria-disabled={likeDisabled}
+          onClick={(e) => {
+            // 不用 disabled：部分瀏覽器對 disabled 按鈕的點擊會落到外層卡片，變成開啟預覽
+            e.stopPropagation();
+            if (!likeDisabled) onLikeClick(e);
+          }}
+        >
+          {likeContent}
+        </button>
+      ) : (
+        <div className="cc-likes">{likeContent}</div>
+      )}
+      <div className="cc-downloads">
+        <img src={downloadIcon} alt="Downloads" className="cc-downloads-icon" />
+        <span>{downloads}</span>
+      </div>
     </div>
-    <div className="cc-downloads">
-      <img src={downloadIcon} alt="Downloads" className="cc-downloads-icon" />
-      <span>{downloads}</span>
-    </div>
-  </div>
-);
+  );
+};
 
 /** 文字內容區：負責內距與各行之間的 gap */
 const Content = ({ className = "", children }) => (

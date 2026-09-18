@@ -30,6 +30,8 @@ const ResourceCard = ({
   date,
   isLiked = false,
   onCardClick, // 控制點擊事件的 prop
+  onLikeClick, // 選填：傳入後右上角愛心可點擊收藏（不傳則維持純顯示，刪除頁／後台不受影響）
+  isLikeLoading = false,
 }) => {
   const handleCardClick = () => {
     if (onCardClick) {
@@ -81,7 +83,13 @@ const ResourceCard = ({
       <Card.Preview className="card-header" imageUrl={getFullImageUrl(imageUrl)}>
         <Card.FileType>{fileType}</Card.FileType>
         {/* 顯示喜歡與下載數量 */}
-        <Card.Stats likes={likes} downloads={downloads} isLiked={isLiked} />
+        <Card.Stats
+          likes={likes}
+          downloads={downloads}
+          isLiked={isLiked}
+          onLikeClick={onLikeClick}
+          likeDisabled={isLikeLoading}
+        />
       </Card.Preview>
 
       {/* 卡片內容 */}

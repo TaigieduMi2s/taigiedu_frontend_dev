@@ -6,6 +6,7 @@ import { useToast } from "../components/Toast";
 import { authenticatedFetch } from "../services/authService";
 import { useAuth } from "../contexts/AuthContext";
 import envConfig from "../config";
+import { subscribeLikeChanges, toggleResourceLike } from "../services/resourceLikeService";
 
 // 添加 renderCard 到組件參數中
 const ResourceContent = ({ searchParams, onCardClick, renderCard, onResourcesLoaded }) => {
@@ -16,6 +17,7 @@ const ResourceContent = ({ searchParams, onCardClick, renderCard, onResourcesLoa
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [lastSearchParams, setLastSearchParams] = useState(null); // 存儲上次搜索參數
+  const [likeLoadingIds, setLikeLoadingIds] = useState(() => new Set()); // 點讚請求進行中的資源 id
 
   // 分頁設置
   const ITEMS_PER_PAGE = 12;
@@ -68,6 +70,14 @@ const ResourceContent = ({ searchParams, onCardClick, renderCard, onResourcesLoa
       fetchResources();
     }
   }, [isAuthLoading, lastSearchParams, isAuthenticated]);
+
+  // 預覽頁（另開的分頁）點讚後，同步本頁卡片的愛心與點讚數
+  useEffect(() => subscribeLikeChanges((id, isLiked) => {
+    setAllResources(prev => prev.map(r => {
+      if (String(r.id) !== id || Boolean(r.is_like) === isLiked) return r;
+      return { ...r, is_like: isLiked, likes: Math.max(0, (r.likes || 0) + (isLiked ? 1 : -1)) };
+    }));
+  }), []);
 
   // 當頁碼變更時更新顯示的資源
   useEffect(() => {
@@ -213,6 +223,36 @@ const ResourceContent = ({ searchParams, onCardClick, renderCard, onResourcesLoa
     }
   };
 
+  // 卡片右上角愛心：點讚／取消點讚，成功後就地更新該筆資源（點進預覽頁時也會帶著新狀態）
+  const handleLikeClick = async (resource) => {
+    if (!isAuthenticated) {
+      showToast("請先登入後再進行點讚", "error");
+      return;
+    }
+    if (!resource?.id || likeLoadingIds.has(resource.id)) return;
+
+    setLikeLoadingIds(prev => new Set(prev).add(resource.id));
+    try {
+      const { isLiked, likes } = await toggleResourceLike(resource.id, {
+        isLiked: Boolean(resource.is_like),
+        likes: resource.likes || 0,
+      });
+      setAllResources(prev =>
+        prev.map(r => (r.id === resource.id ? { ...r, is_like: isLiked, likes } : r))
+      );
+      showToast(isLiked ? "已成功點讚此資源" : "已取消點讚", "success");
+    } catch (error) {
+      console.error("點讚操作錯誤:", error);
+      showToast(error?.message || "網絡連接錯誤，請稍後再試", "error");
+    } finally {
+      setLikeLoadingIds(prev => {
+        const next = new Set(prev);
+        next.delete(resource.id);
+        return next;
+      });
+    }
+  };
+
   // 分頁處理函數
   const handlePageChange = (pageNumber) => {
     const newParams = new URLSearchParams(searchParamsFromRouter);
@@ -286,6 +326,8 @@ const ResourceContent = ({ searchParams, onCardClick, renderCard, onResourcesLoa
                       date={resource.date || ""}
                       isLiked={Boolean(resource.is_like)}
                       onCardClick={() => onCardClick && onCardClick(resource)}
+                      onLikeClick={() => handleLikeClick(resource)}
+                      isLikeLoading={likeLoadingIds.has(resource.id)}
                     />
                   );
                 })}

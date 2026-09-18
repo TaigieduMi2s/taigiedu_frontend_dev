@@ -38,6 +38,11 @@
 - **閱讀 (`/read`)**: `readPage/ReadPage.jsx`，提供閩南語文章或相關文本的閱讀模組。
 - **翻譯 (`/translate`)**: `translatePage/TranslatePage.jsx`，可能是提供中台翻譯功能的工具。
 - **教學資源 (`/resource`)**: `resourcePage/ResourcePage.jsx`，讓使用者尋找、下載教學檔案。內含 `/file-preview` 與 `/download` 分支功能。
+  - **點讚（收藏）**：列表卡片右上角的愛心可直接點（`Card.Stats` 傳入 `onLikeClick` 才會變成按鈕，會 stopPropagation 不開預覽）；
+    預覽頁的「點讚資源」按鈕與它共用 `services/resourceLikeService.js`（`POST /api/resource/like`，toggle）。
+    點讚狀態另存 localStorage `resourceLikeStates`，預覽頁是另開分頁，兩個分頁靠 `storage` 事件互相同步愛心。
+    預覽頁的 `is_like` 先讀網址參數，**等 AuthContext 載入完**才用搜尋 API 取回最新狀態（載入中不可重設為未點讚）。
+    刪除我的資源（`/delete-resource`）與後台沒傳 `onLikeClick`，愛心維持純顯示。
 - **主題融入資源 (`/topic-integration`)**: `featuredResourcePage/TopicIntegrationPage`。
 - **台語地名與文化 (`/placename-culture`)**: `placenameCulturePage/PlacenameCulturePage.jsx`，臺南市 37 個行政區的地名由來與台語發音。
   - 兩層導覽以 query string 切換：無參數為臺南全圖（滑過行政區看簡介），`?district=安平區` 為單一行政區的完整介紹。
