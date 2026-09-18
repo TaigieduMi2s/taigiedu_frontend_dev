@@ -74,6 +74,19 @@ const AudioButton = ({ audioUrl, label }) => (
     </button>
 );
 
+// 後端資料可能有缺欄（例如某區沒有古地名、沒有里舊名、某個里舊名沒有說明），
+// 缺的欄位一律不顯示，連同標籤／標題一起隱藏，不留空白或「undefined」。
+const hasText = (value) => typeof value === 'string' && value.trim() !== '';
+
+// 長文欄位可能是段落陣列或單一字串；濾掉空段落
+const toParagraphs = (value) => (Array.isArray(value) ? value : [value]).filter(hasText);
+
+// 沒有名稱的里舊名整筆略過
+const toOldVillageNames = (list) =>
+    (Array.isArray(list) ? list : [])
+        .filter((item) => hasText(item?.name))
+        .map((item) => ({ ...item, description: toParagraphs(item.description) }));
+
 const PlacenameCulturePage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const district = searchParams.get('district') || '';
@@ -170,7 +183,11 @@ const PlacenameCulturePage = () => {
                 if (res?.status !== 'success' || !res.data) {
                     throw new Error('mock api response format invalid');
                 }
-                setDetail(res.data);
+                setDetail({
+                    ...res.data,
+                    description: toParagraphs(res.data.description),
+                    oldVillageNames: toOldVillageNames(res.data.oldVillageNames),
+                });
             })
             .catch((err) => {
                 if (cancelled) return;
@@ -227,9 +244,9 @@ const PlacenameCulturePage = () => {
                                 <IconSlot src={brief.iconUrl} name={brief.name} />
                                 <div className="pc-brief-heading">
                                     <h2 className="pc-brief-name">{brief.name}</h2>
-                                    <p className="pc-brief-romaji">{brief.romaji}</p>
+                                    {hasText(brief.romaji) && <p className="pc-brief-romaji">{brief.romaji}</p>}
                                 </div>
-                                <p className="pc-brief-summary">{brief.summary}</p>
+                                {hasText(brief.summary) && <p className="pc-brief-summary">{brief.summary}</p>}
                             </div>
                         ) : (
                             <div className="pc-intro">
@@ -287,34 +304,46 @@ const PlacenameCulturePage = () => {
                                     <div className="pc-detail-titles">
                                         <div className="pc-detail-title-row">
                                             <h1 className="pc-detail-name">{detail.name}</h1>
-                                            <span className="pc-detail-romaji">{detail.romaji}</span>
+                                            {hasText(detail.romaji) && (
+                                                <span className="pc-detail-romaji">{detail.romaji}</span>
+                                            )}
                                             <AudioButton audioUrl={detail.audioUrl} label={detail.name} />
                                         </div>
-                                        {detail.oldName && <p className="pc-detail-oldname">古地名：{detail.oldName}</p>}
+                                        {hasText(detail.oldName) && <p className="pc-detail-oldname">古地名：{detail.oldName}</p>}
                                     </div>
                                 </div>
 
-                                <div className="pc-detail-body">
-                                    {(detail.description || []).map((paragraph, index) => (
-                                        <p key={index}>{paragraph}</p>
-                                    ))}
-                                </div>
+                                {detail.description.length > 0 && (
+                                    <div className="pc-detail-body">
+                                        {detail.description.map((paragraph, index) => (
+                                            <p key={index}>{paragraph}</p>
+                                        ))}
+                                    </div>
+                                )}
 
-                                {(detail.oldVillageNames || []).length > 0 && (
+                                {detail.oldVillageNames.length > 0 && (
                                     <div className="pc-oldnames">
                                         <h2 className="pc-oldnames-title">里舊名：</h2>
                                         <p className="pc-oldnames-list">
                                             {detail.oldVillageNames.map((item, index) => (
                                                 <React.Fragment key={item.name}>
                                                     {index > 0 && <span className="pc-oldnames-sep">、</span>}
-                                                    <button
-                                                        type="button"
-                                                        className="pc-oldname-link"
-                                                        onClick={() => setOpenOldName(item)}
-                                                    >
-                                                        {item.name}
-                                                        {item.romaji}
-                                                    </button>
+                                                    {/* 沒有說明的里舊名不開懸浮視窗，只顯示文字 */}
+                                                    {item.description.length > 0 ? (
+                                                        <button
+                                                            type="button"
+                                                            className="pc-oldname-link"
+                                                            onClick={() => setOpenOldName(item)}
+                                                        >
+                                                            {item.name}
+                                                            {hasText(item.romaji) && item.romaji}
+                                                        </button>
+                                                    ) : (
+                                                        <span className="pc-oldname-text">
+                                                            {item.name}
+                                                            {hasText(item.romaji) && item.romaji}
+                                                        </span>
+                                                    )}
                                                 </React.Fragment>
                                             ))}
                                         </p>
@@ -336,12 +365,13 @@ const PlacenameCulturePage = () => {
                     <>
                         <div className="pc-oldname-modal-heading">
                             <h2>
-                                {openOldName.name} <span>{openOldName.romaji}</span>
+                                {openOldName.name}
+                                {hasText(openOldName.romaji) && <> <span>{openOldName.romaji}</span></>}
                             </h2>
                             <AudioButton audioUrl={openOldName.audioUrl} label={openOldName.name} />
                         </div>
                         <div className="pc-oldname-modal-body">
-                            {(openOldName.description || []).map((paragraph, index) => (
+                            {openOldName.description.map((paragraph, index) => (
                                 <p key={index}>{paragraph}</p>
                             ))}
                         </div>

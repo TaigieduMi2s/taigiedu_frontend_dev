@@ -331,6 +331,10 @@
     color: var(--pc-accent-dark);
 }
 
+.pc-oldname-text {
+    color: var(--text-primary);
+}
+
 .pc-oldnames-sep {
     margin: 0 6px;
     color: var(--text-muted);

@@ -44,6 +44,9 @@
   - 地圖為 SVG，路徑資料在 `placenameCulturePage/tainanMapData.js`（自 Figma 設計稿匯出後轉檔，勿手改），由 `TainanMap.jsx` 依 `full` / `mini` / `single` 三種形態渲染。
   - ⚠️ **內容目前來自 `services/placenameCultureMockApi.js` 假資料**；上方三個下拉選單為未來擴增其他縣市地圖保留，現階段僅開放臺南市。
   - 由 `VITE_ENABLE_PLACENAME_CULTURE_FEATURE` 控制側邊欄與路由是否顯示。
+  - **後端欄位有缺就隱藏**（2026-09 PM 指定）：台羅、古地名、簡介、完整介紹、里舊名（整區）缺資料時連標籤一起不顯示；
+    沒有名稱的里舊名整筆略過，沒有說明的里舊名只顯示文字、不能點開懸浮視窗。空字串與空白段落都視為缺。
+    唯一例外是發音按鈕：沒有 `audioUrl` 時維持停用狀態保留版位。
   - 後端 API 設計說明見 `docs/placename_culture_api.md`，草稿規格見 `docs/openapi/placename-culture.draft.openapi.json`。
 - **名人堂/台語人物 (`/celebrity`, `/celebrity/detail`)**: `celebrity/CelebrityPage.jsx` 與 `CelebrityDetails.jsx`，展示推廣台語或相關文化的人物介紹。
 - **文化介紹 (`/culture/food`, `/culture/festival`)**: 介紹台灣在地美食 (`CultureFood`) 與節慶 (`CultureFestival`)。
