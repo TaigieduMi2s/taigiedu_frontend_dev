@@ -352,6 +352,8 @@ src/
   - 媒體與社群資源、台語文化（test）的第二層飛出子選單改由 React state 控制顯示（不再靠 CSS `:hover`），
     並同樣以 `position: fixed` 定位（見各頁的 `positionSubmenu`）——因為主選單加了內部捲動，
     子選單若維持 `absolute` 會被 `overflow` 裁掉。
+    ⚠️ 子選單水平位置貼齊**主選單外框**（非項目右緣），且離開項目後延遲 200ms 才關閉（TAIGIE-267）：
+    Windows 主選單會出現實體捲軸，滑鼠移往子選單必經捲軸而觸發 `mouseleave`，沒有延遲會一移動就消失。
   - 手機版（`max-width: 768px`）的分類篩選仍是 bottom sheet（`components/CategoryFilterSheet`），不走上述下拉。
 
 ## 7. 回報問題 (Report Issue)

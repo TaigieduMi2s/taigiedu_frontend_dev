@@ -77,6 +77,14 @@ const SocialmediaPage = () => {
     const [openSubmenuType, setOpenSubmenuType] = useState(null);
     const [submenuStyle, setSubmenuStyle] = useState(null);
     const submenuAnchorRef = useRef(null);
+    // 離開項目後延遲關閉，滑鼠斜向移往子選單時短暫經過縫隙也不會立刻消失
+    const submenuCloseTimerRef = useRef(null);
+    const SUBMENU_CLOSE_DELAY = 200;
+
+    const clearSubmenuCloseTimer = () => {
+        clearTimeout(submenuCloseTimerRef.current);
+        submenuCloseTimerRef.current = null;
+    };
 
     const positionSubmenu = useCallback(() => {
         const anchorEl = submenuAnchorRef.current;
@@ -87,10 +95,17 @@ const SocialmediaPage = () => {
         const minWidth = Math.max(rect.width, 200);
         const maxHeight = Math.min(300, window.innerHeight - MARGIN * 2);
 
+        // 水平方向貼齊「主選單」外框而非項目本身：Windows 的主選單捲軸（約 17px）位在項目右側，
+        // 滑鼠往右移必定經過捲軸（不屬於該項目）而觸發 mouseleave，靠 SUBMENU_CLOSE_DELAY 撐過這段；
+        // 子選單放在捲軸外側則不會蓋住捲軸。
+        // 另外往內重疊 SUBMENU_OVERLAP px，避免縮放比例造成的小數像素縫隙。
+        const menuRect = dropdownMenuRef.current?.getBoundingClientRect() ?? rect;
+        const SUBMENU_OVERLAP = 2;
+
         // 右側放不下就翻到左邊；上下夾在畫面內
-        let left = rect.right;
+        let left = menuRect.right - SUBMENU_OVERLAP;
         if (left + minWidth > window.innerWidth - MARGIN) {
-            left = Math.max(MARGIN, rect.left - minWidth);
+            left = Math.max(MARGIN, menuRect.left - minWidth + SUBMENU_OVERLAP);
         }
         const top = Math.max(MARGIN, Math.min(rect.top, window.innerHeight - MARGIN - maxHeight));
 
@@ -98,6 +113,7 @@ const SocialmediaPage = () => {
     }, []);
 
     const handleCategoryHover = (type, hasSubMenu, el) => {
+        clearSubmenuCloseTimer();
         if (!hasSubMenu) {
             submenuAnchorRef.current = null;
             setOpenSubmenuType(null);
@@ -123,6 +139,7 @@ const SocialmediaPage = () => {
     // 主選單收合時一併關閉子選單
     useEffect(() => {
         if (!isDropdownOpen) {
+            clearSubmenuCloseTimer();
             submenuAnchorRef.current = null;
             setOpenSubmenuType(null);
         }
@@ -571,8 +588,11 @@ const SocialmediaPage = () => {
                                                 onMouseEnter={(e) => handleCategoryHover(type, hasSubMenu, e.currentTarget)}
                                                 onMouseLeave={() => {
                                                     if (openSubmenuType !== type) return;
-                                                    submenuAnchorRef.current = null;
-                                                    setOpenSubmenuType(null);
+                                                    clearSubmenuCloseTimer();
+                                                    submenuCloseTimerRef.current = setTimeout(() => {
+                                                        submenuAnchorRef.current = null;
+                                                        setOpenSubmenuType(null);
+                                                    }, SUBMENU_CLOSE_DELAY);
                                                 }}
                                             >
                                                 {!hasSubMenu ? (
