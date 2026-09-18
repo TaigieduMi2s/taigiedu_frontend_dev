@@ -9,11 +9,12 @@ import dotenv from 'dotenv';
  * - 使用 Page Helpers 模式而非完整 POM，因為專案規模適中且頁面結構相對簡單
  * - 固定 1440x900 viewport（桌面版專用，無 RWD 測試需求）
  * - 透過環境變數支援 local/staging/production 環境切換
- * - 使用測試專案分組（smoke/auth-setup/regression）提升測試效率
+ * - 使用測試專案分組（smoke/features/auth-setup/regression）提升測試效率
  * 
  * 📝 使用方式：
  * - 執行所有測試: npm run test:e2e
  * - 執行冒煙測試: npm run test:e2e:smoke
+ * - 執行功能測試: npm run test:e2e:features
  * - UI 模式除錯: npm run test:e2e:ui
  * 
  * 🔐 環境變數設定：
@@ -63,6 +64,12 @@ export default defineConfig({
         {
             name: 'smoke',
             testMatch: '**/smoke/**/*.spec.js',
+            use: { ...devices['Desktop Chrome'] },
+        },
+        // 功能測試 - 不需登入；多數頁面使用前端假資料，結果可預期
+        {
+            name: 'features',
+            testMatch: '**/features/**/*.spec.js',
             use: { ...devices['Desktop Chrome'] },
         },
         // 認證設置專案 - 執行登入測試並保存認證狀態

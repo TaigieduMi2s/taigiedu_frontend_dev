@@ -13,6 +13,7 @@
     "test:e2e": "npx playwright test --config=tests/e2e/playwright.config.js",
     "test:e2e:ui": "npx playwright test --config=tests/e2e/playwright.config.js --ui",
     "test:e2e:smoke": "npx playwright test --config=tests/e2e/playwright.config.js --project=smoke",
+    "test:e2e:features": "npx playwright test --config=tests/e2e/playwright.config.js --project=features",
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {

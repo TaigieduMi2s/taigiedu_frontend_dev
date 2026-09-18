@@ -11,6 +11,16 @@ import { testData } from '../../fixtures/test-data.js';
 
 test.describe('搜尋功能', () => {
     test.beforeEach(async ({ page }) => {
+        // 首頁送出搜尋時會先 POST /top_keywords { text } 記錄搜尋統計，完成後才導頁。
+        // 攔截這一支：(1) 避免測試關鍵字灌進正式的熱門關鍵字統計；(2) 後端忙碌時不會卡住導頁。
+        // 載入熱門標籤用的 /top_keywords（body 沒有 text）照常打真實 API。
+        await page.route('**/top_keywords', (route) => {
+            const body = route.request().postDataJSON?.() ?? null;
+            if (body && typeof body.text === 'string') {
+                return route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+            }
+            return route.continue();
+        });
         await navigateAndWait(page, '/');
     });
 
@@ -27,7 +37,6 @@ test.describe('搜尋功能', () => {
 
         // 驗證跳轉到搜尋結果頁
         await expect(page).toHaveURL(new RegExp(`/search\\?query=${encodeURIComponent(searchQuery)}`));
-        await waitForStableUI(page);
     });
 
     test('點擊搜尋圖示觸發搜尋', async ({ page }) => {
@@ -43,7 +52,7 @@ test.describe('搜尋功能', () => {
         await searchButton.click();
 
         // 驗證跳轉（使用更寬鬆的匹配）
-        await expect(page).toHaveURL(/\/search.*query=/, { timeout: 10000 });
+        await expect(page).toHaveURL(/\/search.*query=/);
     });
 
     test('點擊熱門關鍵字標籤跳轉搜尋', async ({ page }) => {
@@ -62,7 +71,7 @@ test.describe('搜尋功能', () => {
         await tagButton.click();
 
         // 驗證跳轉到搜尋頁面，query 參數應包含標籤文字
-        await expect(page).toHaveURL(new RegExp('/search\\?query='));
+        await expect(page).toHaveURL(new RegExp(`/search\\?query=${encodeURIComponent(tagText.trim())}`));
     });
 
     test('空白搜尋不觸發跳轉', async ({ page }) => {
@@ -79,15 +88,15 @@ test.describe('搜尋功能', () => {
     });
 
     test('搜尋結果頁面正確顯示', async ({ page }) => {
-        // 直接導航到搜尋結果頁
-        await navigateAndWait(page, `/search?query=${encodeURIComponent('台語')}`);
+        // 直接導航到搜尋結果頁（此頁會持續打 API，不等 networkidle）
+        await navigateAndWait(page, `/search?query=${encodeURIComponent('台語')}`, { waitForIdle: false });
 
-        // 頁面應該載入成功
         await expect(page).toHaveURL(/\/search/);
-        await waitForStableUI(page);
+
+        // 搜尋列應帶入網址上的關鍵字
+        await expect(page.locator('.search-bar .search-input')).toHaveValue('台語');
 
         // Sidebar 應該仍然顯示
-        const sidebar = page.getByTestId('sidebar');
-        await expect(sidebar).toBeVisible();
+        await expect(page.getByTestId('sidebar')).toBeVisible();
     });
 });

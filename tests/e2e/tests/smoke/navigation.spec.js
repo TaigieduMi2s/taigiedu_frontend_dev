@@ -7,6 +7,7 @@
 
 import { test, expect } from '@playwright/test';
 import { navigateAndWait, waitForStableUI } from '../../utils/helpers.js';
+import { testData } from '../../fixtures/test-data.js';
 
 test.describe('Sidebar 導航功能', () => {
     test.beforeEach(async ({ page }) => {
@@ -125,6 +126,17 @@ test.describe('直接 URL 導航', () => {
         await expect(page).toHaveURL('/policy');
     });
 
+    test('直接訪問 /team 頁面成功並顯示網站貢獻名單', async ({ page }) => {
+        await navigateAndWait(page, '/team');
+        await expect(page).toHaveURL('/team');
+
+        // TAIGIE-236：頁尾的網站貢獻名單（資料寫死在 contributorsData.js）
+        const credits = page.locator('section.credits');
+        await expect(credits.getByRole('heading', { name: '網站貢獻名單' })).toBeVisible();
+        await expect(credits.locator('.credits-group').first()).toBeVisible();
+        expect(await credits.locator('.credits-name').count()).toBeGreaterThan(0);
+    });
+
     test('直接訪問 /login 頁面成功', async ({ page }) => {
         await navigateAndWait(page, '/login');
         await expect(page).toHaveURL('/login');
@@ -132,5 +144,65 @@ test.describe('直接 URL 導航', () => {
         // 登入 modal 應該顯示
         const loginModal = page.locator('.login-modal-container, .login-unified-modal');
         await expect(loginModal).toBeVisible();
+    });
+});
+
+test.describe('「本站特色資源」子選單', () => {
+    test.beforeEach(async ({ page }) => {
+        await navigateAndWait(page, '/');
+    });
+
+    test('展開後顯示已開啟 flag 的子項，並能導航', async ({ page }) => {
+        const parent = page.locator('.menu-item', { hasText: '本站特色資源' });
+        // 所有子項 flag 都關閉時父選單不會出現
+        test.skip((await parent.count()) === 0, '本站特色資源的子項 feature flag 皆未開啟');
+
+        await parent.click();
+        const submenu = page.locator('.submenu');
+        await expect(submenu).toBeVisible();
+
+        const visibleItems = [];
+        for (const item of testData.featuredSubmenuItems) {
+            if (await submenu.locator('.submenu-item', { hasText: item.label }).count()) {
+                visibleItems.push(item);
+            }
+        }
+        expect(visibleItems.length).toBeGreaterThan(0);
+
+        // 逐一點擊子項，確認導到正確路徑且側邊欄 active 狀態正確
+        for (const item of visibleItems) {
+            await page.locator('.submenu-item', { hasText: new RegExp(`^${item.label}$`) }).click();
+            await expect(page).toHaveURL(item.path);
+            await expect(page.locator('.submenu-item.active')).toHaveText(item.label);
+        }
+    });
+
+    test('直接開啟子頁面時，父選單自動展開並標示 active', async ({ page }) => {
+        const [first] = testData.featuredSubmenuItems.filter(i => i.path === '/occupation-test');
+        await navigateAndWait(page, `${first.path}/1`);
+        test.skip(new URL(page.url()).pathname === '/', '職業台語的 feature flag 未開啟');
+
+        // 巢狀路由 /occupation-test/:id 也要讓「職業台語」維持 active
+        await expect(page.locator('.menu-item.active', { hasText: '本站特色資源' })).toBeVisible();
+        await expect(page.locator('.submenu-item.active')).toHaveText(first.label);
+    });
+});
+
+test.describe('Footer 連結', () => {
+    for (const { label, path } of [
+        { label: '團隊介紹', path: '/team' },
+        { label: '使用條款', path: '/terms' },
+        { label: '隱私政策', path: '/policy' },
+    ]) {
+        test(`點擊「${label}」導航到 ${path}`, async ({ page }) => {
+            await navigateAndWait(page, '/resource', { waitForIdle: false });
+            await page.getByTestId('footer').getByRole('button', { name: label }).click();
+            await expect(page).toHaveURL(path);
+        });
+    }
+
+    test('前台 Footer 顯示「回報問題」按鈕', async ({ page }) => {
+        await navigateAndWait(page, '/');
+        await expect(page.getByTestId('footer').getByRole('button', { name: '回報問題' })).toBeVisible();
     });
 });

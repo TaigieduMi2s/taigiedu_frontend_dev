@@ -261,30 +261,5 @@ test.describe('資源上傳測試', () => {
             throw verifyError;
         }
     });
-
-    test('資源頁面應該能正確載入並顯示上傳按鈕', async ({ page }) => {
-        // 設定超時時間
-        test.setTimeout(30000);
-
-        // 導航到資源頁面
-        await page.goto('/resource');
-
-        // 等待頁面載入
-        await page.waitForLoadState('domcontentloaded');
-
-        // 驗證頁面有搜尋功能
-        const searchInput = page.locator('input.res-search-input, input[placeholder*="搜尋"]');
-        await expect(searchInput.first()).toBeVisible({ timeout: 10000 });
-        console.log('[測試] ✓ 搜尋輸入框已顯示');
-
-        // 驗證有上傳按鈕
-        const uploadButton = page.locator('button.res-upload-button, button:has-text("上傳我的資源")');
-        await expect(uploadButton.first()).toBeVisible();
-        console.log('[測試] ✓ 上傳按鈕已顯示');
-
-        // 驗證有階段下拉選單
-        const gradeDropdown = page.locator('select.grade-dropdown');
-        await expect(gradeDropdown).toBeVisible();
-        console.log('[測試] ✓ 階段選單已顯示');
-    });
+    // 「資源頁面應該能正確載入並顯示上傳按鈕」不需登入，已移到 tests/features/resource.spec.js
 });

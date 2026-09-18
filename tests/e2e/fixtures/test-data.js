@@ -35,6 +35,13 @@ export const testData = {
         register: '/register',
         terms: '/terms',
         policy: '/policy',
+        team: '/team',
+        // 以下受 feature flag 控制（.env.local 預設開啟）
+        topicIntegration: '/topic-integration',
+        relativeCalculator: '/relative-calculator',
+        placenameCulture: '/placename-culture',
+        cultureTest: '/culture-test',
+        occupationTest: '/occupation-test',
     },
 
     // Sidebar 選單項目（用於驗證）
@@ -49,6 +56,16 @@ export const testData = {
         { label: '節慶飲食', hasSubmenu: true },
         { label: '媒體與社群資源', path: '/socialmedia' },
         { label: '認證考試', path: '/exam' },
+        { label: '本站特色資源', hasSubmenu: true },
+    ],
+
+    // 「本站特色資源」子選單（皆受 feature flag 控制，關閉時不顯示）
+    featuredSubmenuItems: [
+        { label: '議題融入', path: '/topic-integration' },
+        { label: '親戚計算機', path: '/relative-calculator' },
+        { label: '台語地名與文化', path: '/placename-culture' },
+        { label: '台語文化', path: '/culture-test' },
+        { label: '職業台語', path: '/occupation-test' },
     ],
 
     // 首頁區塊標題（用於驗證）
