@@ -220,6 +220,15 @@
   padding-right: var(--filter-bleed-x, 0px);
 }
 
+/* 手機版：sticky 篩選列會一直佔著畫面，上下留白縮小；
+   各頁也應把篩選列收成一列（搜尋框 + 篩選條件並排），見各頁 CSS */
+@media (max-width: 768px) {
+  .page-filter-header {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+}
+
 .page-filter-row {
   display: flex;
   align-items: center;

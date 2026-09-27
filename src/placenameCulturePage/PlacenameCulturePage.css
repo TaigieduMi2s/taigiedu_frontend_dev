@@ -435,15 +435,29 @@
 
 @media (max-width: 768px) {
     .pc-toolbar {
-        padding: 16px;
+        padding: 12px 16px;
     }
 
+    /* 地區／縣市／區域三個下拉排成一列，壓低 sticky 篩選列的高度 */
     .pc-toolbar-content {
-        gap: 12px;
+        flex-wrap: nowrap;
+        gap: 8px;
     }
 
     .pc-select-wrap {
-        width: calc(50% - 6px);
+        flex: 1 1 0;
+        width: auto;
+        min-width: 0;
+    }
+
+    .pc-select-wrap .custom-select-header {
+        height: 44px;
+        padding: 8px 28px 8px 10px;
+        font-size: 14px;
+    }
+
+    .pc-select-wrap .custom-select-arrow {
+        right: 6px;
     }
 
     .pc-intro-title {
@@ -470,5 +484,17 @@
 
     .pc-detail-oldname {
         font-size: 17px;
+    }
+}
+
+/* 極窄螢幕（如 320px）：三個下拉各約 90px，縮小字級與內距讓「南部地區」不被截斷 */
+@media (max-width: 360px) {
+    .pc-select-wrap .custom-select-header {
+        padding: 8px 24px 8px 8px;
+        font-size: 13px;
+    }
+
+    .pc-select-wrap .custom-select-arrow {
+        right: 4px;
     }
 }

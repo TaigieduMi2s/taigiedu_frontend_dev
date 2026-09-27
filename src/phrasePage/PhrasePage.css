@@ -42,7 +42,64 @@
         padding: 0 3%;
     }
 
+    /* 意涵分類與搜尋框並排成一列，壓低 sticky 篩選列的高度。
+       .input-container / .search-container 與主頁搜尋（mainSearchPage/SearchBar.css）同名，
+       那邊的手機版會把 .input-container 改成直排，因此這裡以 .phrase-page 限定範圍覆寫。 */
+    .phrase-page .input-container {
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .phrase-page .filter-section {
+        flex: 0 0 38%;
+        width: auto;
+        min-width: 0;
+        padding-right: 0;
+    }
+
+    .phrase-page .filter-section .select-header {
+        height: 44px;
+        padding: 0 32px 0 12px;
+    }
+
+    .phrase-page .filter-section .arrow {
+        right: 8px;
+    }
+
+    .phrase-page .search-container {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .phrase-page .phrase-search-input {
+        height: 44px;
+        padding: 0 44px 0 12px;
+        font-size: 14px;
+        text-overflow: ellipsis;
+    }
+
+    .phrase-page .search-icon {
+        right: 6px;
+    }
+
     .phrase-results-container {
         gap: 14px;
+    }
+}
+
+/* 極窄螢幕（如 320px）：讓「意涵分類 (N)」完整顯示 */
+@media (max-width: 360px) {
+    .phrase-page .filter-section {
+        flex-basis: 44%;
+    }
+
+    .phrase-page .filter-section .select-header {
+        padding-right: 28px;
+    }
+
+    .phrase-page .filter-section .display-text,
+    .phrase-page .filter-section .select-placeholder {
+        font-size: 13px;
     }
 }

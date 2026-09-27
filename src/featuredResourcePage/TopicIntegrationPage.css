@@ -246,18 +246,31 @@
 }
 
 @media (max-width: 768px) {
+  /* 三個控制項一列放不下，維持兩列，但間距與高度比照其他列表頁壓低 */
   .ti-toolbar {
-    padding: 16px;
+    padding: 12px 16px;
   }
   .ti-toolbar-content {
-    gap: 12px;
+    gap: 8px;
   }
   .ti-select-wrap {
-    width: calc(50% - 6px);
+    width: calc(50% - 4px);
+  }
+  .ti-select-wrap .custom-select-header {
+    height: 44px;
+    padding: 8px 32px 8px 12px;
+    font-size: 14px;
+  }
+  .ti-select-wrap .custom-select-arrow {
+    right: 8px;
   }
   .ti-search-input-group {
     flex-basis: 100%;
     max-width: 100%;
+    height: 44px;
+  }
+  .ti-search-input {
+    font-size: 14px;
   }
   .ti-topic-grid {
     gap: 10px 8px;

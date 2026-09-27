@@ -342,6 +342,17 @@ src/
   因此停機橫幅出現時也會自動往下讓位。已套用：教學資源共享平台、俗諺語、媒體與社群資源、認證考試、台語文化（test）、台語地名與文化、職業台語（test）。
   - 篩選列若位於左右有 padding 的容器內（如 `/resource`），加上 `.is-bleed` 並在容器上設 `--filter-bleed-x`，白底才會通到邊緣。
   - **例外**：台語文字轉換（`/translate`）**刻意不 sticky**，篩選列隨內容正常捲動（PM 指定）。
+  - **手機版（`max-width: 768px`）一律收成一列**：搜尋框與篩選條件並排、控制項高 44px，
+    `.page-filter-header` 上下留白在 `global.css` 縮為 12px。iPhone SE（375×667）下篩選列約 68px
+    （原本教學資源 248px、其餘多為 140～150px，佔掉畫面三到四成）。各頁的覆寫都寫在該頁自己的 CSS，桌機／平板版面不變。
+    新增列表頁時比照辦理，別讓 sticky 列在手機吃掉過多畫面。
+    - **教學資源共享平台**條件多，階段／版本／內容類型收進可展開面板（`ResourceHeader` 的 `.res-filter-panel`，
+      桌機為 `display: contents`，子元素照舊排進原本的 flex 列）：按「篩選」展開，按「套用篩選」或搜尋後自動收合，
+      按鈕上的數字＝與預設值不同的條件數。上傳／刪除我的資源在手機版移到 sticky 列**之外**，隨內容捲走。
+      手機與桌機由 `useIsMobile`（`components/CategoryFilterSheet/useIsMobile.js`）在 JS 端擇一渲染。
+    - **主題融入資源**有兩個下拉加搜尋框，一列放不下，維持兩列（約 120px）。
+    - 俗諺語的 `.input-container` / `.search-container` 與主頁搜尋（`mainSearchPage/SearchBar.css`）同名，
+      覆寫時要以 `.phrase-page` 限定範圍。
 - **下拉選單定位**：所有篩選下拉一律 portal 到 `#root`、以 `position: fixed` 定位，座標由
   `components/AnchoredMenu/useAnchoredMenu.js` 依 trigger 的 `getBoundingClientRect()` 算出，並在
   `scroll`（capture）／`resize` 時重算。效果是：頁面捲動時選單永遠貼著原篩選欄位，且下方空間不足會往上翻、

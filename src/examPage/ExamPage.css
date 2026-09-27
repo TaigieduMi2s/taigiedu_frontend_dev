@@ -191,19 +191,35 @@
     padding: 0 16px;
   }
 
+  /* 類型下拉與搜尋框並排成一列，壓低 sticky 篩選列的高度 */
   .exam-header-content {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
+    gap: 8px;
   }
 
   .exam-type-select {
-    width: 100%;
+    width: 38%;
+    min-width: 0;
+  }
+
+  .exam-type-select .custom-select-header {
+    height: 44px;
+    padding: 8px 32px 8px 12px;
+    font-size: 14px;
+  }
+
+  .exam-type-select .custom-select-arrow {
+    right: 8px;
   }
 
   .exam-search-container {
     max-width: 100%;
-    flex-grow: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .exam-search-input {
+    height: 44px;
+    font-size: 14px;
   }
 
   .exam-section-header {
